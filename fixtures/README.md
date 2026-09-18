@@ -1,5 +1,4 @@
 # Fixtures
 
-Deterministic synthetic orders, carriers, and vehicles live here. Checkpoint 1
-will introduce `ORD-8842` without using real customer or logistics data.
-
+Deterministic synthetic orders, mandates, scenarios, carriers, and vehicles
+live here. `ORD-8842` uses no real customer or logistics data.

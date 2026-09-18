@@ -12,6 +12,8 @@
     "create_dispatch_plan",
     "list_carrier_quotes",
     "select_carrier_quote",
+    "prepare_freight_booking",
+    "confirm_freight_booking",
     "write_tracking_outbox"
   ],
   "selected_vehicle_id": "VEH-COLD-01",

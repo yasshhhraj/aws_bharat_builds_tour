@@ -10,8 +10,9 @@ from fixtures import FixtureLoader
 from packages.domain.enums import AgentName, EventType, RunStatus
 from packages.domain.errors import NoSuitableVehicleError
 from packages.domain.models import TrajectoryState
-from packages.governor import ObserverGovernor
+from packages.governor import ManifestGovernor
 from packages.ledger import MemoryTraceStore
+from packages.policy import PythonReferencePolicyEngine
 from packages.tools import build_tool_registry
 
 
@@ -51,15 +52,15 @@ def test_complete_benign_journey_matches_expected_contract():
     assert [event.sequence for event in events] == list(range(1, len(events) + 1))
 
 
-def test_every_attempt_has_observation_and_success():
+def test_every_attempt_has_decision_and_success():
     service = build_run_service()
     summary = service.start_run("ORD-8842")
     events = service.get_events(summary.trace_id)
 
     attempts = [event for event in events if event.event_type == EventType.TOOL_ATTEMPTED]
-    observed = [event for event in events if event.event_type == EventType.GOVERNANCE_OBSERVED]
+    observed = [event for event in events if event.event_type == EventType.POLICY_DECIDED]
     successes = [event for event in events if event.event_type == EventType.TOOL_SUCCEEDED]
-    assert len(attempts) == len(observed) == len(successes) == 7
+    assert len(attempts) == len(observed) == len(successes) == 9
 
 
 def test_two_runs_do_not_share_state_or_events():
@@ -91,7 +92,7 @@ def test_two_concurrent_runs_do_not_share_state_or_events():
 class FailingDispatchAgent(BaseAgent):
     name = AgentName.DISPATCH
 
-    def run(self, state: TrajectoryState, governor: ObserverGovernor) -> str:
+    def run(self, state: TrajectoryState, governor: ManifestGovernor) -> str:
         raise NoSuitableVehicleError("No suitable vehicle is available.")
 
 
@@ -99,7 +100,7 @@ def test_failed_run_preserves_prior_events_and_stops_later_agents():
     loader = FixtureLoader()
     store = MemoryTraceStore()
     registry, _ = build_tool_registry(loader)
-    governor = ObserverGovernor(registry, store)
+    governor = ManifestGovernor(registry, store, PythonReferencePolicyEngine(), loader)
     orchestrator = ShipmentOrchestrator(
         [InventoryAgent(), FailingDispatchAgent()], governor, store
     )

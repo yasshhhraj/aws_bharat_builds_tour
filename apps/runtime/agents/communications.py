@@ -3,7 +3,7 @@
 from packages.domain.enums import AgentName
 from packages.domain.errors import ManifestError
 from packages.domain.models import TrajectoryState
-from packages.governor import ObserverGovernor
+from packages.governor import ManifestGovernor
 
 from .base import BaseAgent
 
@@ -11,20 +11,23 @@ from .base import BaseAgent
 class CustomerCommunicationsAgent(BaseAgent):
     name = AgentName.CUSTOMER_COMMUNICATIONS
 
-    def run(self, state: TrajectoryState, governor: ObserverGovernor) -> str:
-        if state.selected_quote is None:
-            raise ManifestError("A carrier must be selected before notification.")
-        message = (
-            f"Synthetic tracking update for {state.order_id}: "
-            f"assigned to {state.selected_quote.carrier_id}."
-        )
-        notification = governor.execute_tool(
+    def run(self, state: TrajectoryState, governor: ManifestGovernor) -> str:
+        if state.selected_quote is None or state.confirmed_booking_id is None:
+            raise ManifestError("A confirmed carrier booking is required before notification.")
+        result = governor.execute_tool(
             state,
             self.name,
             "write_tracking_outbox",
             order_id=state.order_id,
-            message=message,
+            recipient_ref=f"DEMO-RECIPIENT-{state.order_id.removeprefix('ORD-')}",
+            template_id="TRACKING_UPDATE_V1",
+            template_variables={
+                "order_id": state.order_id,
+                "carrier_id": state.selected_quote.carrier_id,
+            },
             idempotency_key=f"{state.trace_id}:tracking-outbox",
         )
-        state.notification_id = str(notification["notification_id"])
+        if result.value is None:
+            raise ManifestError(result.decision.because)
+        state.notification_id = str(result.value["notification_id"])
         return "Customer Communications Agent wrote a simulated tracking message."

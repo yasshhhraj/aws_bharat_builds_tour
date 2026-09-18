@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "manifest-governor"
-version = "0.1.0"
+version = "0.5.0"
 description = "A governed autonomous logistics-agent prototype"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,4 +25,7 @@ pythonpath = ["."]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["apps*", "packages*"]
+include = ["apps*", "packages*", "fixtures*"]
+
+[tool.setuptools.package-data]
+fixtures = ["**/*.json", "README.md"]

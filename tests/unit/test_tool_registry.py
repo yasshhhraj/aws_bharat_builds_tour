@@ -7,11 +7,12 @@ from packages.domain.models import ToolDefinition
 from packages.tools import ToolRegistry, build_tool_registry
 
 
-def test_checkpoint_one_registers_seven_classified_tools():
+def test_checkpoint_three_registers_ten_classified_tools():
     registry, _ = build_tool_registry(FixtureLoader())
     definitions = registry.list_definitions()
 
-    assert len(definitions) == 7
+    assert len(definitions) == 10
+    assert any(item.name == "cancel_freight_booking" for item in definitions)
     assert all(definition.owner for definition in definitions)
     assert all(definition.effect_class for definition in definitions)
     assert all(definition.description for definition in definitions)

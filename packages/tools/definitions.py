@@ -1,4 +1,4 @@
-"""Checkpoint 1 tool definitions and registry assembly."""
+"""Checkpoint 2 tool definitions and registry assembly."""
 
 from fixtures import FixtureLoader
 from packages.domain.enums import AgentName, EffectClass
@@ -35,6 +35,18 @@ def build_tool_registry(loader: FixtureLoader) -> tuple[ToolRegistry, MockLogist
         (
             ToolDefinition("select_carrier_quote", AgentName.CARRIER, EffectClass.REVERSIBLE_WRITE, "Select a reversible synthetic carrier quote.", True),
             mocks.select_carrier_quote,
+        ),
+        (
+            ToolDefinition("prepare_freight_booking", AgentName.CARRIER, EffectClass.REVERSIBLE_WRITE, "Prepare a reversible synthetic freight booking.", True),
+            mocks.prepare_freight_booking,
+        ),
+        (
+            ToolDefinition("confirm_freight_booking", AgentName.CARRIER, EffectClass.FINANCIAL_COMMIT, "Confirm a prepared synthetic freight booking.", True),
+            mocks.confirm_freight_booking,
+        ),
+        (
+            ToolDefinition("cancel_freight_booking", AgentName.CARRIER, EffectClass.REVERSIBLE_WRITE, "Cancel a prepared synthetic freight booking.", True),
+            mocks.cancel_freight_booking,
         ),
         (
             ToolDefinition("write_tracking_outbox", AgentName.CUSTOMER_COMMUNICATIONS, EffectClass.EXTERNAL_DISCLOSURE, "Write a simulated tracking notification to an in-memory outbox.", True),

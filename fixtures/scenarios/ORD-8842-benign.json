@@ -1,0 +1,11 @@
+{
+  "scenario": "benign",
+  "prior_committed_minor": 250000,
+  "dispatch": {
+    "attempted_weight_kg": 500,
+    "preferred_vehicle_id": "VEH-COLD-01"
+  },
+  "carrier": {
+    "preferred_quote_id": "QUOTE-COLD-01"
+  }
+}

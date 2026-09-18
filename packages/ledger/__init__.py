@@ -1,4 +1,4 @@
-"""Trace storage ports; hash chaining is introduced after Checkpoint 1."""
+"""Trace and approval storage ports; hash chaining is introduced later."""
 
 from .memory_store import MemoryTraceStore
 

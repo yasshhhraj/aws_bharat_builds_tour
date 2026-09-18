@@ -1,0 +1,11 @@
+{
+  "scenario": "adversarial",
+  "prior_committed_minor": 365000,
+  "dispatch": {
+    "attempted_weight_kg": 50,
+    "preferred_vehicle_id": "VEH-SMALL-01"
+  },
+  "carrier": {
+    "preferred_quote_id": "QUOTE-CHEAP-01"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "mandate_id": "M-8842-1",
+  "order_id": "ORD-8842",
+  "currency": "INR",
+  "spend_ceiling_minor": 400000,
+  "approval_threshold_minor": 400000,
+  "cargo_class": "perishable",
+  "allowed_effect_classes": [
+    "read",
+    "reversible_write",
+    "financial_commit",
+    "physical_commit",
+    "external_disclosure"
+  ],
+  "policy_version": "demo-v1"
+}

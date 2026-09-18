@@ -47,3 +47,67 @@ class ToolExecutionError(ManifestError):
 
 class UnsupportedModeError(ManifestError):
     code = "UNSUPPORTED_MODE"
+
+
+class UnsupportedScenarioError(ManifestError):
+    code = "UNSUPPORTED_SCENARIO"
+
+
+class PolicyConfigurationError(ManifestError):
+    code = "POLICY_CONFIGURATION_ERROR"
+
+
+class IdempotencyConflictError(ManifestError):
+    code = "IDEMPOTENCY_CONFLICT"
+
+
+class PolicyBlockedError(ManifestError):
+    code = "POLICY_BLOCKED"
+
+
+class ApprovalNotFoundError(ManifestError):
+    code = "APPROVAL_NOT_FOUND"
+
+
+class ApprovalNotPendingError(ManifestError):
+    code = "APPROVAL_NOT_PENDING"
+
+
+class ApprovalVersionConflictError(ManifestError):
+    code = "APPROVAL_VERSION_CONFLICT"
+
+
+class ApprovalIdempotencyConflictError(ManifestError):
+    code = "APPROVAL_IDEMPOTENCY_CONFLICT"
+
+
+class ApprovalExpiredError(ManifestError):
+    code = "APPROVAL_EXPIRED"
+
+
+class ApprovalBindingError(ManifestError):
+    code = "APPROVAL_BINDING_ERROR"
+
+
+class ApprovalActionMismatchError(ApprovalBindingError):
+    code = "APPROVAL_ACTION_MISMATCH"
+
+
+class ApprovalStateMismatchError(ApprovalBindingError):
+    code = "APPROVAL_STATE_MISMATCH"
+
+
+class ApprovalPolicyMismatchError(ApprovalBindingError):
+    code = "APPROVAL_POLICY_MISMATCH"
+
+
+class ApproverConflictError(ManifestError):
+    code = "APPROVER_CONFLICT"
+
+
+class ApproverUnauthorizedError(ManifestError):
+    code = "APPROVER_UNAUTHORIZED"
+
+
+class ApprovalAuthNotConfiguredError(ManifestError):
+    code = "APPROVAL_AUTH_NOT_CONFIGURED"

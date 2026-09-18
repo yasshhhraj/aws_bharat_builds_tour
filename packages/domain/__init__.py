@@ -1,7 +1,17 @@
 """Shared shipment, trace, fact, and decision models."""
 
-from .enums import AgentName, EffectClass, EventType, RunStatus
+from .enums import (
+    AgentName,
+    ApprovalDecision,
+    ApprovalStatus,
+    EffectClass,
+    EventType,
+    RunStatus,
+    WorkflowStage,
+)
 from .models import (
+    ApprovalRecord,
+    ApprovalResolution,
     CarrierQuote,
     InventoryFact,
     Order,
@@ -17,6 +27,10 @@ from .models import (
 
 __all__ = [
     "AgentName",
+    "ApprovalDecision",
+    "ApprovalRecord",
+    "ApprovalResolution",
+    "ApprovalStatus",
     "CarrierQuote",
     "EffectClass",
     "EventType",
@@ -30,5 +44,6 @@ __all__ = [
     "TraceEvent",
     "TrajectoryState",
     "Vehicle",
+    "WorkflowStage",
     "to_primitive",
 ]
