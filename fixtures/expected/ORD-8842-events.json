@@ -1,0 +1,20 @@
+{
+  "agent_order": [
+    "inventory",
+    "dispatch",
+    "carrier",
+    "customer_communications"
+  ],
+  "tool_order": [
+    "get_order",
+    "check_inventory",
+    "list_available_vehicles",
+    "create_dispatch_plan",
+    "list_carrier_quotes",
+    "select_carrier_quote",
+    "write_tracking_outbox"
+  ],
+  "selected_vehicle_id": "VEH-COLD-01",
+  "selected_carrier_id": "CARRIER-COLD-01",
+  "selected_amount_minor": 90000
+}

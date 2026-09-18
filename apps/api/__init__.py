@@ -1,2 +1,5 @@
-"""Manifest HTTP API (implemented in a later checkpoint)."""
+"""Manifest HTTP API."""
 
+from .main import app
+
+__all__ = ["app"]

@@ -1,0 +1,9 @@
+{
+  "order_id": "ORD-8842",
+  "sku_id": "SKU-17",
+  "quantity": 10,
+  "cargo_class": "perishable",
+  "destination_zone": "BLR-SOUTH",
+  "currency": "INR",
+  "spend_ceiling_minor": 400000
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "sku_id": "SKU-17",
+    "available_quantity": 25,
+    "shipment_weight_kg": 500,
+    "source_id": "WMS-SNAPSHOT-001"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "quote_id": "QUOTE-COLD-01",
+    "carrier_id": "CARRIER-COLD-01",
+    "amount_minor": 90000,
+    "currency": "INR",
+    "cold_chain_certified": true,
+    "lane_supported": true,
+    "destination_zone": "BLR-SOUTH"
+  },
+  {
+    "quote_id": "QUOTE-CHEAP-01",
+    "carrier_id": "CARRIER-CHEAP-01",
+    "amount_minor": 70000,
+    "currency": "INR",
+    "cold_chain_certified": false,
+    "lane_supported": true,
+    "destination_zone": "BLR-SOUTH"
+  }
+]

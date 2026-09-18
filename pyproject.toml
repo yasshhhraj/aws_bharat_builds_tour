@@ -8,10 +8,14 @@ version = "0.1.0"
 description = "A governed autonomous logistics-agent prototype"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+]
 
 [project.optional-dependencies]
 dev = [
+  "httpx>=0.28,<1",
   "pytest>=8,<9",
 ]
 
@@ -22,4 +26,3 @@ pythonpath = ["."]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["apps*", "packages*"]
-

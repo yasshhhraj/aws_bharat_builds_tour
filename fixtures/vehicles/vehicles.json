@@ -1,0 +1,14 @@
+[
+  {
+    "vehicle_id": "VEH-COLD-01",
+    "capacity_kg": 1000,
+    "refrigerated": true,
+    "available": true
+  },
+  {
+    "vehicle_id": "VEH-SMALL-01",
+    "capacity_kg": 100,
+    "refrigerated": false,
+    "available": true
+  }
+]
