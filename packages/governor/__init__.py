@@ -1,0 +1,2 @@
+"""Trajectory-aware governance decisions."""
+
