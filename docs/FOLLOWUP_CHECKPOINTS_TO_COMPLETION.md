@@ -130,6 +130,9 @@ If the planned 20 attack/30 benign set cannot be completed, ship the six core at
 
 ## Checkpoint 7 — Cedar Authorization Parity
 
+**Detailed implementation specification:**
+[`CHECKPOINT_7_IMPLEMENTATION_PLAN.md`](CHECKPOINT_7_IMPLEMENTATION_PLAN.md)
+
 ### Prerequisite
 
 Checkpoint 6 is complete and its baseline is reproducible.

@@ -82,7 +82,7 @@ def render_markdown(report: EvaluationReport) -> str:
         "# Manifest Checkpoint 6 Evaluation Results",
         "",
         f"**Schema:** `{report.schema_version}`  ",
-        f"**Generated:** `{report.generated_at}`  ",
+        f"**Generated:** `{report.generated_at}`",
         f"**Seed:** `{report.seed}`  ",
         f"**Functional digest:** `{report.functional_digest}`",
         "",

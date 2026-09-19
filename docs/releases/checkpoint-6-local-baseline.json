@@ -27,7 +27,7 @@
     "digest": "sha256:37904e005b547792befed64ef94d0c919eb40ca97330d728e8ada49c7a1b3cf4",
     "file_count": 12
   },
-  "generated_at": "2026-09-19T05:49:13.865586Z",
+  "generated_at": "2026-09-19T09:32:36.225861Z",
   "limitations": [
     "Synthetic logistics data and effects only.",
     "Python reference policy engine; Cedar is not active.",
@@ -53,15 +53,15 @@
   "schema_version": "manifest-release-v1",
   "source": {
     "branch": "main",
-    "commit": "705b1e86cb85c01562d96741a8faa9e2615bde5e",
-    "diff_fingerprint": "sha256:cc8bd306ded85046c007dfa9f29c0b6fc1a06d2f566981b2ea30b8a4f357c70c",
+    "commit": "a8a17c5444f9f70099e7bb874c7a8a214808fa21",
+    "diff_fingerprint": "sha256:47756debeed93a8015e766bfc27429bbba1a2214b5058ce7373fa0a77e248553",
     "dirty": true
   },
   "storage": {
     "mode": "memory_hash_chain"
   },
   "tests": {
-    "collected": 118,
+    "collected": 119,
     "command": "./scripts/run_checkpoint_6.sh",
     "failed": 0,
     "status": "passed"
