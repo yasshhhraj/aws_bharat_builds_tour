@@ -3,16 +3,19 @@
 **Assessment date:** 19 September 2026  
 **Repository:** `/home/yashraj/p0/project`  
 **Assessed branch:** `main`  
-**Current HEAD:** `d7b10f5` (`Add checkpoint scripts and comprehensive tests for approval workflows`)  
-**Assessment basis:** source inspection, repository state, full automated test suite, Checkpoint 5 verification script, and live CLI journeys
+**Current HEAD:** `705b1e8` (`feat: Implement canonical serialization and hashing for ledger events`)
+**Assessment basis:** source inspection, repository state, full automated test suite, Checkpoint 6 evaluation, live CLI journeys, and browser smoke
+
+**Follow-up roadmap:** [`FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md`](FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md)
+**Completed detailed plan:** [`CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](CHECKPOINT_6_IMPLEMENTATION_PLAN.md)
 
 ## 1. Executive summary
 
-Manifest has progressed beyond a walking skeleton into a working local governance prototype. The current working tree demonstrates the complete synthetic `ORD-8842` journey in benign, adversarial shadow, and adversarial enforce modes. It includes four deterministic agent roles, a governed tool boundary, six policy families, guide-back behavior, numeric provenance, cumulative commitment control, human approval, exact-once confirmation, a tamper-evident event chain, HTTP APIs, and a browser dashboard.
+Manifest has progressed beyond a walking skeleton into a measured local governance prototype. The current working tree demonstrates the complete synthetic `ORD-8842` journey in benign, adversarial shadow, and adversarial enforce modes. It includes four deterministic agent roles, a governed tool boundary, six policy families, guide-back behavior, numeric provenance, cumulative commitment control, human approval, exact-once confirmation, a tamper-evident event chain, HTTP APIs, a browser dashboard, and reproducible evaluation evidence.
 
-The local implementation is healthy: **94 automated tests pass**, and the repository's Checkpoint 5 verification script completes all regression, dashboard, projection, and primary CLI journey gates.
+The local implementation is healthy: **119 automated tests pass**. The labelled evaluation passes **22/22 cases**, comprising **10/10 detected attacks**, **12/12 passing benign/boundary cases**, **0/12 false positives**, and **2/2 successful guide-backs**. Browser smoke covers health, benign, shadow, enforce, approval, verification, tamper detection, and controlled API error presentation.
 
-The prototype is not yet ready to be submitted under the full target architecture. Cedar, Strands, Bedrock, DynamoDB, Lambda/API Gateway, Amplify, Step Functions, EventBridge, deployment infrastructure, reproducible evaluation metrics, release tags, and final demo assets remain incomplete or absent. The correct current claim is therefore:
+The prototype is not yet ready to be submitted under the full target architecture. Cedar, Strands, Bedrock, DynamoDB, Lambda/API Gateway, Amplify, Step Functions, EventBridge, deployment infrastructure, a release tag, and final demo video/deck remain incomplete or absent. The correct current claim is therefore:
 
 > A tested, deterministic, local reference implementation of Manifest's core governance journey, with simulated logistics effects and an in-memory tamper-evident ledger.
 
@@ -26,11 +29,13 @@ Commands executed from the repository root:
 
 ```text
 python3 -m pytest -q
-Result: 94 passed in 2.71s
+Result: 119 passed
 
-./scripts/run_checkpoint_5.sh
-Result: full regression passed; 9 focused dashboard/projection tests passed;
-        all three primary CLI journeys passed
+python3 scripts/run_evaluation.py --warmup 1 --iterations 10
+Result: 22/22 cases passed; generated JSON and Markdown evidence
+
+Browser smoke
+Result: PASS for the complete local hero path and integrity demonstrations
 ```
 
 Verified CLI outcomes:
@@ -43,15 +48,16 @@ Verified CLI outcomes:
 
 ### Repository safety state
 
-The implementation passes locally but is **not yet release-safe**:
+The Checkpoint 4 ledger and Checkpoint 5 dashboard implementation is now committed at `705b1e8`, and `origin/main` matches that revision. The committed source therefore contains the 94-test local baseline described by the README.
 
-- The branch is `main` at commit `d7b10f5`, matching `origin/main`.
-- There are **15 modified tracked files** and **14 untracked files**.
-- The Checkpoint 4 ledger work, Checkpoint 5 dashboard work, related tests, and documentation are among the uncommitted files.
+The project is a reproducible local release candidate but is still **not submission-complete**:
+
 - No Git release tags exist.
-- The current committed revision therefore does not contain all behavior described by the working-tree README.
+- The generated release manifest correctly reports a dirty working tree until the operator reviews and commits Checkpoint 6.
+- Cedar, Strands/Bedrock, durable storage, and cloud deployment remain deferred.
+- Final deck, timed rehearsals, and backup video remain incomplete.
 
-Before sharing or deploying the project, the verified working tree must be reviewed, committed as one coherent checkpoint, and tagged. No report should claim that the remote `main` branch currently contains the verified Checkpoint 5 implementation.
+Before sharing or deploying a tagged release, the complete Checkpoint 6 diff must be reviewed and any commit or tag must be created as an explicit operator action. The manifest should then be regenerated against the clean revision.
 
 ## 3. Checkpoint progress
 
@@ -59,24 +65,24 @@ This table uses the checkpoint sequence defined in the earlier build roadmap. Th
 
 | Roadmap checkpoint | Status | Progress | Evidence | Remaining work |
 |---|---|---:|---|---|
-| 0. Contracts and deterministic fixture | **Substantially complete** | 85% | Typed domain objects cover mandates, state, tools, decisions, facts, prepared actions, approvals, events, ledger heads, and projections. `ORD-8842`, two vehicles, two carriers, benign/adversarial scenarios, and validation are present. | Add a whole-fixture seed checksum/release manifest. Expand fixtures only if needed for evaluation; the planned 20-order data set is not present. |
+| 0. Contracts and deterministic fixture | **Complete for local prototype** | 95% | Typed domain objects and deterministic fixtures are validated; the release manifest records a canonical fixture-tree SHA-256 checksum. | Expand fixtures only if the final 20 attack/30 benign evaluation target is required. |
 | 1. Benign end-to-end journey | **Complete locally** | 90% | Four deterministic agent roles traverse Inventory, Dispatch, Carrier, and Customer Communications through one orchestrator and trace. CLI, API, bounded tool calls, effect-classed registry, trace isolation, and mock effects are tested. | Add a model/agent adapter boundary and Strands implementation. Current roles are plain Python, not Strands agents. |
 | 2. Governor and policy enforcement | **Functional reference implementation** | 80% | Every registered tool attempt is intercepted. Six Python policy families cover ownership/mandate, provenance, cold chain, commitment budget, separation of duties, and PII boundary. Unknown tools and policy-engine failures fail closed. | Replace or supplement the Python reference engine with Cedar and run the same conformance cases against it. Cedar policy/schema files are absent. |
 | 3. Hero controls | **Complete locally** | 95% | Weight drift is caught before dispatch; cold-chain carrier guide-back works; cumulative spend escalates; prepare/approve/confirm/cancel states exist; approval binding, expiry, replay, concurrency, fresh evaluation, and exact-once behavior are tested. | Validate these contracts against the future Cedar and durable-storage adapters. |
 | 4. Shadow mode | **Complete locally** | 100% | The same adversarial fixture runs in shadow and enforce modes. Shadow records counterfactual guide/escalate outcomes while mock execution continues. | Preserve parity when Cedar/Strands adapters are added. |
 | 5. Hash-chained ledger | **Complete locally; durability deferred** | 85% | Canonical SHA-256 event hashing, per-trace sequence/head state, idempotent append, verification, first-bad-sequence reporting, and disabled-by-default disposable tampering are implemented and tested. | Add a DynamoDB adapter with conditional ordered writes. The in-memory chain is lost on process restart and is tamper-evident, not immutable. |
 | 6. HTTP API | **Complete locally** | 95% | Health, fixture, run, trace, decision, projection, verification, approval, reset, and guarded tamper endpoints are implemented in FastAPI. The full approval journey is covered by API tests. | Add durable backing services, deployment configuration, authentication appropriate to the target environment, and cloud smoke tests. |
-| 7. Operator dashboard | **Complete local MVP** | 85% | A same-origin, no-build HTML/CSS/JavaScript dashboard consumes real APIs and exposes run controls, decisions, spend/risk, weight provenance, approvals, and integrity state. Dashboard/projection tests pass. | Perform visual/browser QA, add screenshots, and decide whether the static implementation is sufficient or must be migrated to React/TypeScript for judging. |
+| 7. Operator dashboard | **Complete local MVP** | 95% | The API-driven dashboard passes automated contracts and live browser smoke across health, benign, shadow, enforce, approval, verification, tamper, and API error states; screenshots are recorded. | A framework migration is optional and should occur only if judging requirements demand it. |
 | 8. AWS adapters and deployment | **Not started** | 0% | The README accurately discloses local deterministic, in-memory modes. | Implement/probe Bedrock, Strands, Cedar, DynamoDB, SAM/Lambda/API Gateway, hosting, and optional Step Functions/EventBridge. `infrastructure/` currently has no deployment files. |
-| 9. Evaluation, freeze, and submission | **Early** | 30% | Strong automated regression coverage exists, with 94 passing tests and executable checkpoint scripts. README setup and local demo commands are documented. | Add attack/benign evaluation runner, result JSON with denominators, p50/p95 latency, false-positive and guide-back metrics, release manifest/checksum, immutable tags, cloud/local smoke matrix, screenshots, architecture updated to actual implementation, deck, timed script, rehearsals, and backup video. |
+| 9. Evaluation, freeze, and submission | **In progress** | 60% | 119 tests pass; generated results include exact denominators, p50/p95 latency, false positives, guide-back success, a fixture checksum, release manifest, browser evidence, and screenshots. | Review/commit/tag Checkpoint 6, then add Cedar/cloud parity, final architecture, deck, timed rehearsals, and backup video. |
 
 ### Progress interpretation
 
-- **Core local prototype (Checkpoints 0–7): approximately 89% complete.** The principal user journey works and is well tested.
+- **Core local prototype (Checkpoints 0–7): approximately 93% complete.** The principal journey is implemented, measured, and browser-verified.
 - **Target cloud architecture (Checkpoint 8): 0% complete.** No AWS or Cedar/Strands integration is currently executable.
-- **Submission packaging (Checkpoint 9): approximately 30% complete.** Tests and README are strong, but measured results and release/demo artifacts are missing.
-- **Overall feature progress:** approximately 75% when each roadmap checkpoint is treated equally.
-- **Practical submission readiness:** approximately 55–60%, because cloud credibility, reproducible evidence, and release hygiene are high-impact requirements rather than cosmetic tasks.
+- **Submission packaging (Checkpoint 9): approximately 60% complete.** Measured evidence and screenshots exist; tagged release, cloud path, deck, rehearsals, and video remain.
+- **Overall feature progress:** approximately 80% when roadmap checkpoints are treated equally.
+- **Practical submission readiness:** approximately 65–70%, with Cedar/AWS credibility and final packaging now the dominant gaps.
 
 These percentages are planning estimates, not measured engineering productivity metrics.
 
@@ -100,6 +106,7 @@ These percentages are planning estimates, not measured engineering productivity 
 - FastAPI read/write endpoints for the full local demonstration.
 - API-backed local browser dashboard.
 - Automated unit, policy, integration, API, CLI, concurrency, ledger, and dashboard tests.
+- Labelled evaluation cases, deterministic functional digest, p50/p95 metrics, release manifest, fixture checksum, and browser evidence.
 
 ### Simulated behavior
 
@@ -139,17 +146,13 @@ These percentages are planning estimates, not measured engineering productivity 
 
 ## 6. Key risks and issues
 
-### P0 — Release integrity
+### P0 — Review and tag the measured baseline
 
-The verified implementation is not committed. A clean clone from `origin/main` will not reproduce the assessed Checkpoint 5 state. Review and commit the 29 changed/untracked paths before further integration.
+Checkpoint 6 now generates the release manifest and measured evidence, but the working tree remains dirty until an operator reviews and commits it. After review, regenerate the manifest against the clean revision and create the checkpoint tag explicitly.
 
 ### P0 — Target-architecture claim gap
 
 The central target claim specifies Strands plus Cedar, but the current implementation uses plain Python agents and a Python reference policy engine. The current solution demonstrates the product behavior but not yet the named technical differentiators.
-
-### P0 — No reproducible results report
-
-There is no evaluation runner producing attack/benign denominators, false-positive rate, guide-back success, or p50/p95 policy and total latency. Automated tests are evidence of correctness, but they are not a benchmark report.
 
 ### P1 — Volatile state
 
@@ -169,31 +172,19 @@ The current fixture set is intentionally minimal: one order, one inventory recor
 
 ## 7. Recommended next checkpoints
 
-### Next 1 — Stabilize and tag the verified local release
+### Next 1 — Review and tag the verified local release
 
 **Goal:** Make the assessed state reproducible before adding integrations.
 
-1. Review the current diff and untracked files.
-2. Re-run `./scripts/run_checkpoint_5.sh` from a clean environment.
-3. Commit Checkpoints 4–5 as a coherent release.
-4. Add a release manifest containing commit, fixture checksum, policy version, Python version, and test result.
-5. Tag the result, for example `v0.6.0-local-dashboard`.
+1. Review the Checkpoint 6 implementation and generated evidence.
+2. Run `./scripts/run_checkpoint_6.sh` from the reviewed environment.
+3. Commit the approved changes.
+4. Regenerate the release manifest so `source.dirty` is false.
+5. Tag the result, for example `v0.6.0-local-evaluated`.
 
 **Exit test:** a clean clone at the tag installs and passes the full checkpoint script.
 
-### Next 2 — Produce measured evidence before cloud work
-
-**Goal:** Turn test cases into judge-ready numbers.
-
-1. Add a seeded evaluation runner.
-2. Include the six core attack classes and at least ten benign variants initially.
-3. Output JSON with exact denominators.
-4. Measure policy evaluation and end-to-end decision latency separately.
-5. Report detection, false-positive, guide-back, approval, and ledger-verification results without invented values.
-
-**Exit test:** one command regenerates the metrics file from a clean seed.
-
-### Next 3 — Add Cedar through the existing policy interface
+### Next 2 — Add Cedar through the existing policy interface
 
 **Goal:** Close the most important architecture gap without destabilizing the workflow.
 
@@ -204,7 +195,7 @@ The current fixture set is intentionally minimal: one order, one inventory recor
 
 **Exit test:** all policy conformance and full journey tests pass with Cedar active.
 
-### Next 4 — Add durable storage
+### Next 3 — Add durable storage
 
 **Goal:** Preserve runs, approvals, and the hash chain across processes.
 
@@ -215,7 +206,7 @@ The current fixture set is intentionally minimal: one order, one inventory recor
 
 **Exit test:** an API process can restart and then approve an existing pending trace exactly once.
 
-### Next 5 — Add Strands/Bedrock and deploy the thin cloud path
+### Next 4 — Add Strands/Bedrock and deploy the thin cloud path
 
 **Goal:** Demonstrate the intended agent and AWS integration without moving authorization into the model.
 
@@ -227,7 +218,7 @@ The current fixture set is intentionally minimal: one order, one inventory recor
 
 **Exit test:** one cloud adversarial run reaches pending approval, resumes exactly once, and verifies its persisted chain.
 
-### Next 6 — Freeze and package the submission
+### Next 5 — Freeze and package the submission
 
 **Goal:** Convert the implementation into a reliable four-minute submission.
 
@@ -257,4 +248,4 @@ The current fixture set is intentionally minimal: one order, one inventory recor
 
 **Current decision: CONDITIONAL GO for a local prototype demonstration; NO-GO for the full target submission claim.**
 
-The local product thesis is convincingly implemented and tested. The immediate priority is not another feature: it is to commit and tag the verified state, produce measured evidence, and then close the Cedar/AWS gaps in that order. If time becomes constrained, preserve the current local flow, add Cedar conformance and metrics, and submit with explicit disclosure rather than risking the stable demo on optional cloud services.
+The local product thesis is convincingly implemented and tested. The immediate priority is not another feature: it is to produce measured evidence and a release manifest for the committed baseline, then create an operator-approved checkpoint tag before closing the Cedar/AWS gaps in that order. If time becomes constrained, preserve the current local flow, add Cedar conformance and metrics, and submit with explicit disclosure rather than risking the stable demo on optional cloud services.

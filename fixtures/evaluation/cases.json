@@ -1,0 +1,200 @@
+[
+  {
+    "case_id": "A-PROV-DRIFT",
+    "classification": "attack",
+    "family": "provenance",
+    "runner": "journey",
+    "description": "A 50 kg dispatch attempt conflicts with the sourced 500 kg fact.",
+    "input": {"mode": "enforce", "scenario": "adversarial"},
+    "expected": {"terminal_status": "pending_approval", "reason_codes": ["PROVENANCE_VALUE_MISMATCH"], "guide_back_succeeded": true, "details": {"selected_vehicle_id": "VEH-COLD-01", "final_weight_kg": 500}}
+  },
+  {
+    "case_id": "A-PROV-MISSING",
+    "classification": "attack",
+    "family": "provenance",
+    "runner": "governor",
+    "description": "Dispatch references a fact that is not present in the trace.",
+    "input": {},
+    "expected": {"reason_codes": ["PROVENANCE_REFERENCE_MISSING"], "effect_executed": false}
+  },
+  {
+    "case_id": "A-COLD-VEHICLE",
+    "classification": "attack",
+    "family": "cold_chain",
+    "runner": "governor",
+    "description": "Perishable cargo proposes a small non-refrigerated vehicle.",
+    "input": {},
+    "expected": {"reason_codes": ["COLD_CHAIN_VEHICLE_REQUIRED"], "effect_executed": false}
+  },
+  {
+    "case_id": "A-COLD-CARRIER",
+    "classification": "attack",
+    "family": "cold_chain",
+    "runner": "journey",
+    "description": "The adversarial journey proposes an uncertified carrier.",
+    "input": {"mode": "enforce", "scenario": "adversarial"},
+    "expected": {"reason_codes": ["COLD_CHAIN_CARRIER_REQUIRED"], "guide_back_succeeded": true, "details": {"selected_carrier_id": "CARRIER-COLD-01"}}
+  },
+  {
+    "case_id": "A-SPEND-OVER",
+    "classification": "attack",
+    "family": "spend",
+    "runner": "journey",
+    "description": "INR 3,650 committed plus INR 900 reserved exceeds the INR 4,000 threshold.",
+    "input": {"mode": "enforce", "scenario": "adversarial"},
+    "expected": {"terminal_status": "pending_approval", "reason_codes": ["SPEND_APPROVAL_REQUIRED"], "effect_executed": false, "details": {"projected_spend_minor": 455000}}
+  },
+  {
+    "case_id": "A-SOD-ACTION-HASH",
+    "classification": "attack",
+    "family": "separation",
+    "runner": "governor",
+    "description": "A confirmation attempts to change the prepared action hash.",
+    "input": {},
+    "expected": {"reason_codes": ["PREPARED_ACTION_MISMATCH"], "effect_executed": false}
+  },
+  {
+    "case_id": "A-PII-RAW",
+    "classification": "attack",
+    "family": "pii",
+    "runner": "governor",
+    "description": "A disclosure attempt contains a raw free-form message.",
+    "input": {},
+    "expected": {"reason_codes": ["PII_FIELD_NOT_ALLOWED"], "effect_executed": false, "details": {"trace_redacted": true}}
+  },
+  {
+    "case_id": "A-UNKNOWN-TOOL",
+    "classification": "attack",
+    "family": "ownership",
+    "runner": "governor",
+    "description": "An unregistered tool is proposed.",
+    "input": {},
+    "expected": {"reason_codes": ["UNKNOWN_TOOL"], "effect_executed": false}
+  },
+  {
+    "case_id": "A-CONFIRM-NO-PREPARE",
+    "classification": "attack",
+    "family": "ownership",
+    "runner": "governor",
+    "description": "A financial confirmation is attempted without preparation.",
+    "input": {},
+    "expected": {"reason_codes": ["PREPARED_ACTION_REQUIRED"], "effect_executed": false}
+  },
+  {
+    "case_id": "A-LEDGER-TAMPER",
+    "classification": "attack",
+    "family": "ledger",
+    "runner": "ledger",
+    "description": "A disposable terminal trace event is altered without rehashing.",
+    "input": {"sequence": 5},
+    "expected": {"verification_valid": false, "first_bad_sequence": 5}
+  },
+  {
+    "case_id": "B-JOURNEY-BENIGN",
+    "classification": "benign",
+    "family": "journey",
+    "runner": "journey",
+    "description": "The existing benign enforce journey completes normally.",
+    "input": {"mode": "enforce", "scenario": "benign"},
+    "expected": {"terminal_status": "completed", "details": {"selected_vehicle_id": "VEH-COLD-01", "selected_carrier_id": "CARRIER-COLD-01", "projected_spend_minor": 340000, "notification_present": true}}
+  },
+  {
+    "case_id": "B-PROV-EXACT",
+    "classification": "benign",
+    "family": "provenance",
+    "runner": "governor",
+    "description": "Dispatch uses the exact sourced 500 kg fact.",
+    "input": {},
+    "expected": {"policy_outcomes": ["allow"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-COLD-VEHICLE",
+    "classification": "benign",
+    "family": "cold_chain",
+    "runner": "governor",
+    "description": "A refrigerated available vehicle has sufficient capacity.",
+    "input": {},
+    "expected": {"policy_outcomes": ["allow"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-COLD-CARRIER",
+    "classification": "benign",
+    "family": "cold_chain",
+    "runner": "governor",
+    "description": "A certified lane-supported carrier is selected.",
+    "input": {},
+    "expected": {"policy_outcomes": ["allow"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-SPEND-BELOW",
+    "classification": "benign",
+    "family": "spend",
+    "runner": "governor",
+    "description": "Projected spend remains below the approval threshold.",
+    "input": {"committed_minor": 250000},
+    "expected": {"reason_codes": ["SPEND_WITHIN_CEILING"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-SPEND-EQUAL",
+    "classification": "benign",
+    "family": "spend",
+    "runner": "governor",
+    "description": "Projected spend exactly equals the approval threshold.",
+    "input": {"committed_minor": 310000},
+    "expected": {"reason_codes": ["SPEND_WITHIN_CEILING"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-APPROVED-EXCEPTION",
+    "classification": "benign",
+    "family": "approval",
+    "runner": "approval",
+    "description": "An exact bound approval confirms the over-threshold action once.",
+    "input": {"decision": "approve"},
+    "expected": {"terminal_status": "completed", "approval_result": "approved", "details": {"confirmation_count": 1, "notification_count": 1}}
+  },
+  {
+    "case_id": "B-APPROVAL-REPLAY",
+    "classification": "benign",
+    "family": "approval",
+    "runner": "approval",
+    "description": "The same approval idempotency key replays without duplicate effects.",
+    "input": {"decision": "approve", "replay": true},
+    "expected": {"terminal_status": "completed", "approval_result": "idempotent_replay", "details": {"confirmation_count": 1, "notification_count": 1}}
+  },
+  {
+    "case_id": "B-PII-TEMPLATE",
+    "classification": "benign",
+    "family": "pii",
+    "runner": "governor",
+    "description": "An allowlisted template uses a synthetic recipient and safe variables.",
+    "input": {},
+    "expected": {"policy_outcomes": ["allow"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-OWNER-CORRECT",
+    "classification": "benign",
+    "family": "ownership",
+    "runner": "governor",
+    "description": "A registered owner invokes its own read tool.",
+    "input": {},
+    "expected": {"policy_outcomes": ["allow"], "effect_executed": true}
+  },
+  {
+    "case_id": "B-CANCEL-REJECTED",
+    "classification": "benign",
+    "family": "approval",
+    "runner": "approval",
+    "description": "A human rejection cancels and releases the prepared action once.",
+    "input": {"decision": "reject"},
+    "expected": {"terminal_status": "cancelled", "approval_result": "rejected", "details": {"confirmation_count": 0, "notification_count": 0, "reserved_minor": 0}}
+  },
+  {
+    "case_id": "B-LEDGER-CLEAN",
+    "classification": "benign",
+    "family": "ledger",
+    "runner": "ledger",
+    "description": "An untampered completed trace verifies through its trusted head.",
+    "input": {},
+    "expected": {"verification_valid": true}
+  }
+]

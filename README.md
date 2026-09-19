@@ -5,7 +5,7 @@ agent actions before they create physical, financial, or disclosure effects.
 
 ## Current status
 
-**Checkpoint 5 is implemented.** One deterministic shipment runs through four
+**Checkpoint 6 is implemented locally.** One deterministic shipment runs through four
 plain-Python agent roles in either shadow or enforce mode. Every registered tool
 attempt receives a typed policy decision before its mock effect executes, and a
 bound human approval can resume or cancel a paused commitment. Every retained
@@ -31,9 +31,39 @@ The implementation demonstrates:
 - a read-only dashboard projection for spend, risk signals, and weight
   provenance; and
 - a responsive local operator dashboard with approval and integrity controls.
+- a labelled 22-case evaluation catalogue with exact denominators;
+- separately measured policy and end-to-end latency;
+- a canonical fixture-tree checksum and generated release manifest; and
+- recorded browser evidence for health, shadow, enforce, approval, verification,
+  tamper detection, and controlled error presentation.
 
 The implementation specification is
-[`docs/CHECKPOINT_5_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_5_IMPLEMENTATION_PLAN.md).
+[`docs/CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_6_IMPLEMENTATION_PLAN.md).
+
+The generated evidence is in
+[`docs/results/checkpoint-6-evaluation.md`](docs/results/checkpoint-6-evaluation.md),
+with browser verification in
+[`docs/results/browser-smoke.md`](docs/results/browser-smoke.md). Checkpoint 7,
+Cedar authorization parity, is the next implementation milestone.
+
+## Run the evaluation and checkpoint gate
+
+Generate the measured evaluation evidence:
+
+```bash
+python3 scripts/run_evaluation.py --warmup 1 --iterations 10
+python3 scripts/build_release_manifest.py
+```
+
+Run the complete Checkpoint 6 gate:
+
+```bash
+./scripts/run_checkpoint_6.sh
+```
+
+The current labelled set contains 10 attack and 12 benign/boundary cases. The
+committed results must always be read with the disclosed local deterministic,
+Python-reference, and in-memory modes.
 
 ## Requirements and setup
 

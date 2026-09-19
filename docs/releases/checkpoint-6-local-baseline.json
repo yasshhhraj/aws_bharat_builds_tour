@@ -1,0 +1,69 @@
+{
+  "approval": {
+    "mode": "local"
+  },
+  "dashboard": {
+    "mode": "static_no_build"
+  },
+  "dependencies": {
+    "fastapi": "0.135.3",
+    "httpx": "0.28.1",
+    "pytest": "9.1.1",
+    "uvicorn": "0.38.0"
+  },
+  "deployment": {
+    "mode": "local"
+  },
+  "evaluation": {
+    "case_catalog_digest": "sha256:2d6715718497baeb1415e4538cc1948a533a79075d888b90a3cfc247314d1672",
+    "case_passed": 22,
+    "case_total": 22,
+    "functional_digest": "sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120",
+    "result_path": "docs/results/checkpoint-6-evaluation.json",
+    "schema_version": "manifest-evaluation-v1"
+  },
+  "fixture_tree": {
+    "algorithm": "sha256",
+    "digest": "sha256:37904e005b547792befed64ef94d0c919eb40ca97330d728e8ada49c7a1b3cf4",
+    "file_count": 12
+  },
+  "generated_at": "2026-09-19T05:49:13.865586Z",
+  "limitations": [
+    "Synthetic logistics data and effects only.",
+    "Python reference policy engine; Cedar is not active.",
+    "Deterministic Python agents; Strands and Bedrock are not active.",
+    "In-memory storage; runs and approvals do not survive restart.",
+    "Tamper-evident hash chain, not an immutable ledger.",
+    "Local deployment only."
+  ],
+  "package": {
+    "name": "manifest-governor",
+    "version": "0.7.0"
+  },
+  "policy": {
+    "engine": "python_reference",
+    "version": "demo-v1"
+  },
+  "python": {
+    "version": "3.14.6"
+  },
+  "runtime": {
+    "mode": "deterministic"
+  },
+  "schema_version": "manifest-release-v1",
+  "source": {
+    "branch": "main",
+    "commit": "705b1e86cb85c01562d96741a8faa9e2615bde5e",
+    "diff_fingerprint": "sha256:cc8bd306ded85046c007dfa9f29c0b6fc1a06d2f566981b2ea30b8a4f357c70c",
+    "dirty": true
+  },
+  "storage": {
+    "mode": "memory_hash_chain"
+  },
+  "tests": {
+    "collected": 118,
+    "command": "./scripts/run_checkpoint_6.sh",
+    "failed": 0,
+    "status": "passed"
+  }
+}

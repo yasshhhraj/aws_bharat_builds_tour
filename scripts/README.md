@@ -13,4 +13,13 @@ and the focused hash-chain verification and disposable-tamper API tests.
 `run_checkpoint_5.sh` runs the full regression suite, focused dashboard and
 projection contracts, and the primary CLI journeys used by the operator UI.
 
-Durable seed, evaluation, and cloud scripts will be added in later checkpoints.
+`run_evaluation.py` executes the isolated labelled Checkpoint 6 catalogue,
+collects policy and end-to-end latency, and generates JSON and Markdown evidence.
+
+`build_release_manifest.py` binds that evidence to the source revision, fixture
+tree checksum, policy version, active modes, dependency versions, and test count.
+
+`run_checkpoint_6.sh` preserves the Checkpoint 5 gate, regenerates the measured
+evidence and release manifest, and validates recorded browser-smoke evidence.
+
+Durable storage and cloud scripts remain deferred to later checkpoints.
