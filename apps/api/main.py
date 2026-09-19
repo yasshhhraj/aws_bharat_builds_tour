@@ -20,6 +20,7 @@ from packages.domain.errors import (
     ApprovalNotFoundError,
     ApprovalNotPendingError,
     ApprovalVersionConflictError,
+    ApprovalPersistenceConflictError,
     ApproverConflictError,
     ApproverUnauthorizedError,
     FixtureError,
@@ -31,6 +32,7 @@ from packages.domain.errors import (
     LedgerTamperValidationError,
     OrderNotFoundError,
     TraceNotFoundError,
+    TraceRevisionConflictError,
     UnsupportedModeError,
     UnsupportedScenarioError,
 )
@@ -97,8 +99,10 @@ def _error_status(exc: ManifestError) -> int:
             ApprovalIdempotencyConflictError,
             ApprovalNotPendingError,
             ApprovalVersionConflictError,
+            ApprovalPersistenceConflictError,
             ApproverConflictError,
             LedgerIdempotencyConflictError,
+            TraceRevisionConflictError,
         ),
     ):
         return 409
@@ -164,7 +168,7 @@ async def health_ready():
         "runtime_mode": "deterministic",
         "governor_mode": "policy_enforced",
         **policy_status,
-        "storage_mode": "memory_hash_chain",
+        **service.store.describe(),
         "fixture_count": fixture_count,
         "supported_modes": ["shadow", "enforce"],
         "supported_scenarios": ["benign", "adversarial"],

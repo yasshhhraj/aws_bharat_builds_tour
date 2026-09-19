@@ -5,7 +5,7 @@ agent actions before they create physical, financial, or disclosure effects.
 
 ## Current status
 
-**Checkpoint 7 is implemented locally.** One deterministic shipment runs through four
+**Checkpoint 8 is implemented locally.** One deterministic shipment runs through four
 plain-Python agent roles in either shadow or enforce mode. Every registered tool
 attempt receives an authoritative Cedar policy decision before its mock effect executes, and a
 bound human approval can resume or cancel a paused commitment. Every retained
@@ -39,20 +39,21 @@ The implementation demonstrates:
 - a loopback-only Rust PDP using the official Cedar 4.12.0 engine;
 - a strictly validated `demo-v1` Cedar schema and policy bundle;
 - fail-closed engine selection with bundle/schema identity disclosure; and
-- exact functional parity across the 22-case Python/Cedar evaluation corpus.
+- exact functional parity across the 22-case Python/Cedar evaluation corpus; and
+- optional durable single-table DynamoDB storage with optimistic revisions,
+  transactional ledger writes, persisted approvals, and replay receipts.
 
-The implementation specification is
-[`docs/CHECKPOINT_7_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_7_IMPLEMENTATION_PLAN.md),
-with verified results in
-[`docs/CHECKPOINT_7_COMPLETION_REPORT.md`](docs/CHECKPOINT_7_COMPLETION_REPORT.md).
+The durable-storage specification is
+[`docs/CHECKPOINT_8_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_8_IMPLEMENTATION_PLAN.md),
+with current results in
+[`docs/CHECKPOINT_8_COMPLETION_REPORT.md`](docs/CHECKPOINT_8_COMPLETION_REPORT.md).
 
 The generated evidence is in
 [`docs/results/checkpoint-6-evaluation.md`](docs/results/checkpoint-6-evaluation.md),
 with Cedar evidence in
 [`docs/results/checkpoint-7-cedar-evaluation.md`](docs/results/checkpoint-7-cedar-evaluation.md)
 and browser verification in
-[`docs/results/browser-smoke.md`](docs/results/browser-smoke.md). Checkpoint 8,
-durable DynamoDB-compatible storage, is the next implementation milestone.
+[`docs/results/browser-smoke.md`](docs/results/browser-smoke.md).
 
 ## Run the evaluation and checkpoint gate
 
@@ -75,6 +76,12 @@ Run the complete Cedar-authoritative Checkpoint 7 gate:
 ./scripts/run_checkpoint_7.sh
 ```
 
+Run the Checkpoint 8 durability gate:
+
+```bash
+./scripts/run_checkpoint_8.sh
+```
+
 The current labelled set contains 10 attack and 12 benign/boundary cases. The
 committed results must always be read with their disclosed engine and with the
 local deterministic and in-memory modes.
@@ -83,6 +90,7 @@ local deterministic and in-memory modes.
 
 - Python 3.10 or newer
 - Rust stable with Cargo (for the Cedar sidecar)
+- Docker with Compose (for durable DynamoDB Local mode)
 
 From `/home/yashraj/p0/project`:
 
@@ -93,6 +101,33 @@ python3 -m pip install -e '.[dev]'
 ```
 
 No AWS account or credentials are required.
+
+### Durable local storage
+
+Start and initialize the pinned, loopback-only database:
+
+```bash
+docker compose up -d dynamodb-local
+python3 scripts/setup_dynamodb.py
+```
+
+Select it before starting the API or CLI:
+
+```bash
+export MANIFEST_STORAGE_BACKEND=dynamodb
+export MANIFEST_DYNAMODB_ENDPOINT=http://127.0.0.1:18000
+export MANIFEST_DYNAMODB_TABLE=manifest-local
+export MANIFEST_DEMO_NAMESPACE=local-demo
+```
+
+The table setup is idempotent and uses credential-shaped local dummy values;
+never supply real AWS keys. Application restarts and `docker compose restart
+dynamodb-local` retain data in a dedicated named volume. `POST /v1/demo/reset`
+removes only the configured synthetic namespace.
+
+Stop without deleting data using `docker compose stop dynamodb-local`. To use
+the zero-service fallback, set `MANIFEST_STORAGE_BACKEND=memory`; memory mode is
+intentionally non-durable. No manual image pull or AWS console setup is needed.
 
 To run the API or CLI directly with Cedar, start the sidecar as documented in
 [`services/cedar_pdp/README.md`](services/cedar_pdp/README.md), then set:
@@ -146,7 +181,7 @@ the synthetic unsafe path to complete.
 
 Add `--json` for a machine-readable run summary.
 
-Resolve the adversarial approval in the same in-memory CLI process:
+Resolve the adversarial approval in the same CLI process:
 
 ```bash
 python3 -m apps.runtime.run \
@@ -156,9 +191,9 @@ python3 -m apps.runtime.run \
   --approval approve
 ```
 
-Use `--approval reject` to exercise cancellation. A separate CLI process cannot
-resume a previous trace because this checkpoint intentionally uses in-memory
-storage.
+Use `--approval reject` to exercise cancellation. With DynamoDB selected, the
+API can retrieve and resolve a previous trace after application or database
+container restart.
 
 ## Run the API
 
@@ -221,7 +256,7 @@ curl -X POST http://127.0.0.1:8000/v1/approvals/APR-REPLACE-ME \
 | GET | `/v1/approvals` | Read/filter synthetic approval records |
 | GET | `/v1/approvals/{approval_id}` | Read one approval and its binding |
 | POST | `/v1/approvals/{approval_id}` | Approve or reject and continue the run |
-| POST | `/v1/demo/reset` | Clear all in-memory demo state and mock effects |
+| POST | `/v1/demo/reset` | Clear the configured demo namespace and mock effects |
 | POST | `/v1/demo/traces/{trace_id}/tamper` | Alter one disposable terminal trace when explicitly enabled |
 
 The approval header is a demo-only shared secret, not production identity.
@@ -255,7 +290,13 @@ approval trace for tampering.
 python3 -m pytest -q
 ```
 
-Or run the complete Checkpoint 7 verification:
+Run the complete Checkpoint 8 verification:
+
+```bash
+./scripts/run_checkpoint_8.sh
+```
+
+The earlier Checkpoint 7 gate remains available:
 
 ```bash
 ./scripts/run_checkpoint_7.sh
@@ -279,16 +320,16 @@ RunService -> ShipmentOrchestrator -> four deterministic agents
                         loopback Rust PDP --> mock tools
                                          |
                                          v
-                    in-memory hash-chain ledger + versioned approvals
+                  TraceRepository (memory or DynamoDB Local)
+                    + hash-chain ledger + versioned approvals
                                       |
                                       v
                          projections + read-only verifier
 ```
 
-The active engine is disclosed as `python_reference`. It is deterministic and
-has no LLM in the authorization path. Cedar is not active in this checkpoint;
-the Python engine is the executable policy specification and the future Cedar
-adapter must pass the same policy cases before activation.
+The active policy and storage engines are disclosed by `/health/ready`. The
+Checkpoint 8 gate uses authoritative Cedar plus DynamoDB Local; the Python
+policy engine and memory repository remain explicit offline/test fallbacks.
 
 ## Real and simulated behavior
 
@@ -300,6 +341,9 @@ Real in this checkpoint:
 - weight provenance and cumulative spend state;
 - prepare/approve/reject/expire/confirm/cancel state;
 - exact-once local approval resolution and workflow resume;
+- conditional distributed approval versioning and durable replay receipts;
+- reconstruction of runs, approvals, decisions, effects, and ledger heads
+  across application and DynamoDB Local container restarts;
 - decision recording, reason codes, API responses, and trace isolation;
 - canonical local event hashing, per-trace heads, and read-only verification;
 - detection of retained-event edits, middle deletion, reorder, duplication,
@@ -320,9 +364,8 @@ new internally consistent chain. This prototype does not claim otherwise.
 
 Deferred:
 
-- durable/distributed approval and a DynamoDB ledger adapter;
 - independently signed or Object-Locked ledger checkpoints;
-- Cedar activation, Strands, Bedrock, DynamoDB, and AWS deployment;
+- Strands, Bedrock, and managed AWS deployment;
 - a production frontend framework, durable dashboard sessions, and real
   logistics integrations.
 

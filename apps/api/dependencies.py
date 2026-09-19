@@ -19,8 +19,7 @@ def _cached_run_service() -> RunService:
 
 
 async def get_run_service() -> RunService:
-    # An async dependency avoids an unnecessary thread-pool hop for this small,
-    # in-memory Checkpoint 3 service.
+    # An async dependency avoids an unnecessary thread-pool hop for this small service.
     return _cached_run_service()
 
 

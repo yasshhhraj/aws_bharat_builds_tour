@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from datetime import datetime, timezone
 from time import perf_counter_ns
 from typing import Callable
@@ -88,9 +89,18 @@ class EvaluationRunner:
         ]
         engine_description = self.engine_factory().describe()
         engine_name = str(engine_description["policy_engine"])
+        storage_mode = (
+            "dynamodb_local"
+            if os.getenv("MANIFEST_STORAGE_BACKEND", "memory").lower() == "dynamodb"
+            else "memory_hash_chain"
+        )
         limitations = [
             "All logistics data and operational effects are synthetic.",
-            "Storage is an in-memory hash chain and is not durable or immutable.",
+            (
+                "Storage is local DynamoDB with a tamper-evident, not immutable, hash chain."
+                if storage_mode.startswith("dynamodb")
+                else "Storage is an in-memory hash chain and is not durable or immutable."
+            ),
             "Agents are deterministic Python roles; Strands and Bedrock are not active.",
             "Latency reflects this local machine and is not a production benchmark.",
         ]
@@ -106,7 +116,7 @@ class EvaluationRunner:
             "runtime": "deterministic",
             "policy_engine": engine_name,
             "policy_version": "demo-v1",
-            "storage": "memory_hash_chain",
+            "storage": storage_mode,
             "approval": "local",
             "deployment": "local",
             "dashboard": "static_no_build",

@@ -11,7 +11,7 @@ from packages.domain.errors import (
     ToolOwnershipError,
 )
 from packages.domain.models import TrajectoryState, to_primitive
-from packages.ledger import MemoryTraceStore
+from packages.storage.protocol import TraceRepository
 from packages.tools.registry import ToolRegistry
 
 
@@ -19,7 +19,7 @@ class ObserverGovernor:
     def __init__(
         self,
         registry: ToolRegistry,
-        store: MemoryTraceStore,
+        store: TraceRepository,
         *,
         max_tool_calls: int = 20,
     ) -> None:

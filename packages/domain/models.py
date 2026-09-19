@@ -378,6 +378,7 @@ class TrajectoryState:
     tool_call_count: int = 0
     error: str | None = None
     terminal_reason: str | None = None
+    storage_revision: int = 0
 
 
 @dataclass(frozen=True, slots=True)

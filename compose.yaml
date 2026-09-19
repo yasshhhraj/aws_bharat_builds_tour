@@ -1,0 +1,13 @@
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:2.5.4@sha256:cf8cebd061f988628c02daff10fdb950a54478feff9c52f6ddf84710fe3c3906
+    user: root
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data
+    ports:
+      - "127.0.0.1:18000:8000"
+    volumes:
+      - manifest-dynamodb-data:/home/dynamodblocal/data
+    restart: unless-stopped
+
+volumes:
+  manifest-dynamodb-data:

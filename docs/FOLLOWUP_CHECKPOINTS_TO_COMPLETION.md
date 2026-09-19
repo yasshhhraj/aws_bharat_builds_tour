@@ -21,7 +21,7 @@ CP6 Stable local release and evaluation baseline
   -> CP12 submission freeze and final verification
 ```
 
-Checkpoints 6 and 7 have passed their local exit gates. Checkpoint 8 is now the next unlocked checkpoint.
+Checkpoints 6, 7, and 8 have passed their local exit gates. Checkpoint 9 is now the next unlocked checkpoint.
 
 ## 2. One-at-a-time checkpoint protocol
 
@@ -44,8 +44,8 @@ If a checkpoint becomes blocked by external access, use its declared fallback an
 |---|---|---|---:|
 | 6 | Reproducible local release plus measured evaluation | **COMPLETE** | Completed |
 | 7 | Cedar is the authoritative policy engine | **COMPLETE** | Completed |
-| 8 | Runs, approvals, and ledger survive process restart | **NEXT** | 5–7 hours |
-| 9 | Strands agents use Bedrock or a disclosed deterministic fallback | Locked | 5–7 hours |
+| 8 | Runs, approvals, and ledger survive process restart | **COMPLETE** | Completed |
+| 9 | Strands agents use Bedrock or a disclosed deterministic fallback | **NEXT** | 5–7 hours |
 | 10 | Core API and dashboard run through an AWS demo stack | Locked | 6–9 hours |
 | 11 | Demo hardening, observability, and optional managed workflow | Locked | 3–5 hours |
 | 12 | Frozen, measured, rehearsed submission artifact | Locked | 5–7 hours |
@@ -477,10 +477,10 @@ The following work does not belong in these completion checkpoints:
 
 ## 5. Current handoff
 
-**Completed checkpoint:** 6 — Stable Local Release and Evaluation Baseline  
-**Evidence:** 119 tests; 22/22 labelled cases; 10/10 attacks detected; 12/12 benign cases passed; 0/12 false positives; 2/2 guide-backs; browser smoke passed  
-**Current checkpoint:** 7 — Cedar Authorization Parity  
-**Current status:** Ready to plan and implement  
-**Do not begin yet:** DynamoDB, Strands/Bedrock, or AWS deployment  
-**Checkpoint 6 implementation:** [`CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](CHECKPOINT_6_IMPLEMENTATION_PLAN.md)  
-**Checkpoint 6 results:** [`results/checkpoint-6-evaluation.md`](results/checkpoint-6-evaluation.md)
+- **Completed checkpoints:** 6 — Stable Local Release; 7 — Cedar Authorization Parity; 8 — Durable Storage and DynamoDB Parity
+- **Checkpoint 8 evidence:** 164 Python tests with live Cedar; 11 shared/durable storage tests; 2 Rust tests; three DynamoDB hero journeys; 22/22 evaluation cases; exact Checkpoint 7 functional parity
+- **Current checkpoint:** 9 — Strands Agents and Bedrock Runtime
+- **Current status:** Unlocked and ready for planning/implementation
+- **Do not begin yet:** AWS application deployment (Checkpoint 10)
+- **Checkpoint 8 completion report:** [`CHECKPOINT_8_COMPLETION_REPORT.md`](CHECKPOINT_8_COMPLETION_REPORT.md)
+- **Checkpoint 8 release evidence:** [`releases/checkpoint-8-dynamodb-local.json`](releases/checkpoint-8-dynamodb-local.json)

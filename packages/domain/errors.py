@@ -135,3 +135,39 @@ class LedgerTamperUnauthorizedError(LedgerError):
 
 class LedgerTamperValidationError(LedgerError):
     code = "LEDGER_TAMPER_VALIDATION_ERROR"
+
+
+class StorageError(ManifestError):
+    code = "STORAGE_ERROR"
+
+
+class StorageConfigurationError(StorageError):
+    code = "STORAGE_CONFIGURATION_ERROR"
+
+
+class StorageUnavailableError(StorageError):
+    code = "STORAGE_UNAVAILABLE"
+
+
+class TraceRevisionConflictError(StorageError):
+    code = "TRACE_REVISION_CONFLICT"
+
+
+class TracePersistenceError(StorageError):
+    code = "TRACE_PERSISTENCE_ERROR"
+
+
+class ApprovalPersistenceConflictError(StorageError):
+    code = "APPROVAL_PERSISTENCE_CONFLICT"
+
+
+class EffectReceiptConflictError(StorageError):
+    code = "EFFECT_RECEIPT_CONFLICT"
+
+
+class SerializationVersionError(StorageError):
+    code = "SERIALIZATION_VERSION_ERROR"
+
+
+class ItemSizeLimitError(StorageError):
+    code = "ITEM_SIZE_LIMIT_ERROR"

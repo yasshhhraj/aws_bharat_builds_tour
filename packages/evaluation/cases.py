@@ -18,8 +18,8 @@ from packages.domain.enums import (
 )
 from packages.domain.models import NumericFact, TrajectoryState
 from packages.governor import ManifestGovernor
-from packages.ledger import MemoryTraceStore
 from packages.policy import PolicyEngine, PythonReferencePolicyEngine
+from packages.storage import TraceRepository, build_trace_repository_from_env
 from packages.tools import build_tool_registry
 
 from .models import EvaluationCase, EvaluationObservation
@@ -28,7 +28,7 @@ from .models import EvaluationCase, EvaluationObservation
 @dataclass(slots=True)
 class EvaluationState:
     state: TrajectoryState
-    store: MemoryTraceStore
+    store: TraceRepository
     governor: ManifestGovernor
 
 
@@ -60,7 +60,7 @@ def build_evaluation_state(
         source_hash=fact.source_hash,
         created_by_tool="check_inventory",
     )
-    store = MemoryTraceStore()
+    store = build_trace_repository_from_env()
     store.create_run(state)
     registry, _ = build_tool_registry(loader)
     governor = ManifestGovernor(

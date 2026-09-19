@@ -5,6 +5,7 @@ from __future__ import annotations
 from time import perf_counter
 from typing import Any
 from uuid import uuid4
+import hashlib
 
 from fixtures import FixtureLoader
 from packages.domain.enums import (
@@ -12,6 +13,7 @@ from packages.domain.enums import (
     ApprovalStatus,
     CommitmentStatus,
     DecisionOutcome,
+    EffectClass,
     EventType,
     GovernanceMode,
     WorkflowStage,
@@ -29,8 +31,11 @@ from packages.domain.models import (
     to_primitive,
     utc_now,
 )
-from packages.ledger import MemoryTraceStore
+from packages.ledger.canonical import canonical_json
+from packages.storage.keyspace import opaque_key_hash
+from packages.storage.models import EffectReceipt
 from packages.policy.protocol import PolicyEngine
+from packages.storage.protocol import TraceRepository
 from packages.tools.registry import ToolRegistry
 from .reasons import REASON_CODES
 
@@ -47,7 +52,7 @@ class ManifestGovernor:
     def __init__(
         self,
         registry: ToolRegistry,
-        store: MemoryTraceStore,
+        store: TraceRepository,
         engine: PolicyEngine,
         loader: FixtureLoader,
         *,
@@ -159,7 +164,9 @@ class ManifestGovernor:
         if definition is None:
             return GovernedToolResult(decision=decision)
         try:
-            value = self.registry.execute(tool_name, arguments)
+            value = self._execute_with_durable_receipt(
+                state, tool_name, definition.effect_class, arguments
+            )
         except ManifestError as exc:
             self._record_failure(
                 state, agent, tool_name, proposal.effect_class, exc.message,
@@ -185,6 +192,48 @@ class ManifestGovernor:
             self._apply_cancellation(state, arguments)
         state.effect_history.append(EffectRecord(tool_name, proposal.effect_class, request.resource_id, agent.value))
         return GovernedToolResult(decision=decision, value=value)
+
+    def _execute_with_durable_receipt(
+        self,
+        state: TrajectoryState,
+        tool_name: str,
+        effect_class,
+        arguments: dict[str, Any],
+    ) -> Any:
+        """Replay synthetic writes from durable storage across process restarts."""
+        idempotency_key = arguments.get("idempotency_key")
+        if effect_class == EffectClass.READ or not isinstance(idempotency_key, str):
+            return self.registry.execute(tool_name, arguments)
+        key_hash = opaque_key_hash(idempotency_key)
+        fingerprint = hashlib.sha256(
+            canonical_json(
+                {"tool_name": tool_name, "arguments": to_primitive(arguments)}
+            ).encode("utf-8")
+        ).hexdigest()
+        existing = self.store.get_effect_receipt(state.trace_id, key_hash)
+        if existing is not None:
+            if existing.fingerprint != fingerprint:
+                from packages.domain.errors import EffectReceiptConflictError
+
+                raise EffectReceiptConflictError(
+                    "An effect idempotency key was reused with different arguments."
+                )
+            return dict(existing.result)
+        result = self.registry.execute(tool_name, arguments)
+        if not isinstance(result, dict):
+            raise ToolExecutionError(
+                f"Write tool {tool_name} returned a non-object result."
+            )
+        stored = self.store.put_effect_receipt(
+            EffectReceipt(
+                trace_id=state.trace_id,
+                tool_name=tool_name,
+                key_hash=key_hash,
+                fingerprint=fingerprint,
+                result=to_primitive(result),
+            )
+        )
+        return dict(stored.result)
 
     def _build_request(self, state, proposal, definition, raw_arguments) -> PolicyRequest:
         # Policy evaluation receives typed raw arguments; only trace output is redacted.
@@ -331,7 +380,7 @@ class ManifestGovernor:
             created_at=utc_now(), expires_at=prepared.expires_at,
         )
         state.pending_approval_id = approval.approval_id
-        self.store.add_approval(approval)
+        self.store.add_approval(state, approval)
         return approval
 
     @staticmethod

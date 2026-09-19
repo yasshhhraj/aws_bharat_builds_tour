@@ -10,7 +10,7 @@ from packages.domain.enums import AgentName, EventType, GovernanceMode, RunStatu
 from packages.domain.errors import ApprovalStateMismatchError, ManifestError, PolicyBlockedError
 from packages.domain.models import ApprovalRecord, ScenarioConfig, ShipmentMandate, TrajectoryState
 from packages.governor import ManifestGovernor
-from packages.ledger import MemoryTraceStore
+from packages.storage.protocol import TraceRepository
 
 from .agents.base import BaseAgent
 
@@ -20,7 +20,7 @@ class ShipmentOrchestrator:
         self,
         agents: Sequence[BaseAgent],
         governor: ManifestGovernor,
-        store: MemoryTraceStore,
+        store: TraceRepository,
         loader: FixtureLoader | None = None,
     ) -> None:
         self.agents = tuple(agents)

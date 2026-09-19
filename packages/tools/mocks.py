@@ -156,7 +156,11 @@ class MockLogisticsTools:
             confirmed_ids = {
                 item["prepared_action_id"] for item in self._confirmed_bookings.values()
             }
-            if prepared_action_id not in prepared_ids:
+            # A freshly reconstructed runtime has no process-local preparation
+            # cache; the governed durable state and effect receipt are then the
+            # source of truth. Still reject mismatches when this process has a
+            # populated preparation cache.
+            if prepared_ids and prepared_action_id not in prepared_ids:
                 raise FixtureError(f"Prepared booking {prepared_action_id} was not found.")
             if prepared_action_id in confirmed_ids:
                 raise FixtureError(f"Prepared booking {prepared_action_id} is already confirmed.")

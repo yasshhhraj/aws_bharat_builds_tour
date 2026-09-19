@@ -7,7 +7,7 @@ from typing import Callable
 
 from fixtures import FixtureLoader
 from packages.approvals import ApprovalCommand, ApprovalLifecycle
-from packages.domain.enums import ApprovalDecision, ApprovalStatus, CommitmentStatus, EventType, GovernanceMode, ScenarioName
+from packages.domain.enums import ApprovalDecision, ApprovalStatus, CommitmentStatus, EventType, GovernanceMode, RunStatus, ScenarioName
 from packages.domain.errors import (
     ApprovalExpiredError,
     ApprovalIdempotencyConflictError,
@@ -29,9 +29,10 @@ from packages.domain.models import (
     utc_now,
 )
 from packages.governor import ManifestGovernor
-from packages.ledger import MemoryTraceStore
 from packages.policy import PolicyEngine, build_policy_engine_from_env
 from packages.projections import build_dashboard_projection
+from packages.storage.protocol import TraceRepository
+from packages.storage.factory import build_trace_repository_from_env
 from packages.tools import MockLogisticsTools, build_tool_registry
 
 from .agents import CarrierAgent, CustomerCommunicationsAgent, DispatchAgent, InventoryAgent
@@ -41,7 +42,7 @@ from .orchestrator import ShipmentOrchestrator
 class RunService:
     def __init__(self, loader, store, mocks, orchestrator, policy_engine, approval_lifecycle) -> None:
         self.loader: FixtureLoader = loader
-        self.store: MemoryTraceStore = store
+        self.store: TraceRepository = store
         self.mocks: MockLogisticsTools = mocks
         self.orchestrator: ShipmentOrchestrator = orchestrator
         self.policy_engine = policy_engine
@@ -149,10 +150,22 @@ class RunService:
             if approval.status == ApprovalStatus.EXPIRED:
                 raise ApprovalExpiredError(f"Approval {approval_id} has expired.")
             if approval.status != ApprovalStatus.PENDING_APPROVAL:
+                if self._matches_claimed_command(approval, command):
+                    state = self.store.load_trace(approval.trace_id).state
+                    if state.status == RunStatus.PENDING_APPROVAL:
+                        self._continue_resolved_approval(state, approval)
+                    self.store.record_approval_replay(
+                        approval_id, idempotency_key, fingerprint
+                    )
+                    return ApprovalResolution(
+                        approval=self.store.get_approval(approval_id),
+                        run=RunSummary.from_state(state, self.policy_engine.name),
+                        idempotent_replay=True,
+                    )
                 raise ApprovalNotPendingError(
                     f"Approval {approval_id} is already {approval.status.value}."
                 )
-            state = self.store.get_state_for_update(approval.trace_id)
+            state = self.store.load_trace(approval.trace_id).state
             try:
                 self.approval_lifecycle.validate_pending(approval, state, command)
             except ApprovalExpiredError:
@@ -161,43 +174,68 @@ class RunService:
 
             resolved = self.approval_lifecycle.resolve(approval, command)
             self.store.replace_approval(resolved)
-            if resolved.status == ApprovalStatus.APPROVED:
-                prepared = state.prepared_actions[resolved.prepared_action_id]
-                prepared.status = CommitmentStatus.APPROVED
-                state.approved_by = resolved.approver_label
-                self.store.append_event(
-                    state,
-                    EventType.APPROVAL_APPROVED,
-                    "The prepared commitment was approved.",
-                    details={
-                        "approval_id": resolved.approval_id,
-                        "approver_label": resolved.approver_label,
-                        "version": resolved.version,
-                    },
-                    idempotency_key=(
-                        f"approval:{resolved.approval_id}:approved:v{resolved.version}"
-                    ),
-                )
-                self.orchestrator.resume_approved(state, resolved)
-            else:
-                self.store.append_event(
-                    state,
-                    EventType.APPROVAL_REJECTED,
-                    "The prepared commitment was rejected.",
-                    details={
-                        "approval_id": resolved.approval_id,
-                        "approver_label": resolved.approver_label,
-                        "version": resolved.version,
-                    },
-                    idempotency_key=(
-                        f"approval:{resolved.approval_id}:rejected:v{resolved.version}"
-                    ),
-                )
-                self.orchestrator.cancel_pending(state, resolved, "APPROVAL_REJECTED")
+            self._continue_resolved_approval(state, resolved)
             self.store.record_approval_replay(approval_id, idempotency_key, fingerprint)
             return ApprovalResolution(
                 approval=self.store.get_approval(approval_id),
                 run=RunSummary.from_state(state, self.policy_engine.name),
+            )
+
+    @staticmethod
+    def _matches_claimed_command(
+        approval: ApprovalRecord, command: ApprovalCommand
+    ) -> bool:
+        expected_status = (
+            ApprovalStatus.APPROVED
+            if command.decision == ApprovalDecision.APPROVE
+            else ApprovalStatus.REJECTED
+        )
+        return (
+            approval.status == expected_status
+            and approval.version == command.expected_version + 1
+            and approval.decision == command.decision
+            and approval.approver_label == command.approver_label
+            and approval.comment == command.comment
+            and approval.decision_idempotency_key == command.idempotency_key
+        )
+
+    def _continue_resolved_approval(
+        self, state, resolved: ApprovalRecord
+    ) -> None:
+        if resolved.status == ApprovalStatus.APPROVED:
+            prepared = state.prepared_actions[resolved.prepared_action_id]
+            prepared.status = CommitmentStatus.APPROVED
+            state.approved_by = resolved.approver_label
+            self.store.append_event(
+                state,
+                EventType.APPROVAL_APPROVED,
+                "The prepared commitment was approved.",
+                details={
+                    "approval_id": resolved.approval_id,
+                    "approver_label": resolved.approver_label,
+                    "version": resolved.version,
+                },
+                idempotency_key=(
+                    f"approval:{resolved.approval_id}:approved:v{resolved.version}"
+                ),
+            )
+            self.orchestrator.resume_approved(state, resolved)
+        else:
+            self.store.append_event(
+                state,
+                EventType.APPROVAL_REJECTED,
+                "The prepared commitment was rejected.",
+                details={
+                    "approval_id": resolved.approval_id,
+                    "approver_label": resolved.approver_label,
+                    "version": resolved.version,
+                },
+                idempotency_key=(
+                    f"approval:{resolved.approval_id}:rejected:v{resolved.version}"
+                ),
+            )
+            self.orchestrator.cancel_pending(
+                state, resolved, "APPROVAL_REJECTED"
             )
 
     def expire_due_approvals(self) -> list[ApprovalRecord]:
@@ -206,7 +244,7 @@ class RunService:
             now = self.approval_lifecycle.now_fn()
             for approval in self.store.list_approvals(status=ApprovalStatus.PENDING_APPROVAL):
                 if now >= approval.expires_at:
-                    state = self.store.get_state_for_update(approval.trace_id)
+                    state = self.store.load_trace(approval.trace_id).state
                     expired.append(self._expire_locked(approval, state))
         return expired
 
@@ -232,7 +270,7 @@ class RunService:
         ]
 
     def reset_demo(self) -> ResetResult:
-        removed = self.store.reset()
+        removed = self.store.reset_demo_namespace()
         self.mocks.reset()
         return ResetResult(status="reset", removed_run_count=removed)
 
@@ -241,15 +279,25 @@ def build_run_service(
     now_fn: Callable | None = None,
     *,
     policy_engine: PolicyEngine | None = None,
+    store: TraceRepository | None = None,
 ) -> RunService:
     loader = FixtureLoader()
     loader.validate_all()
-    store = MemoryTraceStore()
+    active_store = store or build_trace_repository_from_env()
     registry, mocks = build_tool_registry(loader)
     active_policy_engine = policy_engine or build_policy_engine_from_env()
     active_policy_engine.validate_startup()
-    governor = ManifestGovernor(registry, store, active_policy_engine, loader)
+    governor = ManifestGovernor(registry, active_store, active_policy_engine, loader)
     agents = [InventoryAgent(), DispatchAgent(), CarrierAgent(), CustomerCommunicationsAgent()]
-    orchestrator = ShipmentOrchestrator(agents, governor, store, loader)
+    orchestrator = ShipmentOrchestrator(
+        agents, governor, active_store, loader
+    )
     approval_lifecycle = ApprovalLifecycle(now_fn or utc_now)
-    return RunService(loader, store, mocks, orchestrator, active_policy_engine, approval_lifecycle)
+    return RunService(
+        loader,
+        active_store,
+        mocks,
+        orchestrator,
+        active_policy_engine,
+        approval_lifecycle,
+    )

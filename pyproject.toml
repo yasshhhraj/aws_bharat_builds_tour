@@ -9,6 +9,7 @@ description = "A governed autonomous logistics-agent prototype"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+  "boto3>=1.40,<2",
   "fastapi>=0.115,<1",
   "uvicorn>=0.34,<1",
 ]

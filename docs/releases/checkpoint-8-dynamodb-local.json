@@ -1,0 +1,76 @@
+{
+  "approval": {
+    "mode": "local"
+  },
+  "dashboard": {
+    "mode": "static_no_build"
+  },
+  "dependencies": {
+    "boto3": "1.43.98",
+    "fastapi": "0.141.1",
+    "httpx": "0.28.1",
+    "pytest": "8.4.2",
+    "uvicorn": "0.53.0"
+  },
+  "deployment": {
+    "mode": "local"
+  },
+  "evaluation": {
+    "case_catalog_digest": "sha256:2d6715718497baeb1415e4538cc1948a533a79075d888b90a3cfc247314d1672",
+    "case_passed": 22,
+    "case_total": 22,
+    "functional_digest": "sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120",
+    "result_path": "docs/results/checkpoint-8-dynamodb-evaluation.json",
+    "schema_version": "manifest-evaluation-v1"
+  },
+  "fixture_tree": {
+    "algorithm": "sha256",
+    "digest": "sha256:37904e005b547792befed64ef94d0c919eb40ca97330d728e8ada49c7a1b3cf4",
+    "file_count": 12
+  },
+  "generated_at": "2026-09-19T15:02:06.139854Z",
+  "limitations": [
+    "Synthetic logistics data and effects only.",
+    "Cedar policy engine runs as a local loopback sidecar.",
+    "Deterministic Python agents; Strands and Bedrock are not active.",
+    "DynamoDB Local is durable across application restart but is not a managed production deployment.",
+    "Tamper-evident hash chain, not an immutable ledger.",
+    "Local deployment only."
+  ],
+  "package": {
+    "name": "manifest-governor",
+    "version": "0.7.0"
+  },
+  "policy": {
+    "cedar_runtime_version": "4.12.0",
+    "engine": "cedar",
+    "policy_bundle_hash": "sha256:28dbf5808a3e1f49f9ebf9653c4a90f7988a32b96459a9642f67e0d05e975667",
+    "policy_schema_hash": "sha256:53da87760937b3d7b3ca99e2cc62f0a1a0b0ed32197239526ed98ec40641f322",
+    "version": "demo-v1"
+  },
+  "python": {
+    "version": "3.14.6"
+  },
+  "runtime": {
+    "mode": "deterministic"
+  },
+  "schema_version": "manifest-release-v1",
+  "source": {
+    "branch": "main",
+    "commit": "e8e8ab485fa377b4908d96a22ffc577192b4e59d",
+    "diff_fingerprint": "sha256:ac4e5cade13c7b4dde85685993ca4d452f91d029d831dc92f4c0f2bf36895384",
+    "dirty": true
+  },
+  "storage": {
+    "local_image": "amazon/dynamodb-local:2.5.4@sha256:cf8cebd061f988628c02daff10fdb950a54478feff9c52f6ddf84710fe3c3906",
+    "mode": "dynamodb_local",
+    "namespace": "checkpoint-8-gate",
+    "table": "manifest-local"
+  },
+  "tests": {
+    "collected": 174,
+    "command": "./scripts/run_checkpoint_8.sh",
+    "failed": 0,
+    "status": "passed"
+  }
+}

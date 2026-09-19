@@ -11,11 +11,14 @@ from uuid import uuid4
 from packages.domain.enums import AgentName, ApprovalStatus, EffectClass, EventType, RunStatus
 from packages.domain.errors import (
     ApprovalNotFoundError,
+    ApprovalPersistenceConflictError,
     LedgerAppendError,
     LedgerIdempotencyConflictError,
     LedgerTamperValidationError,
     TraceNotFoundError,
+    TraceRevisionConflictError,
     TraceSequenceError,
+    EffectReceiptConflictError,
 )
 from packages.domain.models import (
     ApprovalRecord,
@@ -26,6 +29,12 @@ from packages.domain.models import (
     TrajectoryState,
     VerificationResult,
     utc_now,
+)
+from packages.storage.models import (
+    EffectReceipt,
+    ReplayKind,
+    StoredTrace,
+    TraceTransition,
 )
 
 from .canonical import (
@@ -40,15 +49,21 @@ from .verifier import verify_chain
 class MemoryTraceStore:
     """Local store whose trace events form one hash chain per run."""
 
+    name = "memory"
+
     def __init__(self) -> None:
         self._runs: dict[str, TrajectoryState] = {}
         self._approvals: dict[str, ApprovalRecord] = {}
         self._approval_replays: dict[tuple[str, str], str] = {}
         self._heads: dict[str, LedgerHead] = {}
         self._event_replays: dict[tuple[str, str], tuple[str, TraceEvent]] = {}
+        self._effect_receipts: dict[tuple[str, str], EffectReceipt] = {}
         self._lock = RLock()
 
-    def create_run(self, state: TrajectoryState) -> None:
+    def validate_startup(self) -> None:
+        return None
+
+    def create_run(self, state: TrajectoryState) -> StoredTrace:
         with self._lock:
             if state.trace_id in self._runs:
                 raise TraceSequenceError(f"Trace {state.trace_id} already exists.")
@@ -57,7 +72,8 @@ class MemoryTraceStore:
                     f"Trace {state.trace_id} must start with an empty event list."
                 )
             created_at = utc_now()
-            self._runs[state.trace_id] = state
+            state.storage_revision = 0
+            self._runs[state.trace_id] = deepcopy(state)
             self._heads[state.trace_id] = LedgerHead(
                 trace_id=state.trace_id,
                 sequence=0,
@@ -66,6 +82,7 @@ class MemoryTraceStore:
                 schema_version=LEDGER_SCHEMA_VERSION,
                 updated_at=created_at,
             )
+            return StoredTrace(deepcopy(state), state.storage_revision)
 
     def append_event(
         self,
@@ -83,10 +100,7 @@ class MemoryTraceStore:
             stored = self._runs.get(state.trace_id)
             if stored is None:
                 raise TraceNotFoundError(f"Trace {state.trace_id} was not found.")
-            if stored is not state:
-                raise TraceSequenceError(
-                    f"Trace {state.trace_id} was updated with a detached state object."
-                )
+            self._assert_revision(state, stored)
             safe_details = deepcopy(details or {})
             fingerprint: str | None = None
             if idempotency_key is not None:
@@ -165,6 +179,7 @@ class MemoryTraceStore:
                     fingerprint,
                     event,
                 )
+            self._persist_state(state)
             return deepcopy(event)
 
     def get_state(self, trace_id: str) -> TrajectoryState:
@@ -175,12 +190,15 @@ class MemoryTraceStore:
             return deepcopy(state)
 
     def get_state_for_update(self, trace_id: str) -> TrajectoryState:
-        """Return the live state for RunService while its resolution lock is held."""
-        with self._lock:
-            state = self._runs.get(trace_id)
-            if state is None:
-                raise TraceNotFoundError(f"Trace {trace_id} was not found.")
-            return state
+        """Compatibility alias returning a detached optimistic snapshot."""
+        return self.get_state(trace_id)
+
+    def load_trace(
+        self, trace_id: str, *, consistent: bool = True
+    ) -> StoredTrace:
+        del consistent
+        state = self.get_state(trace_id)
+        return StoredTrace(state, state.storage_revision)
 
     def get_events(self, trace_id: str) -> list[TraceEvent]:
         return list(self.get_state(trace_id).events)
@@ -217,11 +235,16 @@ class MemoryTraceStore:
             state = self._runs.get(trace_id)
             if state is None:
                 raise TraceNotFoundError(f"Trace {trace_id} was not found.")
+            terminal_event = bool(state.events) and state.events[-1].event_type in {
+                EventType.RUN_COMPLETED,
+                EventType.RUN_CANCELLED,
+                EventType.RUN_FAILED,
+            }
             if state.status not in {
                 RunStatus.COMPLETED,
                 RunStatus.CANCELLED,
                 RunStatus.BLOCKED,
-            }:
+            } and not terminal_event:
                 raise LedgerTamperValidationError(
                     "Only a terminal disposable trace may be tampered with."
                 )
@@ -237,24 +260,35 @@ class MemoryTraceStore:
             state.events[index] = replace(
                 state.events[index], summary=replacement_summary
             )
+            state.storage_revision += 1
             return TamperResult(trace_id=trace_id, sequence=sequence, field="summary")
 
     def append_decision(self, state: TrajectoryState, decision: Decision) -> None:
         with self._lock:
-            if self._runs.get(state.trace_id) is not state:
-                raise TraceSequenceError(f"Trace {state.trace_id} cannot accept a detached decision.")
+            stored = self._runs.get(state.trace_id)
+            if stored is None:
+                raise TraceNotFoundError(f"Trace {state.trace_id} was not found.")
+            self._assert_revision(state, stored)
             if any(item.decision_id == decision.decision_id for item in state.decisions):
                 raise TraceSequenceError(f"Decision {decision.decision_id} already exists.")
             state.decisions.append(decision)
+            self._persist_state(state)
 
     def get_decisions(self, trace_id: str) -> list[Decision]:
         return list(self.get_state(trace_id).decisions)
 
-    def add_approval(self, approval: ApprovalRecord) -> None:
+    def add_approval(
+        self, state: TrajectoryState, approval: ApprovalRecord
+    ) -> None:
         with self._lock:
+            stored = self._runs.get(state.trace_id)
+            if stored is None:
+                raise TraceNotFoundError(f"Trace {state.trace_id} was not found.")
+            self._assert_revision(state, stored)
             if approval.approval_id in self._approvals:
                 raise TraceSequenceError(f"Approval {approval.approval_id} already exists.")
             self._approvals[approval.approval_id] = approval
+            self._persist_state(state)
 
     def get_approval(self, approval_id: str) -> ApprovalRecord:
         with self._lock:
@@ -265,8 +299,16 @@ class MemoryTraceStore:
 
     def replace_approval(self, approval: ApprovalRecord) -> None:
         with self._lock:
-            if approval.approval_id not in self._approvals:
+            current = self._approvals.get(approval.approval_id)
+            if current is None:
                 raise ApprovalNotFoundError(f"Approval {approval.approval_id} was not found.")
+            # Same-version replacement is retained as an in-memory test seam
+            # for binding/expiry tamper tests. Real lifecycle transitions must
+            # advance by one; DynamoDB always enforces that distributed CAS.
+            if current.version not in {approval.version, approval.version - 1}:
+                raise ApprovalPersistenceConflictError(
+                    "Approval version changed concurrently."
+                )
             self._approvals[approval.approval_id] = approval
 
     def list_approvals(
@@ -294,6 +336,96 @@ class MemoryTraceStore:
         with self._lock:
             self._approval_replays[(approval_id, idempotency_key)] = fingerprint
 
+    def get_effect_receipt(
+        self, trace_id: str, key_hash: str
+    ) -> EffectReceipt | None:
+        with self._lock:
+            return deepcopy(self._effect_receipts.get((trace_id, key_hash)))
+
+    def put_effect_receipt(self, receipt: EffectReceipt) -> EffectReceipt:
+        with self._lock:
+            key = (receipt.trace_id, receipt.key_hash)
+            existing = self._effect_receipts.get(key)
+            if existing is not None:
+                if existing.fingerprint != receipt.fingerprint:
+                    raise EffectReceiptConflictError(
+                        "An effect idempotency key was reused with different arguments."
+                    )
+                return deepcopy(existing)
+            if receipt.trace_id not in self._runs:
+                raise TraceNotFoundError(
+                    f"Trace {receipt.trace_id} was not found."
+                )
+            self._effect_receipts[key] = deepcopy(receipt)
+            return deepcopy(receipt)
+
+    def commit_transition(self, transition: TraceTransition) -> StoredTrace:
+        """Apply one detached optimistic transition atomically in memory."""
+        with self._lock:
+            stored = self._runs.get(transition.trace_id)
+            if stored is None:
+                raise TraceNotFoundError(
+                    f"Trace {transition.trace_id} was not found."
+                )
+            if stored.storage_revision != transition.expected_revision:
+                raise TraceRevisionConflictError(
+                    f"Trace {transition.trace_id} revision changed."
+                )
+            state = deepcopy(transition.state)
+            state.storage_revision = transition.expected_revision
+            state.events = deepcopy(stored.events)
+            state.decisions = deepcopy(stored.decisions)
+            head = self._heads[transition.trace_id]
+            for event in transition.events:
+                if event.sequence != head.sequence + 1:
+                    raise TraceSequenceError(
+                        f"Trace {transition.trace_id} received a stale event sequence."
+                    )
+                if event.previous_hash != head.event_hash:
+                    raise TraceSequenceError(
+                        f"Trace {transition.trace_id} received a stale previous hash."
+                    )
+                if calculate_event_hash(event) != event.event_hash:
+                    raise LedgerAppendError("Transition event hash is invalid.")
+                state.events.append(deepcopy(event))
+                state.next_sequence = event.sequence + 1
+                head = LedgerHead(
+                    trace_id=transition.trace_id,
+                    sequence=event.sequence,
+                    event_count=len(state.events),
+                    event_hash=event.event_hash,
+                    schema_version=LEDGER_SCHEMA_VERSION,
+                    updated_at=event.occurred_at,
+                )
+            for decision in transition.decisions:
+                if any(
+                    item.decision_id == decision.decision_id
+                    for item in state.decisions
+                ):
+                    raise TraceSequenceError(
+                        f"Decision {decision.decision_id} already exists."
+                    )
+                state.decisions.append(deepcopy(decision))
+            for approval in transition.approval_upserts:
+                self._approvals[approval.approval_id] = deepcopy(approval)
+            for replay in transition.replay_records:
+                if replay.kind == ReplayKind.APPROVAL:
+                    self._approval_replays[
+                        (replay.result_reference, replay.key_hash)
+                    ] = replay.fingerprint
+            for receipt in transition.effect_receipts:
+                existing = self._effect_receipts.get(
+                    (receipt.trace_id, receipt.key_hash)
+                )
+                if existing is not None and existing != receipt:
+                    raise TraceSequenceError("Effect receipt already exists.")
+                self._effect_receipts[
+                    (receipt.trace_id, receipt.key_hash)
+                ] = deepcopy(receipt)
+            self._heads[transition.trace_id] = head
+            self._persist_state(state)
+            return StoredTrace(deepcopy(state), state.storage_revision)
+
     def reset(self) -> int:
         with self._lock:
             removed = len(self._runs)
@@ -302,8 +434,32 @@ class MemoryTraceStore:
             self._approval_replays.clear()
             self._heads.clear()
             self._event_replays.clear()
+            self._effect_receipts.clear()
             return removed
+
+    def reset_demo_namespace(self) -> int:
+        return self.reset()
 
     def run_count(self) -> int:
         with self._lock:
             return len(self._runs)
+
+    def describe(self) -> dict[str, object]:
+        return {
+            "storage_backend": self.name,
+            "storage_mode": "memory_hash_chain",
+            "consistent_reads": True,
+        }
+
+    @staticmethod
+    def _assert_revision(
+        state: TrajectoryState, stored: TrajectoryState
+    ) -> None:
+        if state.storage_revision != stored.storage_revision:
+            raise TraceRevisionConflictError(
+                f"Trace {state.trace_id} revision changed."
+            )
+
+    def _persist_state(self, state: TrajectoryState) -> None:
+        state.storage_revision += 1
+        self._runs[state.trace_id] = deepcopy(state)

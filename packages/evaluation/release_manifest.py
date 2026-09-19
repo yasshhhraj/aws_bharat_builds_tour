@@ -6,6 +6,7 @@ import hashlib
 import importlib.metadata
 import json
 import platform
+import os
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -88,7 +89,7 @@ def source_metadata(repo_root: Path) -> dict[str, Any]:
     return metadata
 
 
-def dependency_versions(names: tuple[str, ...] = ("fastapi", "uvicorn", "httpx", "pytest")) -> dict[str, str]:
+def dependency_versions(names: tuple[str, ...] = ("boto3", "fastapi", "uvicorn", "httpx", "pytest")) -> dict[str, str]:
     versions: dict[str, str] = {}
     for name in names:
         try:
@@ -139,10 +140,15 @@ def build_release_manifest(
     for key in ("policy_bundle_hash", "policy_schema_hash", "cedar_runtime_version"):
         if active_modes.get(key):
             policy[key] = str(active_modes[key])
+    storage_mode = str(active_modes.get("storage", "memory_hash_chain"))
     limitations = [
         "Synthetic logistics data and effects only.",
         "Deterministic Python agents; Strands and Bedrock are not active.",
-        "In-memory storage; runs and approvals do not survive restart.",
+        (
+            "DynamoDB Local is durable across application restart but is not a managed production deployment."
+            if storage_mode.startswith("dynamodb")
+            else "In-memory storage; runs and approvals do not survive restart."
+        ),
         "Tamper-evident hash chain, not an immutable ledger.",
         "Local deployment only.",
     ]
@@ -160,7 +166,19 @@ def build_release_manifest(
         "fixture_tree": fixture_tree_digest(repo_root / "fixtures"),
         "policy": policy,
         "runtime": {"mode": "deterministic"},
-        "storage": {"mode": "memory_hash_chain"},
+        "storage": {
+            "mode": storage_mode,
+            **(
+                {
+                    "table": os.getenv("MANIFEST_DYNAMODB_TABLE", "manifest-local"),
+                    "namespace": os.getenv("MANIFEST_DEMO_NAMESPACE", "local-demo"),
+                    "local_image": os.getenv(
+                        "MANIFEST_DYNAMODB_IMAGE", "not-recorded"
+                    ),
+                }
+                if storage_mode.startswith("dynamodb") else {}
+            ),
+        },
         "approval": {"mode": "local"},
         "dashboard": {"mode": "static_no_build"},
         "deployment": {"mode": "local"},

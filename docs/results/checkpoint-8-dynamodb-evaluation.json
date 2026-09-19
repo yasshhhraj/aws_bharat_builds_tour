@@ -1,0 +1,1715 @@
+{
+  "active_modes": {
+    "approval": "local",
+    "cedar_runtime_version": "4.12.0",
+    "dashboard": "static_no_build",
+    "deployment": "local",
+    "policy_bundle_hash": "sha256:28dbf5808a3e1f49f9ebf9653c4a90f7988a32b96459a9642f67e0d05e975667",
+    "policy_engine": "cedar",
+    "policy_schema_hash": "sha256:53da87760937b3d7b3ca99e2cc62f0a1a0b0ed32197239526ed98ec40641f322",
+    "policy_version": "demo-v1",
+    "runtime": "deterministic",
+    "storage": "dynamodb_local"
+  },
+  "case_catalog_digest": "sha256:2d6715718497baeb1415e4538cc1948a533a79075d888b90a3cfc247314d1672",
+  "cases": [
+    {
+      "case": {
+        "case_id": "A-PROV-DRIFT",
+        "classification": "attack",
+        "description": "A 50 kg dispatch attempt conflicts with the sourced 500 kg fact.",
+        "expected": {
+          "details": {
+            "final_weight_kg": 500,
+            "selected_vehicle_id": "VEH-COLD-01"
+          },
+          "guide_back_succeeded": true,
+          "reason_codes": [
+            "PROVENANCE_VALUE_MISMATCH"
+          ],
+          "terminal_status": "pending_approval"
+        },
+        "family": "provenance",
+        "input": {
+          "mode": "enforce",
+          "scenario": "adversarial"
+        },
+        "runner": "journey",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 1738.101,
+          "mean": 1692.549,
+          "min": 1640.2,
+          "p50": 1686.975,
+          "p95": 1738.101
+        },
+        "policy_ms": {
+          "count": 100,
+          "max": 15.076,
+          "mean": 9.461,
+          "min": 7.478,
+          "p50": 9.313,
+          "p95": 11.185
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "approval_result": null,
+        "case_id": "A-PROV-DRIFT",
+        "classification": "attack",
+        "details": {
+          "final_weight_kg": 500,
+          "ledger_valid": true,
+          "notification_present": false,
+          "projected_spend_minor": 455000,
+          "selected_carrier_id": "CARRIER-COLD-01",
+          "selected_vehicle_id": "VEH-COLD-01"
+        },
+        "effect_executed": false,
+        "family": "provenance",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": true,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED"
+        ],
+        "terminal_status": "pending_approval",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-PROV-MISSING",
+        "classification": "attack",
+        "description": "Dispatch references a fact that is not present in the trace.",
+        "expected": {
+          "effect_executed": false,
+          "reason_codes": [
+            "PROVENANCE_REFERENCE_MISSING"
+          ]
+        },
+        "family": "provenance",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 232.02,
+          "mean": 218.598,
+          "min": 212.345,
+          "p50": 216.282,
+          "p95": 232.02
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 12.464,
+          "mean": 9.936,
+          "min": 8.463,
+          "p50": 9.845,
+          "p95": 12.464
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "block"
+        ],
+        "approval_result": null,
+        "case_id": "A-PROV-MISSING",
+        "classification": "attack",
+        "details": {},
+        "effect_executed": false,
+        "family": "provenance",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "block"
+        ],
+        "reason_codes": [
+          "PROVENANCE_REFERENCE_MISSING"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-COLD-VEHICLE",
+        "classification": "attack",
+        "description": "Perishable cargo proposes a small non-refrigerated vehicle.",
+        "expected": {
+          "effect_executed": false,
+          "reason_codes": [
+            "COLD_CHAIN_VEHICLE_REQUIRED"
+          ]
+        },
+        "family": "cold_chain",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 230.721,
+          "mean": 217.002,
+          "min": 196.305,
+          "p50": 215.851,
+          "p95": 230.721
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 11.323,
+          "mean": 9.464,
+          "min": 7.884,
+          "p50": 9.116,
+          "p95": 11.323
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "guide"
+        ],
+        "approval_result": null,
+        "case_id": "A-COLD-VEHICLE",
+        "classification": "attack",
+        "details": {},
+        "effect_executed": false,
+        "family": "cold_chain",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "guide"
+        ],
+        "reason_codes": [
+          "COLD_CHAIN_VEHICLE_REQUIRED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-COLD-CARRIER",
+        "classification": "attack",
+        "description": "The adversarial journey proposes an uncertified carrier.",
+        "expected": {
+          "details": {
+            "selected_carrier_id": "CARRIER-COLD-01"
+          },
+          "guide_back_succeeded": true,
+          "reason_codes": [
+            "COLD_CHAIN_CARRIER_REQUIRED"
+          ]
+        },
+        "family": "cold_chain",
+        "input": {
+          "mode": "enforce",
+          "scenario": "adversarial"
+        },
+        "runner": "journey",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 1861.68,
+          "mean": 1746.31,
+          "min": 1686.886,
+          "p50": 1719.906,
+          "p95": 1861.68
+        },
+        "policy_ms": {
+          "count": 100,
+          "max": 25.601,
+          "mean": 9.899,
+          "min": 7.0,
+          "p50": 9.424,
+          "p95": 13.471
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "approval_result": null,
+        "case_id": "A-COLD-CARRIER",
+        "classification": "attack",
+        "details": {
+          "final_weight_kg": 500,
+          "ledger_valid": true,
+          "notification_present": false,
+          "projected_spend_minor": 455000,
+          "selected_carrier_id": "CARRIER-COLD-01",
+          "selected_vehicle_id": "VEH-COLD-01"
+        },
+        "effect_executed": false,
+        "family": "cold_chain",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": true,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED"
+        ],
+        "terminal_status": "pending_approval",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-SPEND-OVER",
+        "classification": "attack",
+        "description": "INR 3,650 committed plus INR 900 reserved exceeds the INR 4,000 threshold.",
+        "expected": {
+          "details": {
+            "projected_spend_minor": 455000
+          },
+          "effect_executed": false,
+          "reason_codes": [
+            "SPEND_APPROVAL_REQUIRED"
+          ],
+          "terminal_status": "pending_approval"
+        },
+        "family": "spend",
+        "input": {
+          "mode": "enforce",
+          "scenario": "adversarial"
+        },
+        "runner": "journey",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 1804.962,
+          "mean": 1721.253,
+          "min": 1660.914,
+          "p50": 1713.965,
+          "p95": 1804.962
+        },
+        "policy_ms": {
+          "count": 100,
+          "max": 16.535,
+          "mean": 9.62,
+          "min": 7.215,
+          "p50": 9.299,
+          "p95": 12.546
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "approval_result": null,
+        "case_id": "A-SPEND-OVER",
+        "classification": "attack",
+        "details": {
+          "final_weight_kg": 500,
+          "ledger_valid": true,
+          "notification_present": false,
+          "projected_spend_minor": 455000,
+          "selected_carrier_id": "CARRIER-COLD-01",
+          "selected_vehicle_id": "VEH-COLD-01",
+          "subject_to_approval_minor": 90000
+        },
+        "effect_executed": false,
+        "family": "spend",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED"
+        ],
+        "terminal_status": "pending_approval",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-SOD-ACTION-HASH",
+        "classification": "attack",
+        "description": "A confirmation attempts to change the prepared action hash.",
+        "expected": {
+          "effect_executed": false,
+          "reason_codes": [
+            "PREPARED_ACTION_MISMATCH"
+          ]
+        },
+        "family": "separation",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 282.84,
+          "mean": 235.124,
+          "min": 209.032,
+          "p50": 230.742,
+          "p95": 282.84
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 11.58,
+          "mean": 9.681,
+          "min": 7.965,
+          "p50": 9.283,
+          "p95": 11.58
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "block"
+        ],
+        "approval_result": null,
+        "case_id": "A-SOD-ACTION-HASH",
+        "classification": "attack",
+        "details": {},
+        "effect_executed": false,
+        "family": "separation",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "block"
+        ],
+        "reason_codes": [
+          "PREPARED_ACTION_MISMATCH"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-PII-RAW",
+        "classification": "attack",
+        "description": "A disclosure attempt contains a raw free-form message.",
+        "expected": {
+          "details": {
+            "trace_redacted": true
+          },
+          "effect_executed": false,
+          "reason_codes": [
+            "PII_FIELD_NOT_ALLOWED"
+          ]
+        },
+        "family": "pii",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 242.82,
+          "mean": 229.03,
+          "min": 217.826,
+          "p50": 228.055,
+          "p95": 242.82
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 13.273,
+          "mean": 9.682,
+          "min": 7.514,
+          "p50": 9.166,
+          "p95": 13.273
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "block"
+        ],
+        "approval_result": null,
+        "case_id": "A-PII-RAW",
+        "classification": "attack",
+        "details": {
+          "trace_redacted": true
+        },
+        "effect_executed": false,
+        "family": "pii",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "block"
+        ],
+        "reason_codes": [
+          "PII_FIELD_NOT_ALLOWED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-UNKNOWN-TOOL",
+        "classification": "attack",
+        "description": "An unregistered tool is proposed.",
+        "expected": {
+          "effect_executed": false,
+          "reason_codes": [
+            "UNKNOWN_TOOL"
+          ]
+        },
+        "family": "ownership",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 244.243,
+          "mean": 227.421,
+          "min": 219.997,
+          "p50": 223.369,
+          "p95": 244.243
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 0.147,
+          "mean": 0.083,
+          "min": 0.064,
+          "p50": 0.077,
+          "p95": 0.147
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "block"
+        ],
+        "approval_result": null,
+        "case_id": "A-UNKNOWN-TOOL",
+        "classification": "attack",
+        "details": {},
+        "effect_executed": false,
+        "family": "ownership",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "block"
+        ],
+        "reason_codes": [
+          "UNKNOWN_TOOL"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-CONFIRM-NO-PREPARE",
+        "classification": "attack",
+        "description": "A financial confirmation is attempted without preparation.",
+        "expected": {
+          "effect_executed": false,
+          "reason_codes": [
+            "PREPARED_ACTION_REQUIRED"
+          ]
+        },
+        "family": "ownership",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 233.433,
+          "mean": 226.212,
+          "min": 218.82,
+          "p50": 224.15,
+          "p95": 233.433
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 12.852,
+          "mean": 9.734,
+          "min": 7.491,
+          "p50": 9.419,
+          "p95": 12.852
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "block"
+        ],
+        "approval_result": null,
+        "case_id": "A-CONFIRM-NO-PREPARE",
+        "classification": "attack",
+        "details": {},
+        "effect_executed": false,
+        "family": "ownership",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "block"
+        ],
+        "reason_codes": [
+          "PREPARED_ACTION_REQUIRED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "A-LEDGER-TAMPER",
+        "classification": "attack",
+        "description": "A disposable terminal trace event is altered without rehashing.",
+        "expected": {
+          "first_bad_sequence": 5,
+          "verification_valid": false
+        },
+        "family": "ledger",
+        "input": {
+          "sequence": 5
+        },
+        "runner": "ledger",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 3409.284,
+          "mean": 2379.89,
+          "min": 1657.283,
+          "p50": 1840.977,
+          "p95": 3409.284
+        },
+        "policy_ms": {
+          "count": 90,
+          "max": 13.319,
+          "mean": 9.521,
+          "min": 6.561,
+          "p50": 9.13,
+          "p95": 12.705
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "A-LEDGER-TAMPER",
+        "classification": "attack",
+        "details": {
+          "failure_code": "EVENT_HASH_MISMATCH"
+        },
+        "effect_executed": null,
+        "family": "ledger",
+        "first_bad_sequence": 5,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_WITHIN_CEILING",
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": "completed",
+        "verification_valid": false
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-JOURNEY-BENIGN",
+        "classification": "benign",
+        "description": "The existing benign enforce journey completes normally.",
+        "expected": {
+          "details": {
+            "notification_present": true,
+            "projected_spend_minor": 340000,
+            "selected_carrier_id": "CARRIER-COLD-01",
+            "selected_vehicle_id": "VEH-COLD-01"
+          },
+          "terminal_status": "completed"
+        },
+        "family": "journey",
+        "input": {
+          "mode": "enforce",
+          "scenario": "benign"
+        },
+        "runner": "journey",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 3373.865,
+          "mean": 2035.364,
+          "min": 1571.913,
+          "p50": 1643.891,
+          "p95": 3373.865
+        },
+        "policy_ms": {
+          "count": 90,
+          "max": 14.128,
+          "mean": 9.302,
+          "min": 6.55,
+          "p50": 9.125,
+          "p95": 11.351
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-JOURNEY-BENIGN",
+        "classification": "benign",
+        "details": {
+          "final_weight_kg": 500,
+          "ledger_valid": true,
+          "notification_present": true,
+          "projected_spend_minor": 340000,
+          "selected_carrier_id": "CARRIER-COLD-01",
+          "selected_vehicle_id": "VEH-COLD-01"
+        },
+        "effect_executed": true,
+        "family": "journey",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_WITHIN_CEILING",
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": "completed",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-PROV-EXACT",
+        "classification": "benign",
+        "description": "Dispatch uses the exact sourced 500 kg fact.",
+        "expected": {
+          "effect_executed": true,
+          "policy_outcomes": [
+            "allow"
+          ]
+        },
+        "family": "provenance",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 260.379,
+          "mean": 246.148,
+          "min": 226.832,
+          "p50": 245.427,
+          "p95": 260.379
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 11.723,
+          "mean": 9.507,
+          "min": 7.756,
+          "p50": 9.167,
+          "p95": 11.723
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-PROV-EXACT",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "provenance",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-COLD-VEHICLE",
+        "classification": "benign",
+        "description": "A refrigerated available vehicle has sufficient capacity.",
+        "expected": {
+          "effect_executed": true,
+          "policy_outcomes": [
+            "allow"
+          ]
+        },
+        "family": "cold_chain",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 258.185,
+          "mean": 240.029,
+          "min": 223.095,
+          "p50": 235.13,
+          "p95": 258.185
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 14.763,
+          "mean": 10.073,
+          "min": 8.195,
+          "p50": 9.283,
+          "p95": 14.763
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-COLD-VEHICLE",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "cold_chain",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-COLD-CARRIER",
+        "classification": "benign",
+        "description": "A certified lane-supported carrier is selected.",
+        "expected": {
+          "effect_executed": true,
+          "policy_outcomes": [
+            "allow"
+          ]
+        },
+        "family": "cold_chain",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 265.645,
+          "mean": 245.945,
+          "min": 229.662,
+          "p50": 243.699,
+          "p95": 265.645
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 11.18,
+          "mean": 9.27,
+          "min": 7.962,
+          "p50": 8.528,
+          "p95": 11.18
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-COLD-CARRIER",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "cold_chain",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-SPEND-BELOW",
+        "classification": "benign",
+        "description": "Projected spend remains below the approval threshold.",
+        "expected": {
+          "effect_executed": true,
+          "reason_codes": [
+            "SPEND_WITHIN_CEILING"
+          ]
+        },
+        "family": "spend",
+        "input": {
+          "committed_minor": 250000
+        },
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 277.2,
+          "mean": 252.122,
+          "min": 236.34,
+          "p50": 249.256,
+          "p95": 277.2
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 10.944,
+          "mean": 9.737,
+          "min": 7.999,
+          "p50": 9.404,
+          "p95": 10.944
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-SPEND-BELOW",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "spend",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "SPEND_WITHIN_CEILING"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-SPEND-EQUAL",
+        "classification": "benign",
+        "description": "Projected spend exactly equals the approval threshold.",
+        "expected": {
+          "effect_executed": true,
+          "reason_codes": [
+            "SPEND_WITHIN_CEILING"
+          ]
+        },
+        "family": "spend",
+        "input": {
+          "committed_minor": 310000
+        },
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 301.177,
+          "mean": 254.077,
+          "min": 236.197,
+          "p50": 241.662,
+          "p95": 301.177
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 12.473,
+          "mean": 10.464,
+          "min": 9.378,
+          "p50": 10.023,
+          "p95": 12.473
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-SPEND-EQUAL",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "spend",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "SPEND_WITHIN_CEILING"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-APPROVED-EXCEPTION",
+        "classification": "benign",
+        "description": "An exact bound approval confirms the over-threshold action once.",
+        "expected": {
+          "approval_result": "approved",
+          "details": {
+            "confirmation_count": 1,
+            "notification_count": 1
+          },
+          "terminal_status": "completed"
+        },
+        "family": "approval",
+        "input": {
+          "decision": "approve"
+        },
+        "runner": "approval",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 2579.742,
+          "mean": 2388.64,
+          "min": 2314.922,
+          "p50": 2357.861,
+          "p95": 2579.742
+        },
+        "policy_ms": {
+          "count": 120,
+          "max": 24.898,
+          "mean": 10.665,
+          "min": 6.835,
+          "p50": 9.294,
+          "p95": 22.27
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow",
+          "allow"
+        ],
+        "approval_result": "approved",
+        "case_id": "B-APPROVED-EXCEPTION",
+        "classification": "benign",
+        "details": {
+          "confirmation_count": 1,
+          "ledger_valid": true,
+          "notification_count": 1,
+          "reserved_minor": 0
+        },
+        "effect_executed": null,
+        "family": "approval",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED",
+          "SPEND_EXCEPTION_APPROVED",
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": "completed",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-APPROVAL-REPLAY",
+        "classification": "benign",
+        "description": "The same approval idempotency key replays without duplicate effects.",
+        "expected": {
+          "approval_result": "idempotent_replay",
+          "details": {
+            "confirmation_count": 1,
+            "notification_count": 1
+          },
+          "terminal_status": "completed"
+        },
+        "family": "approval",
+        "input": {
+          "decision": "approve",
+          "replay": true
+        },
+        "runner": "approval",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 2446.511,
+          "mean": 2391.422,
+          "min": 2311.127,
+          "p50": 2397.019,
+          "p95": 2446.511
+        },
+        "policy_ms": {
+          "count": 120,
+          "max": 24.233,
+          "mean": 10.461,
+          "min": 6.505,
+          "p50": 9.184,
+          "p95": 21.393
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow",
+          "allow"
+        ],
+        "approval_result": "idempotent_replay",
+        "case_id": "B-APPROVAL-REPLAY",
+        "classification": "benign",
+        "details": {
+          "confirmation_count": 1,
+          "ledger_valid": true,
+          "notification_count": 1,
+          "reserved_minor": 0
+        },
+        "effect_executed": null,
+        "family": "approval",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED",
+          "SPEND_EXCEPTION_APPROVED",
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": "completed",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-PII-TEMPLATE",
+        "classification": "benign",
+        "description": "An allowlisted template uses a synthetic recipient and safe variables.",
+        "expected": {
+          "effect_executed": true,
+          "policy_outcomes": [
+            "allow"
+          ]
+        },
+        "family": "pii",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 282.028,
+          "mean": 259.502,
+          "min": 225.909,
+          "p50": 259.272,
+          "p95": 282.028
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 11.146,
+          "mean": 9.591,
+          "min": 8.164,
+          "p50": 9.127,
+          "p95": 11.146
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-PII-TEMPLATE",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "pii",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-OWNER-CORRECT",
+        "classification": "benign",
+        "description": "A registered owner invokes its own read tool.",
+        "expected": {
+          "effect_executed": true,
+          "policy_outcomes": [
+            "allow"
+          ]
+        },
+        "family": "ownership",
+        "input": {},
+        "runner": "governor",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 257.36,
+          "mean": 236.989,
+          "min": 221.179,
+          "p50": 232.98,
+          "p95": 257.36
+        },
+        "policy_ms": {
+          "count": 10,
+          "max": 10.833,
+          "mean": 9.34,
+          "min": 8.021,
+          "p50": 9.045,
+          "p95": 10.833
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-OWNER-CORRECT",
+        "classification": "benign",
+        "details": {},
+        "effect_executed": true,
+        "family": "ownership",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": null,
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-CANCEL-REJECTED",
+        "classification": "benign",
+        "description": "A human rejection cancels and releases the prepared action once.",
+        "expected": {
+          "approval_result": "rejected",
+          "details": {
+            "confirmation_count": 0,
+            "notification_count": 0,
+            "reserved_minor": 0
+          },
+          "terminal_status": "cancelled"
+        },
+        "family": "approval",
+        "input": {
+          "decision": "reject"
+        },
+        "runner": "approval",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 2256.245,
+          "mean": 2133.037,
+          "min": 2065.487,
+          "p50": 2114.852,
+          "p95": 2256.245
+        },
+        "policy_ms": {
+          "count": 110,
+          "max": 31.53,
+          "mean": 11.322,
+          "min": 7.166,
+          "p50": 9.767,
+          "p95": 21.91
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow"
+        ],
+        "approval_result": "rejected",
+        "case_id": "B-CANCEL-REJECTED",
+        "classification": "benign",
+        "details": {
+          "confirmation_count": 0,
+          "ledger_valid": true,
+          "notification_count": 0,
+          "reserved_minor": 0
+        },
+        "effect_executed": null,
+        "family": "approval",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "guide",
+          "allow",
+          "allow",
+          "escalate",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "PROVENANCE_VALUE_MISMATCH",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "COLD_CHAIN_CARRIER_REQUIRED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_APPROVAL_REQUIRED",
+          "CANCELLATION_ALLOWED"
+        ],
+        "terminal_status": "cancelled",
+        "verification_valid": null
+      },
+      "passed": true
+    },
+    {
+      "case": {
+        "case_id": "B-LEDGER-CLEAN",
+        "classification": "benign",
+        "description": "An untampered completed trace verifies through its trusted head.",
+        "expected": {
+          "verification_valid": true
+        },
+        "family": "ledger",
+        "input": {},
+        "runner": "ledger",
+        "tags": []
+      },
+      "failure_summary": null,
+      "latency": {
+        "end_to_end_ms": {
+          "count": 10,
+          "max": 1744.216,
+          "mean": 1682.442,
+          "min": 1610.175,
+          "p50": 1672.091,
+          "p95": 1744.216
+        },
+        "policy_ms": {
+          "count": 90,
+          "max": 15.224,
+          "mean": 9.889,
+          "min": 7.123,
+          "p50": 9.597,
+          "p95": 11.919
+        }
+      },
+      "measured_iterations": 10,
+      "observation": {
+        "applied_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "approval_result": null,
+        "case_id": "B-LEDGER-CLEAN",
+        "classification": "benign",
+        "details": {
+          "failure_code": null
+        },
+        "effect_executed": null,
+        "family": "ledger",
+        "first_bad_sequence": null,
+        "guide_back_succeeded": null,
+        "policy_outcomes": [
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow",
+          "allow"
+        ],
+        "reason_codes": [
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "ALLOW_POLICY_CHECKS_PASSED",
+          "SPEND_WITHIN_CEILING",
+          "ALLOW_POLICY_CHECKS_PASSED"
+        ],
+        "terminal_status": "completed",
+        "verification_valid": true
+      },
+      "passed": true
+    }
+  ],
+  "functional_digest": "sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120",
+  "generated_at": "2026-09-19T15:01:26.776325Z",
+  "iterations": {
+    "measured_per_case": 10,
+    "warmup_per_case": 1
+  },
+  "latency": {
+    "end_to_end_ms": {
+      "count": 220,
+      "max": 3409.284,
+      "mean": 966.323,
+      "min": 196.305,
+      "p50": 256.269,
+      "p95": 2409.967
+    },
+    "policy_ms": {
+      "count": 1050,
+      "max": 31.53,
+      "mean": 9.932,
+      "min": 0.064,
+      "p50": 9.359,
+      "p95": 13.654
+    }
+  },
+  "limitations": [
+    "All logistics data and operational effects are synthetic.",
+    "Cedar runs as a local loopback sidecar; no remote PDP is active.",
+    "Storage is local DynamoDB with a tamper-evident, not immutable, hash chain.",
+    "Agents are deterministic Python roles; Strands and Bedrock are not active.",
+    "Latency reflects this local machine and is not a production benchmark."
+  ],
+  "schema_version": "manifest-evaluation-v1",
+  "seed": "manifest-checkpoint-8-dynamodb-v1",
+  "summary": {
+    "attack_detected": 10,
+    "attack_detection_rate": 1.0,
+    "attack_total": 10,
+    "benign_pass_rate": 1.0,
+    "benign_passed": 12,
+    "benign_total": 12,
+    "case_failed": 0,
+    "case_passed": 22,
+    "case_total": 22,
+    "false_positive_count": 0,
+    "false_positive_rate": 0.0,
+    "guide_back_succeeded": 2,
+    "guide_back_success_rate": 1.0,
+    "guide_back_total": 2,
+    "policy_outcome_counts": {
+      "allow": 81,
+      "block": 5,
+      "escalate": 6,
+      "guide": 13
+    },
+    "synthetic_value_subject_to_approval_minor": 90000
+  }
+}
