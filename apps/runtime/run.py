@@ -1,4 +1,4 @@
-"""Command-line entry point for the Checkpoint 2 governed journey."""
+"""Command-line entry point for the governed Manifest journey."""
 
 from __future__ import annotations
 

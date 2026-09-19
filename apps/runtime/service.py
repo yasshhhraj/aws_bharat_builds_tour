@@ -18,16 +18,20 @@ from packages.domain.errors import (
 from packages.domain.models import (
     ApprovalRecord,
     ApprovalResolution,
+    DashboardProjection,
     Decision,
     OrderSummary,
     ResetResult,
     RunSummary,
+    TamperResult,
     TraceEvent,
+    VerificationResult,
     utc_now,
 )
 from packages.governor import ManifestGovernor
 from packages.ledger import MemoryTraceStore
 from packages.policy import PythonReferencePolicyEngine
+from packages.projections import build_dashboard_projection
 from packages.tools import MockLogisticsTools, build_tool_registry
 
 from .agents import CarrierAgent, CustomerCommunicationsAgent, DispatchAgent, InventoryAgent
@@ -78,6 +82,22 @@ class RunService:
 
     def get_decisions(self, trace_id: str) -> list[Decision]:
         return self.store.get_decisions(trace_id)
+
+    def verify_trace(self, trace_id: str) -> VerificationResult:
+        return self.store.verify_trace(trace_id)
+
+    def get_dashboard_projection(self, trace_id: str) -> DashboardProjection:
+        return build_dashboard_projection(self.store.get_state(trace_id))
+
+    def tamper_trace_for_demo(
+        self,
+        trace_id: str,
+        sequence: int,
+        replacement_summary: str,
+    ) -> TamperResult:
+        return self.store.tamper_event_summary_for_demo(
+            trace_id, sequence, replacement_summary
+        )
 
     def get_approval(self, approval_id: str) -> ApprovalRecord:
         return self.store.get_approval(approval_id)
@@ -154,6 +174,9 @@ class RunService:
                         "approver_label": resolved.approver_label,
                         "version": resolved.version,
                     },
+                    idempotency_key=(
+                        f"approval:{resolved.approval_id}:approved:v{resolved.version}"
+                    ),
                 )
                 self.orchestrator.resume_approved(state, resolved)
             else:
@@ -166,6 +189,9 @@ class RunService:
                         "approver_label": resolved.approver_label,
                         "version": resolved.version,
                     },
+                    idempotency_key=(
+                        f"approval:{resolved.approval_id}:rejected:v{resolved.version}"
+                    ),
                 )
                 self.orchestrator.cancel_pending(state, resolved, "APPROVAL_REJECTED")
             self.store.record_approval_replay(approval_id, idempotency_key, fingerprint)
@@ -192,6 +218,9 @@ class RunService:
             EventType.APPROVAL_EXPIRED,
             "The prepared commitment approval expired.",
             details={"approval_id": expired.approval_id, "version": expired.version},
+            idempotency_key=(
+                f"approval:{expired.approval_id}:expired:v{expired.version}"
+            ),
         )
         self.orchestrator.cancel_pending(state, expired, "APPROVAL_EXPIRED")
         return expired

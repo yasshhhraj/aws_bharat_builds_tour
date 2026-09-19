@@ -5,7 +5,12 @@ import hmac
 import os
 
 from apps.runtime.service import RunService, build_run_service
-from packages.domain.errors import ApprovalAuthNotConfiguredError, ApproverUnauthorizedError
+from packages.domain.errors import (
+    ApprovalAuthNotConfiguredError,
+    ApproverUnauthorizedError,
+    LedgerTamperDisabledError,
+    LedgerTamperUnauthorizedError,
+)
 
 
 @lru_cache(maxsize=1)
@@ -36,3 +41,19 @@ def verify_demo_approver_secret(supplied: str | None) -> None:
         )
     if supplied is None or not hmac.compare_digest(configured, supplied):
         raise ApproverUnauthorizedError("The demo approver secret is invalid.")
+
+
+def demo_tamper_enabled() -> bool:
+    return os.environ.get("ENABLE_DEMO_TAMPER", "").strip().lower() == "true"
+
+
+def tamper_mutation_ready() -> bool:
+    return demo_tamper_enabled() and bool(os.environ.get("DEMO_TAMPER_SECRET"))
+
+
+def verify_demo_tamper_secret(supplied: str | None) -> None:
+    if not demo_tamper_enabled():
+        raise LedgerTamperDisabledError("The disposable tamper demo is disabled.")
+    configured = os.environ.get("DEMO_TAMPER_SECRET")
+    if not configured or supplied is None or not hmac.compare_digest(configured, supplied):
+        raise LedgerTamperUnauthorizedError("The demo tamper secret is invalid.")

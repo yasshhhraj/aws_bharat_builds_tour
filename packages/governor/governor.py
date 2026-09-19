@@ -1,4 +1,4 @@
-"""Trajectory-aware governed tool boundary for Checkpoint 2."""
+"""Trajectory-aware governed tool boundary for Manifest."""
 
 from __future__ import annotations
 
@@ -96,6 +96,7 @@ class ManifestGovernor:
             tool_name=tool_name,
             effect_class=proposal.effect_class,
             details={"proposal_id": proposal.proposal_id, "attempt": attempt, "arguments": proposal.arguments},
+            idempotency_key=f"proposal:{proposal.proposal_id}:attempted",
         )
 
         started = perf_counter()
@@ -124,6 +125,7 @@ class ManifestGovernor:
                 state, EventType.TOOL_GUIDED, decision.because,
                 agent=agent, tool_name=tool_name, effect_class=proposal.effect_class,
                 details={"decision_id": decision.decision_id, "guidance": decision.guidance or {}},
+                idempotency_key=f"proposal:{proposal.proposal_id}:guided",
             )
             return GovernedToolResult(decision=decision, guidance=decision.guidance)
 
@@ -132,6 +134,7 @@ class ManifestGovernor:
                 state, EventType.TOOL_BLOCKED, decision.because,
                 agent=agent, tool_name=tool_name, effect_class=proposal.effect_class,
                 details={"decision_id": decision.decision_id, "reason_code": decision.reason_code},
+                idempotency_key=f"proposal:{proposal.proposal_id}:blocked",
             )
             return GovernedToolResult(decision=decision)
 
@@ -140,7 +143,16 @@ class ManifestGovernor:
             self.store.append_event(
                 state, EventType.APPROVAL_REQUIRED, decision.because,
                 agent=agent, tool_name=tool_name, effect_class=proposal.effect_class,
-                details={"decision_id": decision.decision_id, "approval_id": approval.approval_id, "prepared_action_id": approval.prepared_action_id},
+                details={
+                    "decision_id": decision.decision_id,
+                    "approval_id": approval.approval_id,
+                    "prepared_action_id": approval.prepared_action_id,
+                    "action_hash": approval.action_hash,
+                    "state_hash": approval.state_hash,
+                    "policy_version": approval.policy_version,
+                    "reason_code": approval.reason_code,
+                },
+                idempotency_key=f"approval:{approval.approval_id}:required",
             )
             return GovernedToolResult(decision=decision, pending_approval=approval)
 
@@ -149,16 +161,23 @@ class ManifestGovernor:
         try:
             value = self.registry.execute(tool_name, arguments)
         except ManifestError as exc:
-            self._record_failure(state, agent, tool_name, proposal.effect_class, exc.message)
+            self._record_failure(
+                state, agent, tool_name, proposal.effect_class, exc.message,
+                proposal.proposal_id,
+            )
             raise
         except Exception as exc:
             message = f"Tool {tool_name} failed unexpectedly."
-            self._record_failure(state, agent, tool_name, proposal.effect_class, message)
+            self._record_failure(
+                state, agent, tool_name, proposal.effect_class, message,
+                proposal.proposal_id,
+            )
             raise ToolExecutionError(message) from exc
         self.store.append_event(
             state, EventType.TOOL_SUCCEEDED, f"{tool_name} completed successfully.",
             agent=agent, tool_name=tool_name, effect_class=proposal.effect_class,
             details={"result": self._safe_result(tool_name, value)},
+            idempotency_key=f"proposal:{proposal.proposal_id}:succeeded",
         )
         if tool_name == "confirm_freight_booking":
             self._apply_confirmation(state, arguments, value)
@@ -273,14 +292,28 @@ class ManifestGovernor:
             agent=decision.agent, tool_name=decision.tool_name, effect_class=decision.effect_class,
             details={
                 "decision_id": decision.decision_id,
+                "request_id": decision.request_id,
+                "proposal_id": decision.proposal_id,
                 "policy_outcome": decision.policy_outcome.value,
                 "applied_outcome": decision.applied_outcome.value,
                 "enforced": decision.enforced,
                 "reason_code": decision.reason_code,
+                "because": decision.because,
+                "guidance": decision.guidance or {},
+                "signals": [
+                    {
+                        "family": signal.family,
+                        "policy_id": signal.policy_id,
+                        "outcome": signal.outcome.value,
+                        "reason_code": signal.reason_code,
+                    }
+                    for signal in decision.reasons
+                ],
                 "policy_version": decision.policy_version,
                 "engine_name": decision.engine_name,
                 "evaluation_ms": decision.evaluation_ms,
             },
+            idempotency_key=f"proposal:{decision.proposal_id}:decision",
         )
 
     def _create_approval(self, state, args, decision) -> PendingApproval:
@@ -325,8 +358,19 @@ class ManifestGovernor:
         state.spend_reserved_minor -= prepared.amount_minor
         state.pending_approval_id = None
 
-    def _record_failure(self, state, agent, tool_name, effect_class, message) -> None:
-        self.store.append_event(state, EventType.TOOL_FAILED, message, agent=agent, tool_name=tool_name, effect_class=effect_class, details={"error": message})
+    def _record_failure(
+        self, state, agent, tool_name, effect_class, message, proposal_id
+    ) -> None:
+        self.store.append_event(
+            state,
+            EventType.TOOL_FAILED,
+            message,
+            agent=agent,
+            tool_name=tool_name,
+            effect_class=effect_class,
+            details={"error": message},
+            idempotency_key=f"proposal:{proposal_id}:failed",
+        )
 
     @staticmethod
     def _safe_arguments(tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:

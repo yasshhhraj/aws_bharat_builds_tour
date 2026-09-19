@@ -111,3 +111,27 @@ class ApproverUnauthorizedError(ManifestError):
 
 class ApprovalAuthNotConfiguredError(ManifestError):
     code = "APPROVAL_AUTH_NOT_CONFIGURED"
+
+
+class LedgerError(ManifestError):
+    code = "LEDGER_ERROR"
+
+
+class LedgerAppendError(LedgerError):
+    code = "LEDGER_APPEND_ERROR"
+
+
+class LedgerIdempotencyConflictError(LedgerError):
+    code = "LEDGER_IDEMPOTENCY_CONFLICT"
+
+
+class LedgerTamperDisabledError(LedgerError):
+    code = "LEDGER_TAMPER_DISABLED"
+
+
+class LedgerTamperUnauthorizedError(LedgerError):
+    code = "LEDGER_TAMPER_UNAUTHORIZED"
+
+
+class LedgerTamperValidationError(LedgerError):
+    code = "LEDGER_TAMPER_VALIDATION_ERROR"

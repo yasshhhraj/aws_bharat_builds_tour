@@ -1,4 +1,4 @@
-"""Pydantic schemas for the Checkpoint 3 HTTP boundary."""
+"""Pydantic schemas for the Manifest HTTP boundary."""
 
 from __future__ import annotations
 
@@ -40,6 +40,7 @@ class RunResponse(BaseModel):
 
 
 class EventResponse(BaseModel):
+    event_id: str
     trace_id: str
     sequence: int
     event_type: str
@@ -49,11 +50,89 @@ class EventResponse(BaseModel):
     summary: str
     details: dict[str, Any]
     occurred_at: str
+    schema_version: str
+    previous_hash: str
+    event_hash: str
+    idempotency_key: str | None
 
 
 class EventsResponse(BaseModel):
     trace_id: str
     items: list[EventResponse]
+
+
+class VerificationResponse(BaseModel):
+    trace_id: str
+    valid: bool
+    checked_event_count: int
+    first_bad_sequence: int | None
+    failure_code: str | None
+    stored_head_sequence: int
+    stored_head_hash: str
+    computed_head_hash: str
+    algorithm: str
+    schema_version: str
+    verified_at: str
+
+
+class RiskSignalPointResponse(BaseModel):
+    sequence: int
+    decision_id: str
+    family: str
+    reason_code: str
+    outcome: str
+    delta: int
+    total: int
+
+
+class SpendPointResponse(BaseModel):
+    sequence: int
+    label: str
+    committed_minor: int
+    reserved_minor: int
+    projected_minor: int
+    ceiling_minor: int
+
+
+class WeightAttemptResponse(BaseModel):
+    sequence: int
+    proposal_id: str
+    attempted_value: int
+    unit: str
+    fact_id: str
+    policy_outcome: str
+    reason_code: str
+
+
+class WeightProvenanceResponse(BaseModel):
+    fact_id: str
+    authoritative_value: int
+    unit: str
+    source_id: str
+    source_hash: str
+    attempts: list[WeightAttemptResponse]
+    final_value: int | None
+
+
+class DashboardProjectionResponse(BaseModel):
+    trace_id: str
+    risk_signal_score: int
+    risk_signal_method: str
+    risk_points: list[RiskSignalPointResponse]
+    spend_points: list[SpendPointResponse]
+    weight_provenance: WeightProvenanceResponse | None
+
+
+class TamperRequest(BaseModel):
+    sequence: int = Field(ge=1)
+    replacement_summary: str = Field(min_length=1, max_length=280)
+
+
+class TamperResponse(BaseModel):
+    trace_id: str
+    sequence: int
+    field: str
+    status: str
 
 
 class DecisionResponse(BaseModel):
@@ -148,6 +227,14 @@ class HealthResponse(BaseModel):
     approval_mode: str
     approval_auth_mode: str
     approval_mutation_ready: bool
+    ledger_algorithm: str
+    ledger_schema_version: str
+    verify_ready: bool
+    demo_tamper_enabled: bool
+    demo_tamper_mutation_ready: bool
+    dashboard_mode: str
+    dashboard_ready: bool
+    projection_version: str
 
 
 class ResetResponse(BaseModel):

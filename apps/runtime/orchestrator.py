@@ -64,6 +64,7 @@ class ShipmentOrchestrator:
                 "mandate_id": active_mandate.mandate_id,
                 "policy_version": state.policy_version,
             },
+            idempotency_key=f"run:{state.trace_id}:started",
         )
         try:
             for agent in self.agents:
@@ -85,11 +86,17 @@ class ShipmentOrchestrator:
                     state, EventType.RUN_PAUSED,
                     f"Run paused for approval {state.pending_approval_id}.",
                     details={"approval_id": state.pending_approval_id},
+                    idempotency_key=f"run:{state.trace_id}:paused:{state.pending_approval_id}",
                 )
             else:
                 state.status = RunStatus.COMPLETED
                 state.workflow_stage = WorkflowStage.COMPLETE
-                self.store.append_event(state, EventType.RUN_COMPLETED, f"Completed deterministic journey for {order_id}.")
+                self.store.append_event(
+                    state,
+                    EventType.RUN_COMPLETED,
+                    f"Completed deterministic journey for {order_id}.",
+                    idempotency_key=f"run:{state.trace_id}:completed",
+                )
         except PolicyBlockedError as exc:
             state.status = RunStatus.BLOCKED
             state.workflow_stage = WorkflowStage.BLOCKED
@@ -118,6 +125,7 @@ class ShipmentOrchestrator:
             EventType.RUN_RESUMED,
             f"Run resumed after approval {approval.approval_id}.",
             details={"approval_id": approval.approval_id},
+            idempotency_key=f"run:{state.trace_id}:resumed:{approval.approval_id}",
         )
         self.store.append_event(
             state,
@@ -150,6 +158,7 @@ class ShipmentOrchestrator:
                 state,
                 EventType.RUN_COMPLETED,
                 f"Completed approved journey for {state.order_id}.",
+                idempotency_key=f"run:{state.trace_id}:completed",
             )
         except PolicyBlockedError as exc:
             state.status = RunStatus.BLOCKED
@@ -202,6 +211,7 @@ class ShipmentOrchestrator:
             EventType.RUN_CANCELLED,
             "Run cancelled after the prepared booking was released.",
             details={"reason_code": reason_code, "approval_id": approval.approval_id},
+            idempotency_key=f"run:{state.trace_id}:cancelled:{reason_code}",
         )
         return state
 

@@ -1,5 +1,21 @@
-"""Trace and approval storage ports; hash chaining is introduced later."""
+"""Trace, approval, and hash-chain ledger support."""
 
+from .canonical import (
+    GENESIS_HASH,
+    HASH_ALGORITHM,
+    LEDGER_SCHEMA_VERSION,
+    calculate_event_hash,
+    canonical_json,
+)
 from .memory_store import MemoryTraceStore
+from .verifier import verify_chain
 
-__all__ = ["MemoryTraceStore"]
+__all__ = [
+    "GENESIS_HASH",
+    "HASH_ALGORITHM",
+    "LEDGER_SCHEMA_VERSION",
+    "MemoryTraceStore",
+    "calculate_event_hash",
+    "canonical_json",
+    "verify_chain",
+]

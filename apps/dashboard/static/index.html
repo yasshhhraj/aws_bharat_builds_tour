@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Manifest trajectory governance operator dashboard">
+    <title>Manifest — Trajectory Control</title>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to dashboard</a>
+    <header class="site-header">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">M</div>
+        <div>
+          <p class="eyebrow">Trajectory control plane</p>
+          <h1>Manifest</h1>
+        </div>
+      </div>
+      <div id="healthBadge" class="health-badge health-loading" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        Connecting
+      </div>
+    </header>
+
+    <main id="workspace" class="workspace">
+      <section class="hero" aria-labelledby="heroTitle">
+        <div>
+          <p class="eyebrow">Before the truck moves</p>
+          <h2 id="heroTitle">Make every autonomous action declared, authorized, and provable.</h2>
+          <p class="hero-copy">Run the same synthetic shipment in shadow or enforce mode. Manifest follows the whole trajectory—not just one tool call.</p>
+        </div>
+        <dl id="environmentGrid" class="environment-grid" aria-label="Active environment">
+          <div><dt>Runtime</dt><dd>Loading…</dd></div>
+          <div><dt>Policy</dt><dd>Loading…</dd></div>
+          <div><dt>Ledger</dt><dd>Loading…</dd></div>
+          <div><dt>Approval</dt><dd>Loading…</dd></div>
+        </dl>
+      </section>
+
+      <section class="control-panel" aria-labelledby="runHeading">
+        <div class="section-heading">
+          <div><p class="eyebrow">Run control</p><h2 id="runHeading">Govern a shipment</h2></div>
+          <p id="lastUpdated" class="muted">No trace loaded</p>
+        </div>
+        <form id="runForm" class="run-form">
+          <label>Order<select id="orderSelect" name="order_id" disabled><option>Loading…</option></select></label>
+          <label>Mode<select id="modeSelect" name="mode"><option value="enforce">Enforce</option><option value="shadow">Shadow</option></select></label>
+          <label>Scenario<select id="scenarioSelect" name="scenario"><option value="adversarial">Adversarial</option><option value="benign">Benign</option></select></label>
+          <button id="runButton" class="button button-primary" type="submit" disabled>Run shipment</button>
+          <button id="refreshButton" class="button button-secondary" type="button" disabled>Refresh</button>
+          <button id="resetButton" class="button button-quiet" type="button" disabled>Reset demo</button>
+        </form>
+        <div id="appMessage" class="app-message" aria-live="polite"></div>
+      </section>
+
+      <section id="summarySection" class="summary-grid" aria-label="Trace summary">
+        <article class="metric-card"><p>Status</p><strong id="runStatus">Waiting</strong><span id="runStage">Start a run</span></article>
+        <article class="metric-card"><p>Projected spend</p><strong id="spendValue">—</strong><span id="spendCeiling">No active mandate</span><div class="spend-track" aria-hidden="true"><span id="spendBar"></span></div></article>
+        <article class="metric-card"><p>Risk signals</p><strong id="riskValue">—</strong><span>Demo control-family score</span></article>
+        <article class="metric-card"><p>Ledger integrity</p><strong id="integrityValue">Unknown</strong><span id="integrityDetail">Not verified</span></article>
+      </section>
+
+      <section class="panel signal-panel" aria-labelledby="signalsHeading">
+        <div class="section-heading"><div><p class="eyebrow">Trajectory exposure</p><h2 id="signalsHeading">Spend &amp; control signals</h2></div><span class="muted">Derived from governed state</span></div>
+        <div class="signal-grid">
+          <div><h3>Spend trajectory</h3><div id="spendChart" class="chart-empty">Run a shipment to see spend movement.</div></div>
+          <div><h3>Demo risk signals</h3><div id="riskChart" class="chart-empty">No policy signals loaded.</div></div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel panel-wide" aria-labelledby="traceHeading">
+          <div class="section-heading"><div><p class="eyebrow">Live chain of custody</p><h2 id="traceHeading">Agent trajectory</h2></div><div class="inline-actions"><button id="timelineInterventions" class="filter-button active" type="button">Interventions</button><button id="timelineAll" class="filter-button" type="button">Show all</button></div></div>
+          <p id="traceId" class="trace-id">No trace</p>
+          <ol id="timeline" class="timeline"><li class="empty-state">Run a shipment to see agents, tools, and decisions in sequence.</li></ol>
+        </article>
+        <article class="panel" aria-labelledby="decisionsHeading">
+          <div class="section-heading"><div><p class="eyebrow">Deterministic policy</p><h2 id="decisionsHeading">Decisions</h2></div></div>
+          <div id="decisionFeed" class="decision-feed"><p class="empty-state">Policy decisions will appear after a run.</p></div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid lower-grid">
+        <article class="panel" aria-labelledby="provenanceHeading">
+          <div class="section-heading"><div><p class="eyebrow">Numeric chain of custody</p><h2 id="provenanceHeading">Weight provenance</h2></div></div>
+          <div id="provenancePanel" class="empty-state">No sourced weight loaded.</div>
+        </article>
+        <article class="panel" aria-labelledby="approvalHeading">
+          <div class="section-heading"><div><p class="eyebrow">Scoped exception</p><h2 id="approvalHeading">Approval</h2></div></div>
+          <div id="approvalPanel" class="empty-state">No approval is pending.</div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid lower-grid">
+        <article class="panel" aria-labelledby="integrityHeading">
+          <div class="section-heading"><div><p class="eyebrow">Cryptographic receipt</p><h2 id="integrityHeading">Integrity</h2></div><button id="verifyButton" class="button button-secondary button-small" type="button" disabled>Verify again</button></div>
+          <div id="integrityPanel" class="empty-state">Verification details will appear after a run.</div>
+        </article>
+        <article id="tamperPanelCard" class="panel hidden" aria-labelledby="tamperHeading">
+          <div class="section-heading"><div><p class="eyebrow">Disposable demonstration</p><h2 id="tamperHeading">Tamper detection</h2></div></div>
+          <div id="tamperPanel">
+            <p class="muted-copy">Create a separate benign trace, alter one summary, and verify that the chain identifies the first bad sequence. Your primary trace is never touched.</p>
+            <button id="createDisposableButton" class="button button-secondary" type="button">Create disposable trace</button>
+            <div id="disposableStatus" class="disposable-status">No disposable trace created.</div>
+            <label class="secret-label">Tamper demo secret<input id="tamperSecret" type="password" autocomplete="off" placeholder="Entered only for this request"></label>
+            <button id="tamperButton" class="button button-danger" type="button" disabled>Alter event #5</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>Manifest prototype · Synthetic logistics data · Tamper-evident, not immutable</footer>
+    <script type="module" src="/dashboard/js/app.js"></script>
+  </body>
+</html>

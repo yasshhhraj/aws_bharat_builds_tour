@@ -239,6 +239,7 @@ class EffectRecord:
 
 @dataclass(frozen=True, slots=True)
 class TraceEvent:
+    event_id: str
     trace_id: str
     sequence: int
     event_type: EventType
@@ -248,6 +249,96 @@ class TraceEvent:
     tool_name: str | None = None
     effect_class: EffectClass | None = None
     occurred_at: datetime = field(default_factory=utc_now)
+    schema_version: str = "ledger-event-v1"
+    previous_hash: str = ""
+    event_hash: str = ""
+    idempotency_key: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class LedgerHead:
+    trace_id: str
+    sequence: int
+    event_count: int
+    event_hash: str
+    schema_version: str
+    updated_at: datetime = field(default_factory=utc_now)
+
+
+@dataclass(frozen=True, slots=True)
+class VerificationResult:
+    trace_id: str
+    valid: bool
+    checked_event_count: int
+    first_bad_sequence: int | None
+    failure_code: str | None
+    stored_head_sequence: int
+    stored_head_hash: str
+    computed_head_hash: str
+    algorithm: str
+    schema_version: str
+    verified_at: datetime = field(default_factory=utc_now)
+
+
+@dataclass(frozen=True, slots=True)
+class TamperResult:
+    trace_id: str
+    sequence: int
+    field: str
+    status: str = "tampered_for_demo"
+
+
+@dataclass(frozen=True, slots=True)
+class RiskSignalPoint:
+    sequence: int
+    decision_id: str
+    family: str
+    reason_code: str
+    outcome: DecisionOutcome
+    delta: int
+    total: int
+
+
+@dataclass(frozen=True, slots=True)
+class SpendPoint:
+    sequence: int
+    label: str
+    committed_minor: int
+    reserved_minor: int
+    projected_minor: int
+    ceiling_minor: int
+
+
+@dataclass(frozen=True, slots=True)
+class WeightAttempt:
+    sequence: int
+    proposal_id: str
+    attempted_value: int
+    unit: str
+    fact_id: str
+    policy_outcome: DecisionOutcome
+    reason_code: str
+
+
+@dataclass(frozen=True, slots=True)
+class WeightProvenanceProjection:
+    fact_id: str
+    authoritative_value: int
+    unit: str
+    source_id: str
+    source_hash: str
+    attempts: tuple[WeightAttempt, ...]
+    final_value: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class DashboardProjection:
+    trace_id: str
+    risk_signal_score: int
+    risk_signal_method: str
+    risk_points: tuple[RiskSignalPoint, ...]
+    spend_points: tuple[SpendPoint, ...]
+    weight_provenance: WeightProvenanceProjection | None
 
 
 @dataclass(slots=True)

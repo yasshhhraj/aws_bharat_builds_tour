@@ -1,12 +1,14 @@
-"""FastAPI application exposing the governed Checkpoint 2 journey."""
+"""FastAPI application and local dashboard for the governed demo journey."""
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from apps.runtime.service import RunService
 from packages.domain.enums import RunStatus
@@ -22,6 +24,11 @@ from packages.domain.errors import (
     ApproverUnauthorizedError,
     FixtureError,
     ManifestError,
+    LedgerAppendError,
+    LedgerIdempotencyConflictError,
+    LedgerTamperDisabledError,
+    LedgerTamperUnauthorizedError,
+    LedgerTamperValidationError,
     OrderNotFoundError,
     TraceNotFoundError,
     UnsupportedModeError,
@@ -29,25 +36,46 @@ from packages.domain.errors import (
 )
 from packages.domain.models import to_primitive
 
-from .dependencies import approval_mutation_ready, get_run_service, verify_demo_approver_secret
+from .dependencies import (
+    approval_mutation_ready,
+    demo_tamper_enabled,
+    get_run_service,
+    tamper_mutation_ready,
+    verify_demo_approver_secret,
+    verify_demo_tamper_secret,
+)
 from .schemas import (
     ApprovalDecisionRequest,
     ApprovalDecisionResponse,
     ApprovalResponse,
     EventsResponse,
     DecisionsResponse,
+    DashboardProjectionResponse,
     ApprovalsResponse,
     HealthResponse,
     OrdersResponse,
     ResetResponse,
     RunRequest,
     RunResponse,
+    TamperRequest,
+    TamperResponse,
+    VerificationResponse,
 )
 
 app = FastAPI(
-    title="Manifest Checkpoint 3 API",
-    version="0.5.0",
-    description="Deterministic governed logistics workflow with approval and resume.",
+    title="Manifest Checkpoint 5 API",
+    version="0.7.0",
+    description=(
+        "Deterministic governed logistics workflow with approval, resume, and "
+        "tamper-evident trace verification."
+    ),
+)
+
+DASHBOARD_DIR = Path(__file__).resolve().parents[1] / "dashboard" / "static"
+DASHBOARD_REQUIRED_ASSETS = (
+    DASHBOARD_DIR / "index.html",
+    DASHBOARD_DIR / "styles.css",
+    DASHBOARD_DIR / "js" / "app.js",
 )
 
 
@@ -56,6 +84,10 @@ def _error_status(exc: ManifestError) -> int:
         return 404
     if isinstance(exc, ApproverUnauthorizedError):
         return 401
+    if isinstance(exc, LedgerTamperUnauthorizedError):
+        return 401
+    if isinstance(exc, LedgerTamperDisabledError):
+        return 404
     if isinstance(exc, ApprovalExpiredError):
         return 410
     if isinstance(
@@ -66,13 +98,19 @@ def _error_status(exc: ManifestError) -> int:
             ApprovalNotPendingError,
             ApprovalVersionConflictError,
             ApproverConflictError,
+            LedgerIdempotencyConflictError,
         ),
     ):
         return 409
-    if isinstance(exc, (UnsupportedModeError, UnsupportedScenarioError)):
+    if isinstance(
+        exc,
+        (UnsupportedModeError, UnsupportedScenarioError, LedgerTamperValidationError),
+    ):
         return 422
     if isinstance(exc, (FixtureError, ApprovalAuthNotConfiguredError)):
         return 503
+    if isinstance(exc, LedgerAppendError):
+        return 500
     return 400
 
 
@@ -111,18 +149,26 @@ async def health_ready():
         )
     return {
         "status": "ready",
-        "version": "0.5.0",
+        "version": "0.7.0",
         "runtime_mode": "deterministic",
         "governor_mode": "policy_enforced",
         "policy_engine": service.policy_engine.name,
         "policy_version": service.policy_engine.policy_version,
-        "storage_mode": "memory",
+        "storage_mode": "memory_hash_chain",
         "fixture_count": fixture_count,
         "supported_modes": ["shadow", "enforce"],
         "supported_scenarios": ["benign", "adversarial"],
         "approval_mode": "local",
         "approval_auth_mode": "demo_shared_secret",
         "approval_mutation_ready": approval_mutation_ready(),
+        "ledger_algorithm": "sha256",
+        "ledger_schema_version": "ledger-event-v1",
+        "verify_ready": True,
+        "demo_tamper_enabled": demo_tamper_enabled(),
+        "demo_tamper_mutation_ready": tamper_mutation_ready(),
+        "dashboard_mode": "static_no_build",
+        "dashboard_ready": all(path.is_file() for path in DASHBOARD_REQUIRED_ASSETS),
+        "projection_version": "dashboard-v1",
     }
 
 
@@ -154,6 +200,28 @@ async def get_events(trace_id: str, service: RunService = Depends(get_run_servic
         "trace_id": trace_id,
         "items": [to_primitive(event) for event in service.get_events(trace_id)],
     }
+
+
+@app.get(
+    "/v1/traces/{trace_id}/verify",
+    response_model=VerificationResponse,
+)
+async def verify_trace(
+    trace_id: str,
+    service: RunService = Depends(get_run_service),
+) -> dict:
+    return to_primitive(service.verify_trace(trace_id))
+
+
+@app.get(
+    "/v1/traces/{trace_id}/projection",
+    response_model=DashboardProjectionResponse,
+)
+async def get_dashboard_projection(
+    trace_id: str,
+    service: RunService = Depends(get_run_service),
+) -> dict:
+    return to_primitive(service.get_dashboard_projection(trace_id))
 
 
 @app.get("/v1/traces/{trace_id}/decisions", response_model=DecisionsResponse)
@@ -203,3 +271,35 @@ async def decide_approval(
 @app.post("/v1/demo/reset", response_model=ResetResponse)
 async def reset_demo(service: RunService = Depends(get_run_service)) -> dict:
     return to_primitive(service.reset_demo())
+
+
+@app.post(
+    "/v1/demo/traces/{trace_id}/tamper",
+    response_model=TamperResponse,
+)
+async def tamper_trace_for_demo(
+    trace_id: str,
+    request: TamperRequest,
+    tamper_secret: str | None = Header(default=None, alias="X-Demo-Tamper-Secret"),
+    service: RunService = Depends(get_run_service),
+) -> dict:
+    verify_demo_tamper_secret(tamper_secret)
+    return to_primitive(
+        service.tamper_trace_for_demo(
+            trace_id,
+            request.sequence,
+            request.replacement_summary,
+        )
+    )
+
+
+@app.get("/", include_in_schema=False)
+async def dashboard_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/dashboard/", status_code=307)
+
+
+app.mount(
+    "/dashboard",
+    StaticFiles(directory=str(DASHBOARD_DIR), html=True),
+    name="dashboard",
+)
