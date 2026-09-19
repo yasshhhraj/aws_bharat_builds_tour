@@ -1,10 +1,12 @@
 # Policies
 
-Checkpoint 2 uses the deterministic `PythonReferencePolicyEngine` in
-`packages/policy/`. It implements six policy families and supplies the
-executable test contract for a future Cedar adapter.
+Checkpoint 7 provides a validated Cedar `demo-v1` policy bundle for Manifest's
+six policy families. The JSON Cedar schema is in `schema/`, the policies and
+stable decision metadata are in `demo-v1/`, and the local PDP is implemented in
+`services/cedar_pdp/` with the official `cedar-policy` crate pinned to 4.12.0.
 
-Cedar is deliberately not reported as active. A Cedar bundle may replace the
-reference engine only after it passes the same table-driven positive, negative,
-boundary, and missing-context cases. Adapter choice is fixed at startup and is
-shown by `/health/ready` and every run summary.
+The adapter choice is fixed at startup and shown by `/health/ready`, decisions,
+evaluation evidence, and the release manifest. Cedar is authoritative when
+`MANIFEST_POLICY_ENGINE=cedar`; startup fails if the sidecar, schema, version,
+or optional pinned bundle hash does not match. The Python engine remains an
+explicit reference/offline mode and is never selected as a silent fallback.

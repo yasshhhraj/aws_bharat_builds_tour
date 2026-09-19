@@ -1,0 +1,81 @@
+{
+  "Manifest": {
+    "commonTypes": {
+      "AuthContext": {
+        "type": "Record",
+        "attributes": {
+          "policyVersion": {"type": "String"},
+          "mandatePolicyVersion": {"type": "String"},
+          "allowedEffectClasses": {"type": "Set", "element": {"type": "String"}},
+          "cargoClass": {"type": "String"},
+          "currency": {"type": "String"},
+          "principalId": {"type": "String"},
+          "provenanceFactPresent": {"type": "Boolean"},
+          "provenanceFactHashValid": {"type": "Boolean"},
+          "attemptedWeight": {"type": "Long"},
+          "attemptedUnit": {"type": "String"},
+          "authoritativeWeight": {"type": "Long"},
+          "authoritativeUnit": {"type": "String"},
+          "vehicleMetadataPresent": {"type": "Boolean"},
+          "vehicleAvailable": {"type": "Boolean"},
+          "vehicleRefrigerated": {"type": "Boolean"},
+          "vehicleCapacityKg": {"type": "Long"},
+          "carrierMetadataPresent": {"type": "Boolean"},
+          "coldChainCertified": {"type": "Boolean"},
+          "laneSupported": {"type": "Boolean"},
+          "quoteIssuer": {"type": "String"},
+          "preparedActionPresent": {"type": "Boolean"},
+          "preparedStatus": {"type": "String"},
+          "preparedCurrency": {"type": "String"},
+          "preparedBy": {"type": "String"},
+          "actionHashMatches": {"type": "Boolean"},
+          "spendCommittedMinor": {"type": "Long"},
+          "spendReservedMinor": {"type": "Long"},
+          "approvalThresholdMinor": {"type": "Long"},
+          "approvalStatus": {"type": "String"},
+          "approvalExpired": {"type": "Boolean"},
+          "approvalActionMatches": {"type": "Boolean"},
+          "approvalStateMatches": {"type": "Boolean"},
+          "approvalPolicyMatches": {"type": "Boolean"},
+          "approverLabel": {"type": "String"},
+          "approverConflictsWithPreparer": {"type": "Boolean"},
+          "containsForbiddenPiiField": {"type": "Boolean"},
+          "templateId": {"type": "String"},
+          "syntheticRecipientValid": {"type": "Boolean"},
+          "templateVariablesAllowed": {"type": "Boolean"}
+        }
+      }
+    },
+    "entityTypes": {
+      "Agent": {
+        "memberOfTypes": [],
+        "shape": {"type": "Record", "attributes": {}}
+      },
+      "ShipmentAction": {
+        "memberOfTypes": [],
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "orderId": {"type": "String"},
+            "toolName": {"type": "String"},
+            "owner": {"type": "Entity", "name": "Agent"},
+            "effectClass": {"type": "String"}
+          }
+        }
+      }
+    },
+    "actions": {
+      "get_order": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "check_inventory": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "list_available_vehicles": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "create_dispatch_plan": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "list_carrier_quotes": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "select_carrier_quote": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "prepare_freight_booking": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "confirm_freight_booking": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "cancel_freight_booking": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}},
+      "write_tracking_outbox": {"appliesTo": {"principalTypes": ["Agent"], "resourceTypes": ["ShipmentAction"], "context": {"type": "AuthContext"}}}
+    }
+  }
+}
+

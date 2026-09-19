@@ -78,8 +78,20 @@ def render_markdown(report: EvaluationReport) -> str:
     summary = report.summary
     policy = report.latency["policy_ms"]
     total = report.latency["end_to_end_ms"]
+    cedar_active = report.active_modes.get("policy_engine") == "cedar"
+    title = (
+        "# Manifest Checkpoint 7 Cedar Evaluation Results"
+        if cedar_active
+        else "# Manifest Checkpoint 6 Evaluation Results"
+    )
+    reproduce = (
+        "MANIFEST_POLICY_ENGINE=cedar CEDAR_ENDPOINT=http://127.0.0.1:18765 "
+        "python3 scripts/run_evaluation.py --policy-engine cedar --warmup 1 --iterations 10"
+        if cedar_active
+        else "python3 scripts/run_evaluation.py --warmup 1 --iterations 10"
+    )
     lines = [
-        "# Manifest Checkpoint 6 Evaluation Results",
+        title,
         "",
         f"**Schema:** `{report.schema_version}`  ",
         f"**Generated:** `{report.generated_at}`",
@@ -150,7 +162,7 @@ def render_markdown(report: EvaluationReport) -> str:
             "## Reproduce",
             "",
             "```bash",
-            "python3 scripts/run_evaluation.py --warmup 1 --iterations 10",
+            reproduce,
             "```",
             "",
         ]

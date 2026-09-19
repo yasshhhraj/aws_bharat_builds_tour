@@ -5,9 +5,9 @@ agent actions before they create physical, financial, or disclosure effects.
 
 ## Current status
 
-**Checkpoint 6 is implemented locally.** One deterministic shipment runs through four
+**Checkpoint 7 is implemented locally.** One deterministic shipment runs through four
 plain-Python agent roles in either shadow or enforce mode. Every registered tool
-attempt receives a typed policy decision before its mock effect executes, and a
+attempt receives an authoritative Cedar policy decision before its mock effect executes, and a
 bound human approval can resume or cancel a paused commitment. Every retained
 trace event is now part of an ordered SHA-256 hash chain that can be verified
 through the API. A no-build browser dashboard now makes the trajectory, spend,
@@ -35,16 +35,24 @@ The implementation demonstrates:
 - separately measured policy and end-to-end latency;
 - a canonical fixture-tree checksum and generated release manifest; and
 - recorded browser evidence for health, shadow, enforce, approval, verification,
-  tamper detection, and controlled error presentation.
+  tamper detection, and controlled error presentation;
+- a loopback-only Rust PDP using the official Cedar 4.12.0 engine;
+- a strictly validated `demo-v1` Cedar schema and policy bundle;
+- fail-closed engine selection with bundle/schema identity disclosure; and
+- exact functional parity across the 22-case Python/Cedar evaluation corpus.
 
 The implementation specification is
-[`docs/CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_6_IMPLEMENTATION_PLAN.md).
+[`docs/CHECKPOINT_7_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_7_IMPLEMENTATION_PLAN.md),
+with verified results in
+[`docs/CHECKPOINT_7_COMPLETION_REPORT.md`](docs/CHECKPOINT_7_COMPLETION_REPORT.md).
 
 The generated evidence is in
 [`docs/results/checkpoint-6-evaluation.md`](docs/results/checkpoint-6-evaluation.md),
-with browser verification in
-[`docs/results/browser-smoke.md`](docs/results/browser-smoke.md). Checkpoint 7,
-Cedar authorization parity, is the next implementation milestone.
+with Cedar evidence in
+[`docs/results/checkpoint-7-cedar-evaluation.md`](docs/results/checkpoint-7-cedar-evaluation.md)
+and browser verification in
+[`docs/results/browser-smoke.md`](docs/results/browser-smoke.md). Checkpoint 8,
+durable DynamoDB-compatible storage, is the next implementation milestone.
 
 ## Run the evaluation and checkpoint gate
 
@@ -61,13 +69,20 @@ Run the complete Checkpoint 6 gate:
 ./scripts/run_checkpoint_6.sh
 ```
 
+Run the complete Cedar-authoritative Checkpoint 7 gate:
+
+```bash
+./scripts/run_checkpoint_7.sh
+```
+
 The current labelled set contains 10 attack and 12 benign/boundary cases. The
-committed results must always be read with the disclosed local deterministic,
-Python-reference, and in-memory modes.
+committed results must always be read with their disclosed engine and with the
+local deterministic and in-memory modes.
 
 ## Requirements and setup
 
 - Python 3.10 or newer
+- Rust stable with Cargo (for the Cedar sidecar)
 
 From `/home/yashraj/p0/project`:
 
@@ -78,6 +93,17 @@ python3 -m pip install -e '.[dev]'
 ```
 
 No AWS account or credentials are required.
+
+To run the API or CLI directly with Cedar, start the sidecar as documented in
+[`services/cedar_pdp/README.md`](services/cedar_pdp/README.md), then set:
+
+```bash
+export MANIFEST_POLICY_ENGINE=cedar
+export CEDAR_ENDPOINT=http://127.0.0.1:18765
+```
+
+The application validates Cedar at startup. It does not silently fall back to
+the Python reference engine.
 
 ## Run the journeys
 
@@ -229,10 +255,10 @@ approval trace for tampering.
 python3 -m pytest -q
 ```
 
-Or run the complete Checkpoint 5 verification:
+Or run the complete Checkpoint 7 verification:
 
 ```bash
-./scripts/run_checkpoint_5.sh
+./scripts/run_checkpoint_7.sh
 ```
 
 ## Architecture
@@ -247,10 +273,10 @@ RunService -> ShipmentOrchestrator -> four deterministic agents
                                  ManifestGovernor
                                    |           |
                                    v           v
-                          Python policy     Tool registry
-                          engine (6 families)   |
+                          PolicyEngine port  Tool registry
+                         (Cedar authoritative)  |
                                    |            v
-                                   +------> mock tools
+                        loopback Rust PDP --> mock tools
                                          |
                                          v
                     in-memory hash-chain ledger + versioned approvals

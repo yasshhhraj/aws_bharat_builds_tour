@@ -19,7 +19,7 @@ from packages.domain.enums import (
 from packages.domain.models import NumericFact, TrajectoryState
 from packages.governor import ManifestGovernor
 from packages.ledger import MemoryTraceStore
-from packages.policy import PythonReferencePolicyEngine
+from packages.policy import PolicyEngine, PythonReferencePolicyEngine
 from packages.tools import build_tool_registry
 
 from .models import EvaluationCase, EvaluationObservation
@@ -32,7 +32,9 @@ class EvaluationState:
     governor: ManifestGovernor
 
 
-def build_evaluation_state(*, committed_minor: int = 250000) -> EvaluationState:
+def build_evaluation_state(
+    *, committed_minor: int = 250000, policy_engine: PolicyEngine | None = None
+) -> EvaluationState:
     loader = FixtureLoader()
     order = loader.get_order("ORD-8842")
     fact = loader.get_inventory_fact(order)
@@ -62,7 +64,7 @@ def build_evaluation_state(*, committed_minor: int = 250000) -> EvaluationState:
     store.create_run(state)
     registry, _ = build_tool_registry(loader)
     governor = ManifestGovernor(
-        registry, store, PythonReferencePolicyEngine(), loader
+        registry, store, policy_engine or PythonReferencePolicyEngine(), loader
     )
     return EvaluationState(state, store, governor)
 
@@ -75,8 +77,10 @@ def _decision_fields(decisions) -> dict[str, tuple[str, ...]]:
     }
 
 
-def _journey_observation(case: EvaluationCase) -> tuple[EvaluationObservation, tuple[float, ...]]:
-    service = build_run_service()
+def _journey_observation(
+    case: EvaluationCase, policy_engine: PolicyEngine | None = None
+) -> tuple[EvaluationObservation, tuple[float, ...]]:
+    service = build_run_service(policy_engine=policy_engine)
     summary = service.start_run(
         "ORD-8842",
         str(case.input.get("mode", "enforce")),
@@ -122,9 +126,13 @@ def _journey_observation(case: EvaluationCase) -> tuple[EvaluationObservation, t
     )
 
 
-def _governor_observation(case: EvaluationCase) -> tuple[EvaluationObservation, tuple[float, ...]]:
+def _governor_observation(
+    case: EvaluationCase, policy_engine: PolicyEngine | None = None
+) -> tuple[EvaluationObservation, tuple[float, ...]]:
     committed = int(case.input.get("committed_minor", 250000))
-    context = build_evaluation_state(committed_minor=committed)
+    context = build_evaluation_state(
+        committed_minor=committed, policy_engine=policy_engine
+    )
     state, store, governor = context.state, context.store, context.governor
 
     if case.case_id == "A-PROV-MISSING":
@@ -270,8 +278,10 @@ def _confirm_prepared(
     )
 
 
-def _approval_observation(case: EvaluationCase) -> tuple[EvaluationObservation, tuple[float, ...]]:
-    service: RunService = build_run_service()
+def _approval_observation(
+    case: EvaluationCase, policy_engine: PolicyEngine | None = None
+) -> tuple[EvaluationObservation, tuple[float, ...]]:
+    service: RunService = build_run_service(policy_engine=policy_engine)
     pending = service.start_run("ORD-8842", "enforce", "adversarial")
     approval_id = pending.pending_approval_id
     assert approval_id is not None
@@ -318,8 +328,10 @@ def _approval_observation(case: EvaluationCase) -> tuple[EvaluationObservation, 
     )
 
 
-def _ledger_observation(case: EvaluationCase) -> tuple[EvaluationObservation, tuple[float, ...]]:
-    service = build_run_service()
+def _ledger_observation(
+    case: EvaluationCase, policy_engine: PolicyEngine | None = None
+) -> tuple[EvaluationObservation, tuple[float, ...]]:
+    service = build_run_service(policy_engine=policy_engine)
     summary = service.start_run("ORD-8842", "enforce", "benign")
     if case.case_id == "A-LEDGER-TAMPER":
         sequence = int(case.input["sequence"])
@@ -345,7 +357,11 @@ def _ledger_observation(case: EvaluationCase) -> tuple[EvaluationObservation, tu
 
 
 EXECUTORS: dict[
-    str, Callable[[EvaluationCase], tuple[EvaluationObservation, tuple[float, ...]]]
+    str,
+    Callable[
+        [EvaluationCase, PolicyEngine | None],
+        tuple[EvaluationObservation, tuple[float, ...]],
+    ],
 ] = {
     "journey": _journey_observation,
     "governor": _governor_observation,
@@ -356,5 +372,6 @@ EXECUTORS: dict[
 
 def execute_case(
     case: EvaluationCase,
+    policy_engine: PolicyEngine | None = None,
 ) -> tuple[EvaluationObservation, tuple[float, ...]]:
-    return EXECUTORS[case.runner](case)
+    return EXECUTORS[case.runner](case, policy_engine)

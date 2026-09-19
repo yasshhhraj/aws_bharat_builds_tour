@@ -269,6 +269,7 @@ class ManifestGovernor:
             reasons=tuple(signals), guidance=guidance or None,
             policy_version=state.policy_version, engine_name=self.engine.name,
             evaluation_ms=round(elapsed * 1000, 3),
+            policy_bundle_hash=getattr(self.engine, "bundle_hash", None),
         )
 
     @staticmethod
@@ -281,7 +282,8 @@ class ManifestGovernor:
             reason_code="GUIDE_RETRY_EXHAUSTED",
             because=f"{old.tool_name} remained invalid after the permitted guided retry.",
             reasons=old.reasons, guidance=old.guidance, policy_version=old.policy_version,
-            engine_name=old.engine_name, evaluation_ms=old.evaluation_ms, created_at=old.created_at,
+            engine_name=old.engine_name, evaluation_ms=old.evaluation_ms,
+            policy_bundle_hash=old.policy_bundle_hash, created_at=old.created_at,
         )
 
     def _record_decision(self, state: TrajectoryState, decision: Decision) -> None:
@@ -311,6 +313,7 @@ class ManifestGovernor:
                 ],
                 "policy_version": decision.policy_version,
                 "engine_name": decision.engine_name,
+                "policy_bundle_hash": decision.policy_bundle_hash,
                 "evaluation_ms": decision.evaluation_ms,
             },
             idempotency_key=f"proposal:{decision.proposal_id}:decision",

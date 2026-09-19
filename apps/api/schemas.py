@@ -153,6 +153,7 @@ class DecisionResponse(BaseModel):
     policy_version: str
     engine_name: str
     evaluation_ms: float
+    policy_bundle_hash: str | None = None
     created_at: str
 
 
@@ -220,6 +221,11 @@ class HealthResponse(BaseModel):
     governor_mode: str
     policy_engine: str
     policy_version: str
+    policy_engine_ready: bool = True
+    policy_bundle_hash: str | None = None
+    policy_schema_hash: str | None = None
+    cedar_runtime_version: str | None = None
+    policy_fallback_active: bool = False
     storage_mode: str
     fixture_count: int
     supported_modes: list[str]

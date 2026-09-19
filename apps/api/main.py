@@ -63,7 +63,7 @@ from .schemas import (
 )
 
 app = FastAPI(
-    title="Manifest Checkpoint 5 API",
+    title="Manifest Checkpoint 7 API",
     version="0.7.0",
     description=(
         "Deterministic governed logistics workflow with approval, resume, and "
@@ -147,13 +147,23 @@ async def health_ready():
             status_code=503,
             content={"error": {"code": exc.code, "message": exc.message}},
         )
+    except (RuntimeError, ValueError):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": {
+                    "code": "POLICY_ENGINE_UNAVAILABLE",
+                    "message": "The configured policy engine is not ready.",
+                }
+            },
+        )
+    policy_status = service.policy_engine.describe()
     return {
         "status": "ready",
         "version": "0.7.0",
         "runtime_mode": "deterministic",
         "governor_mode": "policy_enforced",
-        "policy_engine": service.policy_engine.name,
-        "policy_version": service.policy_engine.policy_version,
+        **policy_status,
         "storage_mode": "memory_hash_chain",
         "fixture_count": fixture_count,
         "supported_modes": ["shadow", "enforce"],

@@ -8,5 +8,5 @@ venv/
 .env
 dist/
 build/
+target/
 *.egg-info/
-

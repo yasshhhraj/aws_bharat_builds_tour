@@ -26,6 +26,7 @@ class PythonReferencePolicyEngine:
 
     name = "python_reference"
     policy_version = "demo-v1"
+    bundle_hash = None
 
     def evaluate(
         self, request: PolicyRequest, state: TrajectoryState
@@ -46,6 +47,17 @@ class PythonReferencePolicyEngine:
     def validate_startup(self) -> None:
         if not self.policy_version or not self.name:
             raise ValueError("Policy engine identity is incomplete.")
+
+    def describe(self) -> dict[str, object]:
+        return {
+            "policy_engine": self.name,
+            "policy_version": self.policy_version,
+            "policy_engine_ready": True,
+            "policy_bundle_hash": None,
+            "policy_schema_hash": None,
+            "cedar_runtime_version": None,
+            "policy_fallback_active": True,
+        }
 
     def _ownership_and_mandate(
         self, request: PolicyRequest, state: TrajectoryState

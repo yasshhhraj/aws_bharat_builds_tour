@@ -173,6 +173,7 @@ class Decision:
     policy_version: str
     engine_name: str
     evaluation_ms: float
+    policy_bundle_hash: str | None = None
     created_at: datetime = field(default_factory=utc_now)
 
 

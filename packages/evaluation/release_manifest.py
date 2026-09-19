@@ -131,6 +131,25 @@ def build_release_manifest(
         package_version = importlib.metadata.version("manifest-governor")
     except importlib.metadata.PackageNotFoundError:
         package_version = "0.7.0"
+    active_modes = evaluation.get("active_modes", {})
+    policy = {
+        "engine": str(active_modes.get("policy_engine", "unknown")),
+        "version": str(active_modes.get("policy_version", "unknown")),
+    }
+    for key in ("policy_bundle_hash", "policy_schema_hash", "cedar_runtime_version"):
+        if active_modes.get(key):
+            policy[key] = str(active_modes[key])
+    limitations = [
+        "Synthetic logistics data and effects only.",
+        "Deterministic Python agents; Strands and Bedrock are not active.",
+        "In-memory storage; runs and approvals do not survive restart.",
+        "Tamper-evident hash chain, not an immutable ledger.",
+        "Local deployment only.",
+    ]
+    if policy["engine"] == "python_reference":
+        limitations.insert(1, "Python reference policy engine; Cedar is not active.")
+    elif policy["engine"] == "cedar":
+        limitations.insert(1, "Cedar policy engine runs as a local loopback sidecar.")
     return {
         "schema_version": RELEASE_SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -139,7 +158,7 @@ def build_release_manifest(
         "package": {"name": "manifest-governor", "version": package_version},
         "dependencies": dependency_versions(),
         "fixture_tree": fixture_tree_digest(repo_root / "fixtures"),
-        "policy": {"engine": "python_reference", "version": "demo-v1"},
+        "policy": policy,
         "runtime": {"mode": "deterministic"},
         "storage": {"mode": "memory_hash_chain"},
         "approval": {"mode": "local"},
@@ -159,14 +178,7 @@ def build_release_manifest(
             "collected": collected_test_count(repo_root),
             "failed": 0,
         },
-        "limitations": [
-            "Synthetic logistics data and effects only.",
-            "Python reference policy engine; Cedar is not active.",
-            "Deterministic Python agents; Strands and Bedrock are not active.",
-            "In-memory storage; runs and approvals do not survive restart.",
-            "Tamper-evident hash chain, not an immutable ledger.",
-            "Local deployment only.",
-        ],
+        "limitations": limitations,
     }
 
 

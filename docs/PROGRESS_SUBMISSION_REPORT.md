@@ -3,11 +3,13 @@
 **Assessment date:** 19 September 2026  
 **Repository:** `/home/yashraj/p0/project`  
 **Assessed branch:** `main`  
-**Current HEAD:** `705b1e8` (`feat: Implement canonical serialization and hashing for ledger events`)
-**Assessment basis:** source inspection, repository state, full automated test suite, Checkpoint 6 evaluation, live CLI journeys, and browser smoke
+**Current baseline HEAD:** `b228ebe` (Checkpoint 6 committed baseline)
+**Assessment basis:** source inspection, repository state, full automated test suite, Checkpoint 7 Cedar evaluation, live Cedar CLI journeys, and browser smoke
 
 **Follow-up roadmap:** [`FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md`](FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md)
 **Completed detailed plan:** [`CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](CHECKPOINT_6_IMPLEMENTATION_PLAN.md)
+
+**Latest implementation update:** Checkpoint 7 is complete in the current working tree. The official Cedar 4.12.0 sidecar is authoritative in the gate; 136 Python tests, 2 Rust tests, and all 22 evaluation cases pass with exact Checkpoint 6 functional parity. See [`CHECKPOINT_7_COMPLETION_REPORT.md`](CHECKPOINT_7_COMPLETION_REPORT.md). The detailed assessment below originated at the Checkpoint 6 baseline; this update supersedes its statements that Cedar is absent.
 
 ## 1. Executive summary
 
@@ -15,11 +17,11 @@ Manifest has progressed beyond a walking skeleton into a measured local governan
 
 The local implementation is healthy: **119 automated tests pass**. The labelled evaluation passes **22/22 cases**, comprising **10/10 detected attacks**, **12/12 passing benign/boundary cases**, **0/12 false positives**, and **2/2 successful guide-backs**. Browser smoke covers health, benign, shadow, enforce, approval, verification, tamper detection, and controlled API error presentation.
 
-The prototype is not yet ready to be submitted under the full target architecture. Cedar, Strands, Bedrock, DynamoDB, Lambda/API Gateway, Amplify, Step Functions, EventBridge, deployment infrastructure, a release tag, and final demo video/deck remain incomplete or absent. The correct current claim is therefore:
+The prototype is not yet ready to be submitted under the full target architecture. Strands, Bedrock, DynamoDB, Lambda/API Gateway, Amplify, Step Functions, EventBridge, deployment infrastructure, a release tag, and final demo video/deck remain incomplete or absent. The correct current claim is therefore:
 
-> A tested, deterministic, local reference implementation of Manifest's core governance journey, with simulated logistics effects and an in-memory tamper-evident ledger.
+> A tested, deterministic, local Cedar-authorized implementation of Manifest's core governance journey, with simulated logistics effects and an in-memory tamper-evident ledger.
 
-It should not yet be described as an AWS-deployed, Cedar-authorized, Strands-based prototype.
+It should not yet be described as an AWS-deployed, Strands-based, or durable prototype.
 
 ## 2. Verified current state
 

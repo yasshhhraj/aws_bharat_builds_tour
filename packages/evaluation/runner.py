@@ -6,7 +6,9 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from time import perf_counter_ns
+from typing import Callable
 
+from packages.policy import PolicyEngine, PythonReferencePolicyEngine
 from .case_loader import EvaluationCaseLoader
 from .cases import execute_case
 from .metrics import latency_summary, summarize_results
@@ -46,8 +48,20 @@ def _expected_failure(
 
 
 class EvaluationRunner:
-    def __init__(self, loader: EvaluationCaseLoader | None = None) -> None:
+    def __init__(
+        self,
+        loader: EvaluationCaseLoader | None = None,
+        *,
+        engine_factory: Callable[[], PolicyEngine] | None = None,
+    ) -> None:
         self.loader = loader or EvaluationCaseLoader()
+        self._uses_default_engine = engine_factory is None
+        self.engine_factory = engine_factory or PythonReferencePolicyEngine
+
+    def _execute_case(self, case):
+        if self._uses_default_engine:
+            return execute_case(case)
+        return execute_case(case, self.engine_factory())
 
     def run(
         self,
@@ -72,21 +86,47 @@ class EvaluationRunner:
         end_to_end_samples = [
             sample for item in results for sample in item.end_to_end_samples_ms
         ]
+        engine_description = self.engine_factory().describe()
+        engine_name = str(engine_description["policy_engine"])
+        limitations = [
+            "All logistics data and operational effects are synthetic.",
+            "Storage is an in-memory hash chain and is not durable or immutable.",
+            "Agents are deterministic Python roles; Strands and Bedrock are not active.",
+            "Latency reflects this local machine and is not a production benchmark.",
+        ]
+        if engine_name == "python_reference":
+            limitations.insert(
+                1, "Authorization uses the Python reference engine; Cedar is not active."
+            )
+        else:
+            limitations.insert(
+                1, "Cedar runs as a local loopback sidecar; no remote PDP is active."
+            )
+        active_modes = {
+            "runtime": "deterministic",
+            "policy_engine": engine_name,
+            "policy_version": "demo-v1",
+            "storage": "memory_hash_chain",
+            "approval": "local",
+            "deployment": "local",
+            "dashboard": "static_no_build",
+        }
+        if engine_name == "cedar":
+            for source_key, report_key in (
+                ("policy_bundle_hash", "policy_bundle_hash"),
+                ("policy_schema_hash", "policy_schema_hash"),
+                ("cedar_runtime_version", "cedar_runtime_version"),
+            ):
+                value = engine_description.get(source_key)
+                if value:
+                    active_modes[report_key] = str(value)
         return EvaluationReport(
             schema_version=EVALUATION_SCHEMA_VERSION,
             generated_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             seed=seed,
             warmup_per_case=warmup,
             measured_per_case=iterations,
-            active_modes={
-                "runtime": "deterministic",
-                "policy_engine": "python_reference",
-                "policy_version": "demo-v1",
-                "storage": "memory_hash_chain",
-                "approval": "local",
-                "deployment": "local",
-                "dashboard": "static_no_build",
-            },
+            active_modes=active_modes,
             case_catalog_digest=canonical_digest(
                 [case.as_dict() for case in cases]
             ),
@@ -97,20 +137,14 @@ class EvaluationRunner:
                 "end_to_end_ms": latency_summary(end_to_end_samples),
             },
             cases=results,
-            limitations=(
-                "All logistics data and operational effects are synthetic.",
-                "Authorization uses the Python reference engine; Cedar is not active.",
-                "Storage is an in-memory hash chain and is not durable or immutable.",
-                "Agents are deterministic Python roles; Strands and Bedrock are not active.",
-                "Latency reflects this local machine and is not a production benchmark.",
-            ),
+            limitations=tuple(limitations),
         )
 
     def _run_case(self, case, *, warmup: int, iterations: int) -> CaseResult:
         errors: list[str] = []
         for _ in range(warmup):
             try:
-                execute_case(case)
+                self._execute_case(case)
             except Exception as exc:
                 errors.append(f"warm-up raised {type(exc).__name__}")
 
@@ -120,7 +154,7 @@ class EvaluationRunner:
         for _ in range(iterations):
             started = perf_counter_ns()
             try:
-                observation, decision_samples = execute_case(case)
+                observation, decision_samples = self._execute_case(case)
             except Exception as exc:  # Keep denominators visible for case failures.
                 observation = EvaluationObservation(
                     case_id=case.case_id,

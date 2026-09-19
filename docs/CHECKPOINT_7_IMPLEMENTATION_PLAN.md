@@ -2,10 +2,12 @@
 
 **Plan version:** 1.0  
 **Created:** 19 September 2026  
-**Checkpoint state:** Planned; implementation not started  
+**Checkpoint state:** Implemented and verified locally
 **Depends on:** Completed Checkpoints 1–6  
 **Required baseline:** 119 passing tests and 22/22 passing Checkpoint 6 evaluation cases  
 **Next checkpoint after completion:** Checkpoint 8 — Durable Storage and DynamoDB Parity
+
+**Completion evidence:** [`CHECKPOINT_7_COMPLETION_REPORT.md`](CHECKPOINT_7_COMPLETION_REPORT.md)
 
 ## 1. Objective
 

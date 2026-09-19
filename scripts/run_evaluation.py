@@ -13,6 +13,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from packages.evaluation.report import write_report  # noqa: E402
 from packages.evaluation.runner import EvaluationRunner  # noqa: E402
+from packages.policy import (  # noqa: E402
+    PythonReferencePolicyEngine,
+    build_policy_engine_from_env,
+)
 
 
 def _output_path(value: str, suffix: str) -> Path:
@@ -32,6 +36,11 @@ def main() -> int:
     parser.add_argument("--warmup", type=int, default=1)
     parser.add_argument("--iterations", type=int, default=10)
     parser.add_argument(
+        "--policy-engine",
+        choices=("python_reference", "cedar"),
+        default="python_reference",
+    )
+    parser.add_argument(
         "--json-output",
         default="docs/results/checkpoint-6-evaluation.json",
     )
@@ -42,13 +51,17 @@ def main() -> int:
     args = parser.parse_args()
     json_path = _output_path(args.json_output, ".json")
     markdown_path = _output_path(args.markdown_output, ".md")
-    report = EvaluationRunner().run(
+    if args.policy_engine == "cedar":
+        engine_factory = build_policy_engine_from_env
+    else:
+        engine_factory = PythonReferencePolicyEngine
+    report = EvaluationRunner(engine_factory=engine_factory).run(
         seed=args.seed, warmup=args.warmup, iterations=args.iterations
     )
     write_report(report, json_path, markdown_path)
     failed = int(report.summary["case_failed"])
     print(
-        f"Checkpoint 6 evaluation: {report.summary['case_passed']}/"
+        f"Policy evaluation ({args.policy_engine}): {report.summary['case_passed']}/"
         f"{report.summary['case_total']} cases passed; "
         f"functional digest {report.functional_digest}"
     )

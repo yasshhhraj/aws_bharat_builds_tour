@@ -30,7 +30,7 @@ from packages.domain.models import (
 )
 from packages.governor import ManifestGovernor
 from packages.ledger import MemoryTraceStore
-from packages.policy import PythonReferencePolicyEngine
+from packages.policy import PolicyEngine, build_policy_engine_from_env
 from packages.projections import build_dashboard_projection
 from packages.tools import MockLogisticsTools, build_tool_registry
 
@@ -237,15 +237,19 @@ class RunService:
         return ResetResult(status="reset", removed_run_count=removed)
 
 
-def build_run_service(now_fn: Callable | None = None) -> RunService:
+def build_run_service(
+    now_fn: Callable | None = None,
+    *,
+    policy_engine: PolicyEngine | None = None,
+) -> RunService:
     loader = FixtureLoader()
     loader.validate_all()
     store = MemoryTraceStore()
     registry, mocks = build_tool_registry(loader)
-    policy_engine = PythonReferencePolicyEngine()
-    policy_engine.validate_startup()
-    governor = ManifestGovernor(registry, store, policy_engine, loader)
+    active_policy_engine = policy_engine or build_policy_engine_from_env()
+    active_policy_engine.validate_startup()
+    governor = ManifestGovernor(registry, store, active_policy_engine, loader)
     agents = [InventoryAgent(), DispatchAgent(), CarrierAgent(), CustomerCommunicationsAgent()]
     orchestrator = ShipmentOrchestrator(agents, governor, store, loader)
     approval_lifecycle = ApprovalLifecycle(now_fn or utc_now)
-    return RunService(loader, store, mocks, orchestrator, policy_engine, approval_lifecycle)
+    return RunService(loader, store, mocks, orchestrator, active_policy_engine, approval_lifecycle)

@@ -36,16 +36,19 @@ def main() -> int:
     parser.add_argument(
         "--output", default="docs/releases/checkpoint-6-local-baseline.json"
     )
+    parser.add_argument("--test-command", default="./scripts/run_checkpoint_6.sh")
     args = parser.parse_args()
     evaluation = _inside_project(args.evaluation, ".json")
     output = _inside_project(args.output, ".json")
     manifest = build_release_manifest(
-        repo_root=PROJECT_ROOT, evaluation_path=evaluation
+        repo_root=PROJECT_ROOT,
+        evaluation_path=evaluation,
+        test_command=args.test_command,
     )
     write_release_manifest(output, manifest)
     print(
-        f"Checkpoint 6 release manifest: {manifest['source']['commit']} "
-        f"(dirty={manifest['source']['dirty']})"
+        f"Release manifest ({manifest['policy']['engine']}): "
+        f"{manifest['source']['commit']} (dirty={manifest['source']['dirty']})"
     )
     return 0
 

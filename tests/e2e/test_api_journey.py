@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import httpx
 
@@ -21,7 +22,9 @@ def test_api_complete_journey():
         health = await request("GET", "/health/ready")
         assert health.status_code == 200
         assert health.json()["governor_mode"] == "policy_enforced"
-        assert health.json()["policy_engine"] == "python_reference"
+        assert health.json()["policy_engine"] == os.environ.get(
+            "MANIFEST_POLICY_ENGINE", "python_reference"
+        )
 
         orders = await request("GET", "/v1/fixtures/orders")
         assert orders.status_code == 200

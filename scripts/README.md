@@ -22,4 +22,11 @@ tree checksum, policy version, active modes, dependency versions, and test count
 `run_checkpoint_6.sh` preserves the Checkpoint 5 gate, regenerates the measured
 evidence and release manifest, and validates recorded browser-smoke evidence.
 
+`run_checkpoint_7.sh` builds and starts the pinned loopback Cedar PDP, runs the
+offline and live integration suites, exercises enforce and shadow journeys,
+regenerates Cedar-specific evaluation evidence, verifies exact functional
+digest parity with Checkpoint 6, and writes the Checkpoint 7 release manifest.
+
+`check_cedar_ready.py` performs the bounded readiness check used by that gate.
+
 Durable storage and cloud scripts remain deferred to later checkpoints.

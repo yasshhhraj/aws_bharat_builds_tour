@@ -21,7 +21,7 @@ CP6 Stable local release and evaluation baseline
   -> CP12 submission freeze and final verification
 ```
 
-Checkpoint 6 has passed its local exit gate. Checkpoint 7 is now the only checkpoint authorized to start next.
+Checkpoints 6 and 7 have passed their local exit gates. Checkpoint 8 is now the next unlocked checkpoint.
 
 ## 2. One-at-a-time checkpoint protocol
 
@@ -43,8 +43,8 @@ If a checkpoint becomes blocked by external access, use its declared fallback an
 | Checkpoint | Outcome | Initial status | Estimated focused time |
 |---|---|---|---:|
 | 6 | Reproducible local release plus measured evaluation | **COMPLETE** | Completed |
-| 7 | Cedar is the authoritative policy engine | **NEXT** | 5–7 hours |
-| 8 | Runs, approvals, and ledger survive process restart | Locked | 5–7 hours |
+| 7 | Cedar is the authoritative policy engine | **COMPLETE** | Completed |
+| 8 | Runs, approvals, and ledger survive process restart | **NEXT** | 5–7 hours |
 | 9 | Strands agents use Bedrock or a disclosed deterministic fallback | Locked | 5–7 hours |
 | 10 | Core API and dashboard run through an AWS demo stack | Locked | 6–9 hours |
 | 11 | Demo hardening, observability, and optional managed workflow | Locked | 3–5 hours |
@@ -129,6 +129,8 @@ If the planned 20 attack/30 benign set cannot be completed, ship the six core at
 ---
 
 ## Checkpoint 7 — Cedar Authorization Parity
+
+**Status: COMPLETE — 19 September 2026.** The official Cedar 4.12.0 Rust sidecar is authoritative in the Checkpoint 7 gate. All 22 evaluation cases match the Checkpoint 6 functional digest, and 136 tests pass with Cedar active. See [`CHECKPOINT_7_COMPLETION_REPORT.md`](CHECKPOINT_7_COMPLETION_REPORT.md).
 
 **Detailed implementation specification:**
 [`CHECKPOINT_7_IMPLEMENTATION_PLAN.md`](CHECKPOINT_7_IMPLEMENTATION_PLAN.md)
