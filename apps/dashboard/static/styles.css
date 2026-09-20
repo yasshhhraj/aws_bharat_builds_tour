@@ -47,7 +47,7 @@ dd { margin: 6px 0 0; font-weight: 700; overflow-wrap: anywhere; }
 .section-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
 .muted, .trace-id { color: var(--muted); font-size: .78rem; }
 .trace-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
-.run-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto auto; gap: 12px; align-items: end; }
+.run-form { display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)) auto auto; gap: 12px; align-items: end; }
 label { display: grid; gap: 7px; color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .08em; }
 select { width: 100%; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: #0a1714; padding: 10px 36px 10px 12px; }
 .button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 750; }

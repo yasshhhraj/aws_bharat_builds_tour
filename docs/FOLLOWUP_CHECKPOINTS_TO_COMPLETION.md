@@ -78,7 +78,7 @@ Relevant provider documentation:
 | 9 | Offline Strands Runtime | **COMPLETE** | Yes | All four roles use Strands with the recorded model and governed tools |
 | 10 | Bedrock Mantle Provider Portability | **COMPLETE** | Yes | Qwen probe, benign journey, and adversarial Cedar escalation passed |
 | 11 | Local Prototype Hardening | **IMPLEMENTED — MANUAL EVIDENCE PENDING** | Yes | Automated candidate passes; browser/screenshots/video remain |
-| 12 | AWS Demo Stack | Locked by CP11 manual closeout | No | Reproducible least-privilege cloud deployment using the working Mantle route |
+| 12 | AWS Demo Stack | **NEXT — PLAN READY** | No | Reproducible least-privilege cloud deployment using the working Mantle route |
 | 13 | Optional Native Nova Parity | Waiting on native access and CP12 | No live gate yet | Nova 2 Lite passes the same contracts if available or required |
 | 14 | Submission Freeze | Locked by release-path decision | Mostly | Final evidence, claims, artifacts, and tagged release |
 
@@ -249,6 +249,8 @@ Two clean local rehearsals
 ## Checkpoint 12 — AWS Demo Stack
 
 **Objective:** Deploy only the minimum AWS components required by the hackathon/submission using the already-proven Bedrock Mantle model route. Native Nova access is not a deployment precondition.
+
+**Detailed implementation and owner runbook:** [`CHECKPOINT_12_AWS_DEPLOYMENT_PLAN.md`](CHECKPOINT_12_AWS_DEPLOYMENT_PLAN.md)
 
 ### Preconditions
 

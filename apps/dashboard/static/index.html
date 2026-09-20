@@ -19,7 +19,7 @@
       </div>
       <div id="healthBadge" class="health-badge health-loading" aria-live="polite">
         <span class="status-dot" aria-hidden="true"></span>
-        Connecting
+        <span id="healthLabel">Connecting</span>
       </div>
     </header>
 
@@ -31,6 +31,7 @@
           <p class="hero-copy">Run the same synthetic shipment in shadow or enforce mode. Manifest follows the whole trajectory—not just one tool call.</p>
         </div>
         <dl id="environmentGrid" class="environment-grid" aria-label="Active environment">
+          <div><dt>Deployment</dt><dd id="envDeployment">Loading…</dd></div>
           <div><dt>Runtime</dt><dd id="envRuntime">Loading…</dd></div>
           <div><dt>Provider</dt><dd id="envProvider">Loading…</dd></div>
           <div><dt>Requested model</dt><dd id="envRequestedModel">Loading…</dd></div>
@@ -49,6 +50,7 @@
           <p id="lastUpdated" class="muted">No trace loaded</p>
         </div>
         <form id="runForm" class="run-form">
+          <label id="accessSecretLabel" class="hidden">Demo access secret<input id="accessSecret" type="password" autocomplete="off" placeholder="Required for deployed mutations"></label>
           <label>Order<select id="orderSelect" name="order_id" disabled><option>Loading…</option></select></label>
           <label>Mode<select id="modeSelect" name="mode"><option value="enforce">Enforce</option><option value="shadow">Shadow</option></select></label>
           <label>Scenario<select id="scenarioSelect" name="scenario"><option value="adversarial">Adversarial</option><option value="benign">Benign</option></select></label>
@@ -117,7 +119,7 @@
       </section>
     </main>
 
-    <footer>Manifest local prototype · Synthetic logistics data and simulated effects · Tamper-evident, not immutable</footer>
+    <footer id="deploymentFooter">Manifest local prototype · Synthetic logistics data and simulated effects · Tamper-evident, not immutable</footer>
     <script type="module" src="/dashboard/js/app.js"></script>
   </body>
 </html>

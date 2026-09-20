@@ -102,10 +102,27 @@ class DynamoDBTraceStore:
         namespace: str | None = None,
         client: Any | None = None,
     ) -> None:
+        deployment_mode = os.getenv("MANIFEST_DEPLOYMENT_MODE", "local").strip().lower()
+        if deployment_mode not in {"local", "aws"}:
+            raise StorageConfigurationError(
+                "MANIFEST_DEPLOYMENT_MODE must be local or aws."
+            )
         self.table_name = table_name or os.getenv("MANIFEST_DYNAMODB_TABLE", "manifest-local")
-        self.endpoint_url = endpoint_url or os.getenv(
-            "MANIFEST_DYNAMODB_ENDPOINT", "http://127.0.0.1:18000"
-        )
+        configured_endpoint = endpoint_url or os.getenv("MANIFEST_DYNAMODB_ENDPOINT")
+        if deployment_mode == "aws":
+            if configured_endpoint:
+                raise StorageConfigurationError(
+                    "AWS deployment must not configure MANIFEST_DYNAMODB_ENDPOINT."
+                )
+            if os.getenv("AWS_ACCESS_KEY_ID") == "local" or os.getenv(
+                "AWS_SECRET_ACCESS_KEY"
+            ) == "local":
+                raise StorageConfigurationError(
+                    "AWS deployment must use its instance role, not local credentials."
+                )
+            self.endpoint_url = None
+        else:
+            self.endpoint_url = configured_endpoint or "http://127.0.0.1:18000"
         self.region_name = region_name or os.getenv("AWS_DEFAULT_REGION", "us-east-1")
         self.namespace = validate_namespace(
             namespace or os.getenv("MANIFEST_DEMO_NAMESPACE", "local-demo")
@@ -122,17 +139,24 @@ class DynamoDBTraceStore:
                 raise StorageConfigurationError(
                     "The DynamoDB backend requires the boto3 dependency."
                 ) from exc
-            client = boto3.client(
-                "dynamodb",
-                endpoint_url=self.endpoint_url,
-                region_name=self.region_name,
-                aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "local"),
-                aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "local"),
+            client_args: dict[str, Any] = {
+                "region_name": self.region_name,
                 # Local acceptance can briefly contend with Cedar and repeated
                 # evaluation writes. Keep requests bounded but tolerate normal
                 # workstation scheduling jitter without adding retries.
-                config=Config(connect_timeout=2, read_timeout=5, retries={"max_attempts": 1}),
-            )
+                "config": Config(
+                    connect_timeout=2,
+                    read_timeout=5,
+                    retries={"max_attempts": 1},
+                ),
+            }
+            if self.endpoint_url:
+                client_args.update(
+                    endpoint_url=self.endpoint_url,
+                    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "local"),
+                    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "local"),
+                )
+            client = boto3.client("dynamodb", **client_args)
         self.client = client
 
     def validate_startup(self) -> None:

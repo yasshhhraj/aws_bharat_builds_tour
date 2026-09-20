@@ -23,6 +23,8 @@ from packages.domain.errors import (
     ApprovalPersistenceConflictError,
     ApproverConflictError,
     ApproverUnauthorizedError,
+    DemoAccessNotConfiguredError,
+    DemoAccessUnauthorizedError,
     FixtureError,
     ManifestError,
     LedgerAppendError,
@@ -40,8 +42,12 @@ from packages.domain.models import to_primitive
 
 from .dependencies import (
     approval_mutation_ready,
+    demo_access_ready,
+    demo_access_required,
     demo_tamper_enabled,
+    deployment_mode,
     get_run_service,
+    require_demo_access,
     tamper_mutation_ready,
     verify_demo_approver_secret,
     verify_demo_tamper_secret,
@@ -84,7 +90,7 @@ DASHBOARD_REQUIRED_ASSETS = (
 def _error_status(exc: ManifestError) -> int:
     if isinstance(exc, (OrderNotFoundError, TraceNotFoundError, ApprovalNotFoundError)):
         return 404
-    if isinstance(exc, ApproverUnauthorizedError):
+    if isinstance(exc, (ApproverUnauthorizedError, DemoAccessUnauthorizedError)):
         return 401
     if isinstance(exc, LedgerTamperUnauthorizedError):
         return 401
@@ -111,7 +117,10 @@ def _error_status(exc: ManifestError) -> int:
         (UnsupportedModeError, UnsupportedScenarioError, LedgerTamperValidationError),
     ):
         return 422
-    if isinstance(exc, (FixtureError, ApprovalAuthNotConfiguredError)):
+    if isinstance(
+        exc,
+        (FixtureError, ApprovalAuthNotConfiguredError, DemoAccessNotConfiguredError),
+    ):
         return 503
     if isinstance(exc, LedgerAppendError):
         return 500
@@ -175,6 +184,7 @@ async def health_ready():
     return {
         "status": "ready",
         "version": "0.7.0",
+        "deployment_mode": deployment_mode(),
         **service.runtime_settings.describe(),
         "governor_mode": "policy_enforced",
         **policy_status,
@@ -185,6 +195,8 @@ async def health_ready():
         "approval_mode": "local",
         "approval_auth_mode": "demo_shared_secret",
         "approval_mutation_ready": approval_mutation_ready(),
+        "demo_access_required": demo_access_required(),
+        "demo_access_ready": demo_access_ready(),
         "ledger_algorithm": "sha256",
         "ledger_schema_version": "ledger-event-v1",
         "verify_ready": True,
@@ -204,6 +216,7 @@ async def list_orders(service: RunService = Depends(get_run_service)) -> dict:
 @app.post("/v1/runs", response_model=RunResponse, status_code=201)
 async def start_run(
     request: RunRequest,
+    _access: None = Depends(require_demo_access),
     service: RunService = Depends(get_run_service),
 ):
     summary = service.start_run(request.order_id, request.mode, request.scenario)
@@ -297,6 +310,7 @@ async def decide_approval(
     approval_id: str,
     request: ApprovalDecisionRequest,
     approver_secret: str | None = Header(default=None, alias="X-Demo-Approver-Secret"),
+    _access: None = Depends(require_demo_access),
     service: RunService = Depends(get_run_service),
 ) -> dict:
     verify_demo_approver_secret(approver_secret)
@@ -312,7 +326,10 @@ async def decide_approval(
 
 
 @app.post("/v1/demo/reset", response_model=ResetResponse)
-async def reset_demo(service: RunService = Depends(get_run_service)) -> dict:
+async def reset_demo(
+    _access: None = Depends(require_demo_access),
+    service: RunService = Depends(get_run_service),
+) -> dict:
     return to_primitive(service.reset_demo())
 
 
@@ -324,6 +341,7 @@ async def tamper_trace_for_demo(
     trace_id: str,
     request: TamperRequest,
     tamper_secret: str | None = Header(default=None, alias="X-Demo-Tamper-Secret"),
+    _access: None = Depends(require_demo_access),
     service: RunService = Depends(get_run_service),
 ) -> dict:
     verify_demo_tamper_secret(tamper_secret)

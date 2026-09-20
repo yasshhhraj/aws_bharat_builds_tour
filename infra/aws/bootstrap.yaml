@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Manifest demo bootstrap resources
+Parameters:
+  Environment:
+    Type: String
+    Default: stage
+    AllowedPattern: '[a-z0-9-]+'
+Resources:
+  Repository:
+    Type: AWS::ECR::Repository
+    Properties:
+      EmptyOnDelete: true
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: {EncryptionType: AES256}
+      LifecyclePolicy:
+        LifecyclePolicyText: '{"rules":[{"rulePriority":1,"description":"retain five images","selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},"action":{"type":"expire"}}]}'
+  TraceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: PK, AttributeType: S}
+        - {AttributeName: SK, AttributeType: S}
+      KeySchema:
+        - {AttributeName: PK, KeyType: HASH}
+        - {AttributeName: SK, KeyType: RANGE}
+      SSESpecification: {SSEEnabled: true}
+  MantleSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Bedrock Mantle API key for the disposable Manifest demo
+  DemoAccessSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Shared access secret for Manifest demo mutations
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludePunctuation: true
+Outputs:
+  RepositoryUri: {Value: !GetAtt Repository.RepositoryUri}
+  TableName: {Value: !Ref TraceTable}
+  TableArn: {Value: !GetAtt TraceTable.Arn}
+  MantleSecretArn: {Value: !Ref MantleSecret}
+  DemoAccessSecretArn: {Value: !Ref DemoAccessSecret}
