@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 set -eu
 
-# Canonical Checkpoint 10 entry point after the live-provider pivot.
-exec "$(dirname "$0")/run_checkpoint_12_bedrock_mantle.sh" "$@"
+# Historical Checkpoint 10 entry point retained for reproducible evidence.
+exec "$(dirname "$0")/run_bedrock_mantle_gate.sh" "$@"

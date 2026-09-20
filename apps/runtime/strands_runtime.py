@@ -124,11 +124,15 @@ class StrandsRuntime(RoleRuntime):
                     f"{result.stop_reason}."
                 )
             context.assert_complete()
-            summary = str(result).strip()
-            if not summary:
+            provider_summary = str(result).strip()
+            if not provider_summary:
                 raise AgentRuntimeError(
                     f"The {request.role.value} Strands invocation returned no summary."
                 )
+            # Provider prose is not authoritative evidence and may contain content
+            # that should not be retained. Completion is established above from
+            # governed state, so store a bounded application-owned summary.
+            summary = self._governed_summary(request)
             usage = result.metrics.accumulated_usage
             run_result = AgentRunResult(
                 summary=summary,
@@ -151,7 +155,7 @@ class StrandsRuntime(RoleRuntime):
                     "runtime_mode": run_result.runtime_mode,
                     "model_provider": run_result.model_provider,
                     "requested_model_id": run_result.model_id,
-                    "resolved_model_id": None,
+                    "resolved_model_id": self.settings.resolved_model_id,
                     "provider_route_kind": self.settings.provider_route_kind,
                     "provider_fallback_active": False,
                     "phase": request.phase.value,
@@ -202,6 +206,33 @@ class StrandsRuntime(RoleRuntime):
             f"for synthetic order={request.state.order_id}. {objective} "
             "Use only supplied tools and execute the task rather than describing it."
         )
+
+    @staticmethod
+    def _governed_summary(request: AgentRunRequest) -> str:
+        """Build retained CLI/event copy from governed state, never model prose."""
+
+        state = request.state
+        if request.role.value == "inventory":
+            weight = state.inventory_fact.shipment_weight_kg if state.inventory_fact else 0
+            return f"Inventory Agent verified the synthetic order and {weight} kg inventory fact."
+        if request.role.value == "dispatch":
+            vehicle = state.selected_vehicle.vehicle_id if state.selected_vehicle else "unknown"
+            weight = state.inventory_fact.shipment_weight_kg if state.inventory_fact else 0
+            return f"Dispatch Agent selected vehicle {vehicle} for {weight} kg."
+        if request.role.value == "carrier":
+            if request.phase.value == "cancel":
+                prepared = request.approval.prepared_action_id if request.approval else "unknown"
+                return f"Carrier Agent cancelled prepared booking {prepared}."
+            if state.pending_approval_id and state.selected_quote is not None:
+                return f"Carrier Agent prepared {state.selected_quote.carrier_id}; approval is required."
+            if request.phase.value == "resume_approved":
+                return f"Carrier Agent confirmed approved booking {state.confirmed_booking_id}."
+            if state.selected_quote is not None and state.confirmed_booking_id is not None:
+                amount = state.selected_quote.amount_minor / 100
+                return f"Carrier Agent confirmed {state.selected_quote.carrier_id} for INR {amount:,.0f}."
+        if request.role.value == "customer_communications":
+            return "Customer Communications Agent wrote a simulated tracking message."
+        return f"{request.role.value} completed its governed {request.phase.value} task."
 
 
 def _usage_value(usage: object, key: str) -> int | None:

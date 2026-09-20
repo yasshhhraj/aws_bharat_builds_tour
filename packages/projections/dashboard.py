@@ -18,6 +18,12 @@ RISK_SIGNAL_METHOD = "20_per_unique_non_allow_policy_family_capped_100"
 
 def build_dashboard_projection(state: TrajectoryState) -> DashboardProjection:
     risk_points = _build_risk_points(state)
+    booking_confirmation_count = sum(
+        item.tool_name == "confirm_freight_booking" for item in state.effect_history
+    )
+    notification_count = sum(
+        item.tool_name == "write_tracking_outbox" for item in state.effect_history
+    )
     return DashboardProjection(
         trace_id=state.trace_id,
         risk_signal_score=risk_points[-1].total if risk_points else 0,
@@ -25,7 +31,40 @@ def build_dashboard_projection(state: TrajectoryState) -> DashboardProjection:
         risk_points=tuple(risk_points),
         spend_points=tuple(_build_spend_points(state)),
         weight_provenance=_build_weight_provenance(state),
+        booking_confirmation_count=booking_confirmation_count,
+        notification_count=notification_count,
+        exact_once_status=_exact_once_status(
+            state, booking_confirmation_count, notification_count
+        ),
+        failure_code=_failure_code(state),
     )
+
+
+def _exact_once_status(
+    state: TrajectoryState,
+    booking_confirmation_count: int,
+    notification_count: int,
+) -> str:
+    if booking_confirmation_count > 1 or notification_count > 1:
+        return "violation"
+    if booking_confirmation_count == 1 and notification_count == 1:
+        return "confirmed_once"
+    if booking_confirmation_count == 1:
+        return "confirmation_once"
+    if state.status == RunStatus.PENDING_APPROVAL:
+        return "awaiting_approval"
+    if state.status == RunStatus.CANCELLED:
+        return "cancelled_without_confirmation"
+    return "no_commitment"
+
+
+def _failure_code(state: TrajectoryState) -> str | None:
+    for event in reversed(state.events):
+        if event.event_type != EventType.RUN_FAILED:
+            continue
+        code = event.details.get("error_code")
+        return code if isinstance(code, str) else "UNEXPECTED_ERROR"
+    return None
 
 
 def _decision_sequences(state: TrajectoryState) -> dict[str, int]:

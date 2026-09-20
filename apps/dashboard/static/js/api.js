@@ -1,5 +1,5 @@
 export class ApiError extends Error {
-  constructor(status, code, message) { super(message); this.status = status; this.code = code; }
+  constructor(status, code, message, traceId = null) { super(message); this.status = status; this.code = code; this.traceId = traceId; }
 }
 
 async function request(path, options = {}) {
@@ -15,7 +15,7 @@ async function request(path, options = {}) {
     try { body = await response.json(); } catch { body = null; }
     if (!response.ok) {
       const error = body?.error || {};
-      throw new ApiError(response.status, error.code || "HTTP_ERROR", error.message || "Request failed.");
+      throw new ApiError(response.status, error.code || "HTTP_ERROR", error.message || "Request failed.", error.trace_id || null);
     }
     return body;
   } catch (error) {

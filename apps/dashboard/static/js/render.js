@@ -7,12 +7,58 @@ const setText = (id, value) => { byId(id).textContent = value; };
 
 export function renderHealth(health) {
   const badge = byId("healthBadge"); badge.className = `health-badge ${health ? "health-ready" : "health-error"}`; badge.lastChild.textContent = health ? " Ready" : " Disconnected";
-  const values = health ? [health.runtime_mode, `${health.policy_engine} / ${health.policy_version}`, health.storage_mode, health.approval_mode] : ["Unavailable", "Unavailable", "Unavailable", "Unavailable"];
-  document.querySelectorAll("#environmentGrid dd").forEach((node, index) => { node.textContent = values[index]; });
+  const values = health ? {
+    envRuntime: health.runtime_mode,
+    envProvider: health.model_provider,
+    envRequestedModel: health.requested_model_id,
+    envResolvedModel: health.resolved_model_id || "Provider did not disclose",
+    envRoute: `${health.provider_route_kind} · fallback ${health.provider_fallback_active ? "active" : "off"}`,
+    envPolicy: `${health.policy_engine} / ${health.policy_version}${health.policy_bundle_hash ? ` · ${shortHash(health.policy_bundle_hash)}` : ""}`,
+    envStorage: health.storage_mode,
+    envLedger: `${health.ledger_algorithm} / ${health.ledger_schema_version}`,
+    envEffects: "Synthetic · simulated",
+  } : Object.fromEntries(["envRuntime", "envProvider", "envRequestedModel", "envResolvedModel", "envRoute", "envPolicy", "envStorage", "envLedger"].map((key) => [key, "Unavailable"]));
+  Object.entries(values).forEach(([id, value]) => setText(id, value));
   byId("tamperPanelCard").classList.toggle("hidden", !health?.demo_tamper_enabled);
 }
 
-export function renderMessage(message = "", isError = false) { const node = byId("appMessage"); node.textContent = message; node.className = `app-message${isError ? " error" : ""}`; }
+export function renderMessage(message = "", isError = false, focus = false) { const node = byId("appMessage"); node.textContent = message; node.className = `app-message${isError ? " error" : ""}`; if (focus) node.focus(); }
+
+function operatorState(run, projection, verification) {
+  if (verification && !verification.valid) return ["Tamper detected", `Ledger invalid at event #${verification.first_bad_sequence}. Protected controls are disabled.`, "critical"];
+  if (run.status === "pending_approval") return ["Approval required", "A prepared commitment is paused and bound to the displayed approval receipt.", "warning"];
+  if (run.status === "blocked") return ["Authorization denied", `${projection?.failure_code || "POLICY_BLOCKED"}: Cedar prevented the protected effect.`, "critical"];
+  if (run.status === "failed") {
+    const states = {
+      PROVIDER_TIMEOUT: ["Provider timeout", "The run failed closed. Retry creates a new trace; no fallback occurred."],
+      PROVIDER_RATE_LIMITED: ["Provider rate limited", "The run failed closed. No automatic retry or fallback occurred."],
+      PROVIDER_AUTHENTICATION_ERROR: ["Provider authentication failed", "Check local provider configuration; no protected effect occurred."],
+      PROVIDER_BILLING_ERROR: ["Provider billing unavailable", "The selected provider rejected billing or credits; no protected effect occurred."],
+      PROVIDER_MODEL_UNAVAILABLE: ["Model unavailable", "The configured model was unavailable; no protected effect occurred."],
+      PROVIDER_UNAVAILABLE: ["Provider unavailable", "The model request failed before the role completed."],
+    };
+    const selected = states[projection?.failure_code] || ["Run failed safely", "Inspect the retained failure event; no silent fallback occurred."];
+    return [...selected, "critical"];
+  }
+  if (run.status === "cancelled") return ["Commitment cancelled", "The prepared action was released without confirmation.", "warning"];
+  if (run.status === "completed") return ["Governed completion", "The retained trace completed and is ready for verification.", "ready"];
+  return [label(run.status), "The governed trajectory is in progress.", "warning"];
+}
+
+function renderOperatorState(run, projection, verification) {
+  const [state, detail, tone] = operatorState(run, projection, verification);
+  setText("operatorState", state); setText("operatorDetail", detail); byId("operatorCard").dataset.tone = tone;
+  const receiptLabels = {
+    confirmed_once: "Confirmed once",
+    confirmation_once: "Confirmation retained",
+    awaiting_approval: "Awaiting approval",
+    cancelled_without_confirmation: "No confirmation",
+    violation: "Invariant violation",
+    no_commitment: "None",
+  };
+  setText("receiptState", receiptLabels[projection?.exact_once_status] || "Unknown");
+  setText("receiptDetail", `${projection?.booking_confirmation_count || 0} confirmations · ${projection?.notification_count || 0} notifications`);
+}
 
 function isIntervention(event) {
   if (["tool_guided", "tool_blocked", "approval_required", "approval_approved", "approval_rejected", "approval_expired", "run_paused", "run_resumed", "run_cancelled", "run_failed"].includes(event.event_type)) return true;
@@ -80,10 +126,12 @@ export function renderTrace(data, options = {}) {
   const ratio = run.spend_ceiling_minor ? Math.min(100, run.projected_spend_minor / run.spend_ceiling_minor * 100) : 0; const bar = byId("spendBar"); bar.style.width = `${ratio}%`; bar.classList.toggle("over", run.projected_spend_minor > run.spend_ceiling_minor);
   setText("integrityValue", verification?.valid ? "Valid" : "Invalid"); setText("integrityDetail", verification ? `${verification.checked_event_count} events checked` : "Not verified"); setText("lastUpdated", `Fresh · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`);
   renderSpendChart(byId("spendChart"), projection?.spend_points); renderRiskChart(byId("riskChart"), projection); renderTimeline(events, options.showAllEvents); renderDecisions(decisions); renderProvenance(projection); renderApproval(approval, run, verification, options.onApprovalDecision); renderIntegrity(verification); byId("timelineAll").classList.toggle("active", options.showAllEvents); byId("timelineInterventions").classList.toggle("active", !options.showAllEvents);
+  renderOperatorState(run, projection, verification);
 }
 
 export function renderEmpty() {
   setText("runStatus", "Waiting"); setText("runStage", "Start a run"); setText("traceId", "No trace"); setText("spendValue", "—"); setText("spendCeiling", "No active mandate"); setText("riskValue", "—"); setText("integrityValue", "Unknown"); setText("integrityDetail", "Not verified"); setText("lastUpdated", "No trace loaded"); byId("spendBar").style.width = "0";
+  setText("operatorState", "Ready"); setText("operatorDetail", "No governed trace loaded"); setText("receiptState", "None"); setText("receiptDetail", "0 confirmations · 0 notifications"); byId("operatorCard").dataset.tone = "ready";
   byId("timeline").replaceChildren(text("li", "Run a shipment to see agents, tools, and decisions in sequence.", "empty-state")); byId("decisionFeed").replaceChildren(text("p", "Policy decisions will appear after a run.", "empty-state")); byId("provenancePanel").replaceChildren(text("p", "No sourced weight loaded.", "empty-state")); byId("approvalPanel").replaceChildren(text("p", "No approval is pending.", "empty-state")); renderIntegrity(null); renderSpendChart(byId("spendChart"), []); renderRiskChart(byId("riskChart"), null);
 }
 

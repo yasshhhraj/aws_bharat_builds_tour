@@ -108,6 +108,10 @@ def test_provider_neutral_runtime_executes_governed_tools_and_records_metrics():
     assert event.details["provider_route_kind"] == "router"
     assert event.details["provider_fallback_active"] is False
     assert event.details["model_cycles"] == 3
+    assert event.summary == "Completed bounded inventory model invocation."
+    assert result.summary == (
+        "Inventory Agent verified the synthetic order and 500 kg inventory fact."
+    )
 
 
 def test_prose_only_hosted_response_fails_without_marking_role_complete():

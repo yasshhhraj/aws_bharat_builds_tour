@@ -58,6 +58,8 @@ def test_release_manifest_binds_source_fixtures_modes_tests_and_evaluation(tmp_p
     assert manifest["fixture_tree"]["digest"].startswith("sha256:")
     assert manifest["policy"] == {"engine": "python_reference", "version": "demo-v1"}
     assert manifest["evaluation"]["functional_digest"] == report.functional_digest
+    assert manifest["runtime"]["requested_model_id"] == "manifest-recorded-v1"
+    assert manifest["runtime"]["resolved_model_id"] == "manifest-recorded-v1"
     assert manifest["tests"]["collected"] >= 94
     assert manifest["tests"]["failed"] == 0
     assert "secret" not in json.dumps(manifest).casefold()

@@ -29,4 +29,26 @@ digest parity with Checkpoint 6, and writes the Checkpoint 7 release manifest.
 
 `check_cedar_ready.py` performs the bounded readiness check used by that gate.
 
-Durable storage and cloud scripts remain deferred to later checkpoints.
+`run_checkpoint_8.sh` proves DynamoDB Local durability, restart recovery, and
+functional parity with Cedar.
+
+`run_checkpoint_9_offline.sh` proves the bounded Strands runtime through the
+recorded, no-network model.
+
+`run_checkpoint_10_bedrock_mantle.sh` is the historical provider-portability
+gate. It delegates to `run_bedrock_mantle_gate.sh`; live modes remain explicitly
+billable and opt-in.
+
+`start_checkpoint_11_local.sh` starts the loopback-only recorded/Cedar/
+DynamoDB Local demo and cleans up only the API and Cedar child processes it
+created.
+
+`run_checkpoint_11.sh` is the canonical local candidate gate. It runs the
+Python, Rust, Cedar, storage, restart, evaluation, parity, hygiene, and two-pass
+automated rehearsal checks without invoking a hosted model.
+
+`check_submission_hygiene.py` scans tracked and untracked text artifacts for
+high-confidence credential leaks, personal paths on current submission
+surfaces, external dashboard assets, and selected stale claims.
+
+AWS application deployment remains Checkpoint 12.

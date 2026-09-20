@@ -143,7 +143,7 @@ class EvaluationRunner:
             "model_provider": runtime.model_provider,
             "model_id": runtime.model_id,
             "requested_model_id": runtime.model_id,
-            "resolved_model_id": "unknown",
+            "resolved_model_id": runtime.resolved_model_id or "unknown",
             "provider_route_kind": runtime.provider_route_kind,
             "agent_max_turns": str(runtime.max_turns),
             "agent_timeout_seconds": str(runtime.timeout_seconds),
