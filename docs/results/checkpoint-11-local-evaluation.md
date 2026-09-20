@@ -1,7 +1,7 @@
 # Manifest Checkpoint 9 Offline Strands Evaluation Results
 
 **Schema:** `manifest-evaluation-v1`  
-**Generated:** `2026-09-20T15:27:06.190052Z`
+**Generated:** `2026-09-20T16:03:20.422944Z`
 **Seed:** `manifest-checkpoint-11-local-candidate-v1`  
 **Functional digest:** `sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120`
 
@@ -39,8 +39,8 @@
 
 | Measurement | Samples | p50 (ms) | p95 (ms) | Mean (ms) |
 |---|---:|---:|---:|---:|
-| Policy evaluation | 1050 | 11.007 | 16.024 | 11.621 |
-| End-to-end case | 220 | 787.821 | 3179.453 | 1462.395 |
+| Policy evaluation | 1050 | 10.057 | 17.165 | 10.292 |
+| End-to-end case | 220 | 752.884 | 2947.606 | 1371.421 |
 
 ## Case results
 

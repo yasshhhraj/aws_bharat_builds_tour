@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Manifest App Runner demo service
+Parameters:
+  ImageIdentifier: {Type: String}
+  TableName: {Type: String}
+  TableArn: {Type: String}
+  MantleSecretArn: {Type: String}
+  DemoAccessSecretArn: {Type: String}
+  ModelId: {Type: String, Default: qwen.qwen3-coder-next}
+Resources:
+  EcrAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: build.apprunner.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: tasks.apprunner.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ManifestRuntime
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:TransactWriteItems
+                Resource: !Ref TableArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref MantleSecretArn
+                  - !Ref DemoAccessSecretArn
+  Scaling:
+    Type: AWS::AppRunner::AutoScalingConfiguration
+    Properties:
+      AutoScalingConfigurationName: !Sub manifest-${AWS::StackName}
+      MaxConcurrency: 20
+      MaxSize: 1
+      MinSize: 1
+  Service:
+    Type: AWS::AppRunner::Service
+    Properties:
+      AutoScalingConfigurationArn: !GetAtt Scaling.AutoScalingConfigurationArn
+      HealthCheckConfiguration:
+        Protocol: HTTP
+        Path: /health/ready
+        Interval: 10
+        Timeout: 5
+        HealthyThreshold: 1
+        UnhealthyThreshold: 5
+      InstanceConfiguration:
+        Cpu: 0.5 vCPU
+        Memory: 1 GB
+        InstanceRoleArn: !GetAtt InstanceRole.Arn
+      SourceConfiguration:
+        AuthenticationConfiguration:
+          AccessRoleArn: !GetAtt EcrAccessRole.Arn
+        AutoDeploymentsEnabled: false
+        ImageRepository:
+          ImageIdentifier: !Ref ImageIdentifier
+          ImageRepositoryType: ECR
+          ImageConfiguration:
+            Port: '8080'
+            RuntimeEnvironmentSecrets:
+              - {Name: BEDROCK_MANTLE_API_KEY, Value: !Ref MantleSecretArn}
+              - {Name: DEMO_ACCESS_SECRET, Value: !Ref DemoAccessSecretArn}
+              - {Name: DEMO_APPROVER_SECRET, Value: !Ref DemoAccessSecretArn}
+            RuntimeEnvironmentVariables:
+              - {Name: MANIFEST_DEPLOYMENT_MODE, Value: aws}
+              - {Name: MANIFEST_AGENT_RUNTIME, Value: strands}
+              - {Name: MANIFEST_MODEL_PROVIDER, Value: bedrock_mantle}
+              - {Name: MANIFEST_MODEL_ID, Value: !Ref ModelId}
+              - {Name: MANIFEST_BEDROCK_REGION, Value: !Ref 'AWS::Region'}
+              - {Name: MANIFEST_AGENT_MAX_TURNS, Value: '8'}
+              - {Name: MANIFEST_AGENT_TIMEOUT_SECONDS, Value: '60'}
+              - {Name: MANIFEST_MODEL_MAX_OUTPUT_TOKENS, Value: '1024'}
+              - {Name: MANIFEST_POLICY_ENGINE, Value: cedar}
+              - {Name: CEDAR_ENDPOINT, Value: 'http://127.0.0.1:8765'}
+              - {Name: CEDAR_TIMEOUT_MS, Value: '1000'}
+              - {Name: CEDAR_POLICY_METADATA_PATH, Value: policies/demo-v1/metadata.json}
+              - {Name: MANIFEST_STORAGE_BACKEND, Value: dynamodb}
+              - {Name: MANIFEST_DYNAMODB_TABLE, Value: !Ref TableName}
+              - {Name: MANIFEST_DEMO_NAMESPACE, Value: checkpoint-12-aws-demo}
+              - {Name: AWS_DEFAULT_REGION, Value: !Ref 'AWS::Region'}
+              - {Name: ENABLE_DEMO_TAMPER, Value: 'false'}
+Outputs:
+  ServiceArn: {Value: !GetAtt Service.ServiceArn}
+  ServiceUrl: {Value: !Sub 'https://${Service.ServiceUrl}'}

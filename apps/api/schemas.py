@@ -221,6 +221,7 @@ class OrdersResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     version: str
+    deployment_mode: str
     runtime_mode: str
     model_provider: str
     model_id: str
@@ -246,6 +247,8 @@ class HealthResponse(BaseModel):
     approval_mode: str
     approval_auth_mode: str
     approval_mutation_ready: bool
+    demo_access_required: bool
+    demo_access_ready: bool
     ledger_algorithm: str
     ledger_schema_version: str
     verify_ready: bool

@@ -157,6 +157,14 @@ class ApprovalAuthNotConfiguredError(ManifestError):
     code = "APPROVAL_AUTH_NOT_CONFIGURED"
 
 
+class DemoAccessNotConfiguredError(ManifestError):
+    code = "DEMO_ACCESS_NOT_CONFIGURED"
+
+
+class DemoAccessUnauthorizedError(ManifestError):
+    code = "DEMO_ACCESS_UNAUTHORIZED"
+
+
 class LedgerError(ManifestError):
     code = "LEDGER_ERROR"
 

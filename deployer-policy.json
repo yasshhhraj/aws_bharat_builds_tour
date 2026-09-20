@@ -1,0 +1,129 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudFormationBasics",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:ListStacks",
+        "cloudformation:ValidateTemplate",
+        "cloudformation:GetTemplate",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:ListStackResources",
+        "cloudformation:DescribeStackResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRGetAuth",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetAuthorizationToken"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPush",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:DescribeRepositories",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": "arn:aws:ecr:us-east-1:958124171224:repository/*"
+    },
+    {
+      "Sid": "AppRunner",
+      "Effect": "Allow",
+      "Action": [
+        "apprunner:CreateService",
+        "apprunner:DeleteService",
+        "apprunner:DescribeService",
+        "apprunner:ListServices",
+        "apprunner:UpdateService",
+        "apprunner:StartDeployment"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DynamoDBAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:Query",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:TransactWriteItems"
+      ],
+      "Resource": "arn:aws:dynamodb:us-east-1:958124171224:table/*"
+    },
+    {
+      "Sid": "SecretsManager",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:DeleteSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:us-east-1:958124171224:secret:*"
+    },
+    {
+      "Sid": "Logs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:us-east-1:958124171224:*"
+    },
+    {
+      "Sid": "IAMForCFN",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::958124171224:role/manifest-*",
+      "Condition": {
+        "StringLike": {
+          "iam:PassedToService": [
+            "apprunner.amazonaws.com",
+            "ecr.amazonaws.com",
+            "build.apprunner.amazonaws.com",
+            "tasks.apprunner.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "STS",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

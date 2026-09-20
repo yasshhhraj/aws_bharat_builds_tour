@@ -6,8 +6,9 @@ const text = (tag, value, className = "") => { const node = document.createEleme
 const setText = (id, value) => { byId(id).textContent = value; };
 
 export function renderHealth(health) {
-  const badge = byId("healthBadge"); badge.className = `health-badge ${health ? "health-ready" : "health-error"}`; badge.lastChild.textContent = health ? " Ready" : " Disconnected";
+  const badge = byId("healthBadge"); badge.className = `health-badge ${health ? "health-ready" : "health-error"}`; setText("healthLabel", health ? "Ready" : "Disconnected");
   const values = health ? {
+    envDeployment: health.deployment_mode,
     envRuntime: health.runtime_mode,
     envProvider: health.model_provider,
     envRequestedModel: health.requested_model_id,
@@ -17,9 +18,10 @@ export function renderHealth(health) {
     envStorage: health.storage_mode,
     envLedger: `${health.ledger_algorithm} / ${health.ledger_schema_version}`,
     envEffects: "Synthetic · simulated",
-  } : Object.fromEntries(["envRuntime", "envProvider", "envRequestedModel", "envResolvedModel", "envRoute", "envPolicy", "envStorage", "envLedger"].map((key) => [key, "Unavailable"]));
+  } : Object.fromEntries(["envDeployment", "envRuntime", "envProvider", "envRequestedModel", "envResolvedModel", "envRoute", "envPolicy", "envStorage", "envLedger"].map((key) => [key, "Unavailable"]));
   Object.entries(values).forEach(([id, value]) => setText(id, value));
   byId("tamperPanelCard").classList.toggle("hidden", !health?.demo_tamper_enabled);
+  if (health) setText("deploymentFooter", `Manifest ${health.deployment_mode === "aws" ? "AWS demo" : "local prototype"} · Synthetic logistics data and simulated effects · Tamper-evident, not immutable`);
 }
 
 export function renderMessage(message = "", isError = false, focus = false) { const node = byId("appMessage"); node.textContent = message; node.className = `app-message${isError ? " error" : ""}`; if (focus) node.focus(); }

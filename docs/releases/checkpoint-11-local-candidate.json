@@ -30,7 +30,7 @@
     "digest": "sha256:37904e005b547792befed64ef94d0c919eb40ca97330d728e8ada49c7a1b3cf4",
     "file_count": 12
   },
-  "generated_at": "2026-09-20T15:27:08.440516Z",
+  "generated_at": "2026-09-20T16:03:21.944734Z",
   "limitations": [
     "Synthetic logistics data and effects only.",
     "Cedar policy engine runs as a local loopback sidecar.",
@@ -67,15 +67,15 @@
   },
   "schema_version": "manifest-release-v1",
   "source": {
-    "branch": "checkpoint-11-hardening",
-    "commit": "3cfd17c8566d901bb5e8f07084b3c3e00e96cb13",
-    "diff_fingerprint": "sha256:0be31f092f9a2a916be4bcddcb029e81c0742287a02d96cf93c9a36cedbab486",
+    "branch": "stage/deployment",
+    "commit": "c99711bbc150fcba8f57981eb2bd3a686d23f1d6",
+    "diff_fingerprint": "sha256:d2b1a5bf6ea4eb61af213fe8879d01a350e5595a2aab5b3a16084fd496997730",
     "dirty": true
   },
   "storage": {
     "local_image": "amazon/dynamodb-local:2.5.4@sha256:cf8cebd061f988628c02daff10fdb950a54478feff9c52f6ddf84710fe3c3906",
     "mode": "dynamodb_local",
-    "namespace": "checkpoint-11-evaluation-1589068",
+    "namespace": "checkpoint-11-evaluation-1620509",
     "table": "manifest-local"
   },
   "tests": {
