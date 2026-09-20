@@ -101,13 +101,19 @@ class RuntimeSettings:
             else "fixed"
         )
 
+    @property
+    def resolved_model_id(self) -> str | None:
+        """Return a model identity only when routing cannot change it."""
+
+        return None if self.provider_route_kind == "router" else self.model_id
+
     def describe(self) -> dict[str, object]:
         return {
             "runtime_mode": self.runtime_mode,
             "model_provider": self.model_provider,
             "model_id": self.model_id,
             "requested_model_id": self.model_id,
-            "resolved_model_id": None,
+            "resolved_model_id": self.resolved_model_id,
             "provider_route_kind": self.provider_route_kind,
             "agent_max_turns": self.max_turns,
             "agent_timeout_seconds": self.timeout_seconds,

@@ -36,7 +36,12 @@ async function loadTrace(traceId, quiet = false) {
 async function startRun(event) {
   event.preventDefault(); update({ loading: true }); setControls({ ready: true, loading: true, hasTrace: false }); renderMessage("Manifest is governing the shipment…");
   try { const run = await api.startRun({ order_id: byId("orderSelect").value, mode: byId("modeSelect").value, scenario: byId("scenarioSelect").value }); await loadTrace(run.trace_id); }
-  catch (error) { update({ loading: false, error }); renderMessage(`${error.code || "ERROR"}: ${error.message}`, true); setControls({ ready: true, loading: false, hasTrace: false }); }
+  catch (error) {
+    update({ loading: false, error });
+    if (error.traceId) await loadTrace(error.traceId, true);
+    renderMessage(`${error.code || "ERROR"}: ${error.message}`, true, true);
+    setControls({ ready: true, loading: false, hasTrace: Boolean(error.traceId) });
+  }
 }
 
 async function resolveApproval(decision, controls) {

@@ -121,6 +121,10 @@ class DashboardProjectionResponse(BaseModel):
     risk_points: list[RiskSignalPointResponse]
     spend_points: list[SpendPointResponse]
     weight_provenance: WeightProvenanceResponse | None
+    booking_confirmation_count: int
+    notification_count: int
+    exact_once_status: str
+    failure_code: str | None
 
 
 class TamperRequest(BaseModel):

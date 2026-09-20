@@ -65,7 +65,7 @@ from .schemas import (
 )
 
 app = FastAPI(
-    title="Manifest Checkpoint 7 API",
+    title="Manifest API",
     version="0.7.0",
     description=(
         "Deterministic governed logistics workflow with approval, resume, and "
@@ -116,6 +116,16 @@ def _error_status(exc: ManifestError) -> int:
     if isinstance(exc, LedgerAppendError):
         return 500
     return 400
+
+
+def _failed_run_status(error_code: str) -> int:
+    if error_code == "PROVIDER_TIMEOUT":
+        return 504
+    if error_code == "PROVIDER_RATE_LIMITED":
+        return 429
+    if error_code.startswith("PROVIDER_"):
+        return 503
+    return 500
 
 
 @app.exception_handler(ManifestError)
@@ -199,7 +209,26 @@ async def start_run(
     summary = service.start_run(request.order_id, request.mode, request.scenario)
     content = to_primitive(summary)
     if summary.status == RunStatus.FAILED:
-        return JSONResponse(status_code=500, content=content)
+        events = service.get_events(summary.trace_id)
+        failed = next(
+            (item for item in reversed(events) if item.event_type.value == "run_failed"),
+            None,
+        )
+        error_code = (
+            str(failed.details.get("error_code", "UNEXPECTED_ERROR"))
+            if failed is not None
+            else "UNEXPECTED_ERROR"
+        )
+        return JSONResponse(
+            status_code=_failed_run_status(error_code),
+            content={
+                "error": {
+                    "code": error_code,
+                    "message": summary.error or "The governed run failed.",
+                    "trace_id": summary.trace_id,
+                }
+            },
+        )
     return content
 
 

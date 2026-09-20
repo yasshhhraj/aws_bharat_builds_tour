@@ -27,10 +27,10 @@ CP10 Bedrock Mantle provider portability + live governed proof (complete)
 CP11 Local prototype hardening + submission candidate
         |
         v
-CP12 Bedrock parity after AWS verification
+CP12 AWS demo deployment using the working Mantle route
         |
         v
-CP13 Optional AWS demo deployment
+CP13 Optional native Nova parity, if available or required
         |
         v
 CP14 Final evidence and submission freeze
@@ -39,7 +39,7 @@ CP14 Final evidence and submission freeze
 This creates two honest milestones:
 
 1. **Local prototype complete at Checkpoint 11:** the full governed journey is hardened and reproducible offline, with separate completed Mantle evidence.
-2. **AWS deployment target complete at Checkpoint 14:** native Nova parity if available, any required cloud deployment, and final evidence are complete.
+2. **AWS deployment target complete at Checkpoint 14:** the required cloud deployment and final evidence are complete; native Nova parity is added only if it is available or required.
 
 The local milestone is not permission to claim that Bedrock or AWS deployment has been completed. It is a working fallback that allows development, testing, UI work, and rehearsal to continue.
 
@@ -77,9 +77,9 @@ Relevant provider documentation:
 |---:|---|---|---|---|
 | 9 | Offline Strands Runtime | **COMPLETE** | Yes | All four roles use Strands with the recorded model and governed tools |
 | 10 | Bedrock Mantle Provider Portability | **COMPLETE** | Yes | Qwen probe, benign journey, and adversarial Cedar escalation passed |
-| 11 | Local Prototype Hardening | **NEXT** | Yes | Rehearsed, reproducible local submission candidate |
-| 12 | Bedrock Provider Parity | Waiting on AWS verification and CP11 | No live gate yet | Nova 2 Lite passes the same provider and governance contracts |
-| 13 | AWS Demo Stack | Locked by CP12 | No | Reproducible least-privilege cloud deployment if required |
+| 11 | Local Prototype Hardening | **IMPLEMENTED — MANUAL EVIDENCE PENDING** | Yes | Automated candidate passes; browser/screenshots/video remain |
+| 12 | AWS Demo Stack | Locked by CP11 manual closeout | No | Reproducible least-privilege cloud deployment using the working Mantle route |
+| 13 | Optional Native Nova Parity | Waiting on native access and CP12 | No live gate yet | Nova 2 Lite passes the same contracts if available or required |
 | 14 | Submission Freeze | Locked by release-path decision | Mostly | Final evidence, claims, artifacts, and tagged release |
 
 Work one checkpoint at a time. A checkpoint closes only after its exit gate and evidence are recorded. Do not weaken Cedar, exact-once approval, numeric provenance, or ledger checks to make a model provider pass.
@@ -204,6 +204,8 @@ OpenRouter completed isolated read-only probes but failed the complete multi-rol
 
 **Objective:** Finish and rehearse the complete local prototype before returning to AWS.
 
+**Detailed implementation plan:** [`CHECKPOINT_11_IMPLEMENTATION_PLAN.md`](CHECKPOINT_11_IMPLEMENTATION_PLAN.md)
+
 ### Scope
 
 1. Show runtime, provider, requested model, actual model when known, policy mode, storage mode, and ledger state in the dashboard.
@@ -244,57 +246,16 @@ Two clean local rehearsals
 
 ---
 
-## Checkpoint 12 — Bedrock Provider Parity
+## Checkpoint 12 — AWS Demo Stack
 
-**Objective:** After AWS account verification succeeds, add Amazon Nova 2 Lite as another provider behind the already-tested Strands runtime.
-
-**Deferred setup guide:** [`manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md`](manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md). The filename is retained for link stability, but the work now belongs to Checkpoint 12.
+**Objective:** Deploy only the minimum AWS components required by the hackathon/submission using the already-proven Bedrock Mantle model route. Native Nova access is not a deployment precondition.
 
 ### Preconditions
 
-- AWS reports that account verification is complete.
-- A Bedrock playground or CLI probe no longer returns `ValidationException: Operation not allowed`.
-- The owner has enabled cost monitoring and agreed to use paid AWS services.
-- CP9–CP11 are green; do not change local governance semantics to accommodate Bedrock.
-
-### Manual AWS work
-
-1. Confirm account and payment verification in Billing/Account settings.
-2. Use `us-east-1` unless the current model availability documentation requires another supported region.
-3. Confirm access to Amazon Nova 2 Lite v1.
-4. Test the US cross-region inference profile `us.amazon.nova-2-lite-v1:0`.
-5. Create a non-root developer identity or temporary login for application testing.
-6. Grant only the required Bedrock Runtime invocation permissions.
-7. Create a small budget alert and review CloudTrail/cost visibility.
-
-Do not create root access keys. Root console access does not repair an account-level `Operation not allowed` restriction.
-
-### Implementation work
-
-1. Add the Strands `BedrockModel` adapter to the provider factory.
-2. Use the normal AWS credential chain; never load AWS secrets from committed configuration.
-3. Keep the same tool schemas, governor boundary, timeouts, traces, and failure behavior as CP10.
-4. Run a read-only tool probe before any effectful hero journey.
-5. Record region, inference profile, provider, latency, and request identifiers without recording credentials or sensitive prompt content.
-
-### Exit gate
-
-- Nova 2 Lite completes a governed read-only tool call.
-- A Bedrock-backed benign hero journey completes.
-- Adversarial enforce mode remains denied/guided back by Cedar.
-- Bedrock unavailability fails closed with no silent provider switch.
-- Offline and no-cost/local provider gates remain green.
-- Evidence clearly distinguishes recorded, local/free, and Bedrock runs.
-
-### If verification is still pending
-
-Leave CP12 in `WAITING_EXTERNAL`. Do not create unrelated paid usage, rotate policies randomly, or weaken security in an attempt to force activation. Continue polishing CP11 evidence and periodically retry a minimal playground/CLI probe.
-
----
-
-## Checkpoint 13 — AWS Demo Stack
-
-**Objective:** Deploy only the minimum AWS components required by the hackathon/submission after Bedrock is proven.
+- Checkpoint 11 is complete and its local candidate is preserved.
+- The owner has approved billable AWS deployment and public endpoint exposure.
+- A non-root AWS deployment identity and budget alert are ready.
+- The selected Region supports every required service.
 
 ### Core deployment scope
 
@@ -322,9 +283,57 @@ EventBridge, Step Functions, SNS/SES, advanced observability, custom domains, an
 ### Manual work
 
 - Approve actual AWS spend before deployment.
+- Create or select a non-root deployment identity; never create root access keys.
 - Review IAM roles and public endpoint exposure.
 - Configure allowed origins and any hosted frontend settings.
 - Run the final console smoke test and capture sanitized evidence.
+
+---
+
+## Checkpoint 13 — Optional Native Nova Provider Parity
+
+**Objective:** If native Nova access becomes available or the submission requires it, add Amazon Nova 2 Lite behind the already-tested Strands provider seam without changing governance behavior.
+
+**Deferred setup guide:** [`manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md`](manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md). The filename is retained for link stability.
+
+### Preconditions
+
+- The AWS deployment path is green or safely frozen at Checkpoint 12.
+- AWS reports that native model access is available.
+- A Bedrock playground or CLI probe no longer returns `ValidationException: Operation not allowed`.
+- The owner has approved the additional paid model test.
+
+### Manual AWS work
+
+1. Confirm account and payment verification in Billing/Account settings.
+2. Use `us-east-1` unless current model availability requires another supported Region.
+3. Confirm access to Amazon Nova 2 Lite v1.
+4. Test the US cross-region inference profile `us.amazon.nova-2-lite-v1:0`.
+5. Grant the application identity only the required Bedrock Runtime invocation permissions.
+6. Review budget and CloudTrail/cost visibility before testing.
+
+Do not create root access keys. Root console access does not repair an account-level `Operation not allowed` restriction.
+
+### Implementation work
+
+1. Complete the existing Strands `BedrockModel` provider branch.
+2. Use the normal AWS credential chain; never load AWS secrets from committed configuration.
+3. Preserve the same tool schemas, governor boundary, timeouts, traces, and failure behavior as CP10.
+4. Run a read-only tool probe before any effectful hero journey.
+5. Record Region, inference profile, provider, latency, and request identifiers without credentials or sensitive prompt content.
+
+### Exit gate
+
+- Nova 2 Lite completes a governed read-only tool call.
+- A native-Bedrock benign hero journey completes.
+- Adversarial enforce mode remains denied/guided back by Cedar.
+- Native Bedrock unavailability fails closed with no silent provider switch.
+- Local and deployed acceptance paths remain green.
+- Evidence distinguishes recorded, Mantle, and native Bedrock runs.
+
+### If native access is still pending
+
+Mark CP13 `NOT_REQUIRED` or `WAITING_EXTERNAL` according to submission needs. Do not block the working Mantle deployment, create unrelated paid usage, weaken security, or change governance semantics to force activation.
 
 ---
 
@@ -334,8 +343,8 @@ EventBridge, Step Functions, SNS/SES, advanced observability, custom domains, an
 
 ### Release-path decision
 
-- **Preferred:** CP12 and CP13 are green; submit the AWS-backed evidence bundle.
-- **Contingency:** If AWS remains externally unavailable and rules permit local submission, submit the CP11 local candidate and explicitly state that Bedrock/AWS gates are pending.
+- **Preferred:** CP12 is green; submit the AWS-backed Mantle evidence bundle. Include CP13 native Nova evidence only if that optional gate was required and passed.
+- **Contingency:** If deployment becomes externally unavailable and rules permit local submission, submit the CP11 local candidate and explicitly state that AWS application deployment is pending.
 - Never describe a local/OpenRouter/Ollama run as a Bedrock run.
 
 ### Required artifacts
@@ -367,9 +376,9 @@ EventBridge, Step Functions, SNS/SES, advanced observability, custom domains, an
 | CP9 | Approve dependency download if prompted | Maybe | Install the pinned Strands SDK |
 | CP10 | Generate and remove a temporary Bedrock API key | Complete | Selected paid Mantle proof |
 | CP11 | Review/record sanitized demo evidence | Yes | Human quality and privacy check |
-| CP12 | Complete AWS account verification | Yes for Bedrock | Account-level activation cannot be automated locally |
-| CP12 | Create non-root AWS identity and budget alert | Yes | Safer runtime access and spend visibility |
-| CP13 | Approve deployment spend and public exposure | Yes | External state and cost change |
+| CP12 | Create non-root AWS identity and budget alert | Yes | Safer deployment access and spend visibility |
+| CP12 | Approve deployment spend and public exposure | Yes | External state and cost change |
+| CP13 | Confirm native Nova access and approve a paid parity test | Only if CP13 is required | Account/model activation cannot be automated locally |
 | CP14 | Approve release commit/tag and submission | Yes | Irreversible release decision |
 
 ## 5. Permanent scope cuts
@@ -389,7 +398,8 @@ Unless a written submission requirement says otherwise, do not add:
 
 ## 6. Current handoff
 
-**Start now:** Checkpoint 11 — Local Prototype Hardening and Submission Candidate.
+**Current action:** finish the Checkpoint 11 manual browser evidence and clean
+release manifest. Then start Checkpoint 12 — AWS Demo Stack.
 
 **Do not wait for:** native Nova access or AWS deployment.
 
@@ -399,7 +409,7 @@ Unless a written submission requirement says otherwise, do not add:
 
 **Completed provider report:** [`CHECKPOINT_10_COMPLETION_REPORT.md`](CHECKPOINT_10_COMPLETION_REPORT.md)
 
-**Current manual guide:** Checkpoint 11 instructions are the next planning task.
+**Current implementation plan:** [`CHECKPOINT_11_IMPLEMENTATION_PLAN.md`](CHECKPOINT_11_IMPLEMENTATION_PLAN.md)
 
 **Deferred AWS guide:** [`manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md`](manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md)
 

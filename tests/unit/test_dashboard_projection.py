@@ -24,6 +24,10 @@ def test_benign_projection_has_zero_risk_and_exact_spend_points():
     assert projection.spend_points[-1].label == "confirmed"
     assert projection.spend_points[-1].committed_minor == 340000
     assert projection.spend_points[-1].reserved_minor == 0
+    assert projection.booking_confirmation_count == 1
+    assert projection.notification_count == 1
+    assert projection.exact_once_status == "confirmed_once"
+    assert projection.failure_code is None
 
 
 def test_primary_projection_exposes_60_risk_and_weight_correction():
@@ -54,6 +58,9 @@ def test_primary_projection_exposes_60_risk_and_weight_correction():
     assert projection.spend_points[-1].reserved_minor == 90000
     assert projection.spend_points[-1].projected_minor == 455000
     assert projection.spend_points[-1].ceiling_minor == 400000
+    assert projection.booking_confirmation_count == 0
+    assert projection.notification_count == 0
+    assert projection.exact_once_status == "awaiting_approval"
 
 
 def test_shadow_projection_uses_policy_outcomes_for_risk():
@@ -120,6 +127,8 @@ def test_rejected_and_expired_projection_release_reserved_spend():
     expired_projection = projection_for(expired_service, expired.trace_id)
     assert expired_projection.spend_points[-1].label == "cancelled"
     assert expired_projection.spend_points[-1].reserved_minor == 0
+    assert rejected_projection.exact_once_status == "cancelled_without_confirmation"
+    assert expired_projection.exact_once_status == "cancelled_without_confirmation"
 
 
 def test_projection_is_read_only_for_events_and_ledger_head():

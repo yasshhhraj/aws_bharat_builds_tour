@@ -128,7 +128,10 @@ class DynamoDBTraceStore:
                 region_name=self.region_name,
                 aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "local"),
                 aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "local"),
-                config=Config(connect_timeout=1, read_timeout=2, retries={"max_attempts": 1}),
+                # Local acceptance can briefly contend with Cedar and repeated
+                # evaluation writes. Keep requests bounded but tolerate normal
+                # workstation scheduling jitter without adding retries.
+                config=Config(connect_timeout=2, read_timeout=5, retries={"max_attempts": 1}),
             )
         self.client = client
 

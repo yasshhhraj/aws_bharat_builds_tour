@@ -340,6 +340,10 @@ class DashboardProjection:
     risk_points: tuple[RiskSignalPoint, ...]
     spend_points: tuple[SpendPoint, ...]
     weight_provenance: WeightProvenanceProjection | None
+    booking_confirmation_count: int
+    notification_count: int
+    exact_once_status: str
+    failure_code: str | None
 
 
 @dataclass(slots=True)

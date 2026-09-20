@@ -1,253 +1,119 @@
 # Manifest Prototype Progress Submission Report
 
-**Assessment date:** 19 September 2026  
-**Repository:** `/home/yashraj/p0/project`  
-**Assessed branch:** `main`  
-**Current baseline HEAD:** `b228ebe` (Checkpoint 6 committed baseline)
-**Assessment basis:** source inspection, repository state, full automated test suite, Checkpoint 7 Cedar evaluation, live Cedar CLI journeys, and browser smoke
+**Updated:** 20 September 2026
 
-**Follow-up roadmap:** [`FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md`](FOLLOWUP_CHECKPOINTS_TO_COMPLETION.md)
-**Completed detailed plan:** [`CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](CHECKPOINT_6_IMPLEMENTATION_PLAN.md)
+**Current branch:** `checkpoint-11-hardening`
 
-**Latest implementation update:** Checkpoint 7 is complete in the current working tree. The official Cedar 4.12.0 sidecar is authoritative in the gate; 136 Python tests, 2 Rust tests, and all 22 evaluation cases pass with exact Checkpoint 6 functional parity. See [`CHECKPOINT_7_COMPLETION_REPORT.md`](CHECKPOINT_7_COMPLETION_REPORT.md). The detailed assessment below originated at the Checkpoint 6 baseline; this update supersedes its statements that Cedar is absent.
+**Baseline revision:** `3cfd17c`
 
-## 1. Executive summary
+**Current checkpoint:** Checkpoint 11 — Local Prototype Hardening
 
-Manifest has progressed beyond a walking skeleton into a measured local governance prototype. The current working tree demonstrates the complete synthetic `ORD-8842` journey in benign, adversarial shadow, and adversarial enforce modes. It includes four deterministic agent roles, a governed tool boundary, six policy families, guide-back behavior, numeric provenance, cumulative commitment control, human approval, exact-once confirmation, a tamper-evident event chain, HTTP APIs, a browser dashboard, and reproducible evaluation evidence.
+## Executive summary
 
-The local implementation is healthy: **119 automated tests pass**. The labelled evaluation passes **22/22 cases**, comprising **10/10 detected attacks**, **12/12 passing benign/boundary cases**, **0/12 false positives**, and **2/2 successful guide-backs**. Browser smoke covers health, benign, shadow, enforce, approval, verification, tamper detection, and controlled API error presentation.
+Manifest is a working governed logistics-agent prototype. Its local acceptance
+path runs four bounded Strands roles through an offline recorded model. Every
+protected tool attempt crosses the Manifest governor and an authoritative Cedar
+4.12.0 policy sidecar before simulated effects execute. DynamoDB Local preserves
+runs, approvals, effect receipts, and the SHA-256 event chain across service
+reconstruction.
 
-The prototype is not yet ready to be submitted under the full target architecture. Strands, Bedrock, DynamoDB, Lambda/API Gateway, Amplify, Step Functions, EventBridge, deployment infrastructure, a release tag, and final demo video/deck remain incomplete or absent. The correct current claim is therefore:
+Separate Checkpoint 10 evidence proves the same provider-neutral runtime with
+the paid Amazon Bedrock Mantle endpoint and `qwen.qwen3-coder-next`. OpenRouter
+remains implemented but was not reliable across the complete multi-role gate.
 
-> A tested, deterministic, local Cedar-authorized implementation of Manifest's core governance journey, with simulated logistics effects and an in-memory tamper-evident ledger.
+The application itself is not deployed to AWS yet. AWS demo deployment is
+Checkpoint 12. Native Nova parity is optional Checkpoint 13 and does not block
+deployment through the already-proven Mantle route.
 
-It should not yet be described as an AWS-deployed, Strands-based, or durable prototype.
+## Implemented capabilities
 
-## 2. Verified current state
+- Four sequential Strands roles with role-specific governed tools.
+- Recorded, OpenRouter, Bedrock Mantle, and native-Bedrock provider seams.
+- No automatic provider fallback.
+- Cedar policy enforcement for ownership/mandate, numeric provenance,
+  cold-chain selection, cumulative commitments, separation of duties, and PII
+  boundaries.
+- 50 kg to 500 kg guide-back using an authoritative numeric fact.
+- Prepare-before-confirm commitment handling.
+- Bound approval, rejection, expiry, replay, and concurrency behavior.
+- Exact-once booking confirmation, cancellation, and simulated notification.
+- Durable local DynamoDB repository with optimistic and transactional writes.
+- Ordered SHA-256 event chain, verification, and first-bad-sequence detection.
+- FastAPI endpoints and a no-build local operator dashboard.
+- Explicit runtime/provider/model/policy/storage/ledger and simulation labels.
+- Safe provider failure categories and inspectable failed traces.
+- One-command local startup and one-command no-paid-call acceptance paths.
 
-### Automated verification
-
-Commands executed from the repository root:
+## Verified Checkpoint 11 automated evidence
 
 ```text
-python3 -m pytest -q
-Result: 119 passed
-
-python3 scripts/run_evaluation.py --warmup 1 --iterations 10
-Result: 22/22 cases passed; generated JSON and Markdown evidence
-
-Browser smoke
-Result: PASS for the complete local hero path and integrity demonstrations
+Python suite:                      206 passed, 13 skipped
+DynamoDB Local contracts:         11 passed
+Checkpoint 10 live Mantle gate:   3 passed in 55.83 seconds
+Rust/Cedar tests:                 2 passed
+Evaluation:                       22/22 passed
+Functional digest:                sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120
+Provider fallback:                disabled
 ```
 
-Verified CLI outcomes:
+Two consecutive canonical Checkpoint 11 gates passed with the same evaluation
+digest. The implementation is complete, but browser screenshots, accessibility
+review, the backup video, and a clean post-commit release manifest remain manual
+closeout items. See `CHECKPOINT_11_COMPLETION_REPORT.md`.
 
-| Journey | Verified result |
-|---|---|
-| Benign enforce | Four-agent workflow completed; synthetic booking confirmed; spend ended at INR 3,400 of INR 4,000 |
-| Adversarial enforce | 50 kg drift guided back to 500 kg; uncertified carrier guided to a certified carrier; projected INR 4,550 triggered `PENDING_APPROVAL` |
-| Adversarial enforce with approval | The exact prepared action was approved, confirmed once, followed by one simulated customer notification, and the run completed |
+## Real, simulated, and pending
 
-### Repository safety state
+| Area | Status | Honest claim |
+|---|---|---|
+| Agent runtime | Implemented | Real Strands loops with bounded role/tool access |
+| Authorization | Implemented locally | Real Cedar sidecar; policy decisions are authoritative |
+| Persistence | Implemented locally | DynamoDB Local; not managed AWS DynamoDB yet |
+| Ledger | Implemented | Tamper-evident SHA-256 chain; not immutable |
+| Bedrock inference | Proven separately | Paid Mantle evidence exists for synthetic fixtures |
+| Logistics systems | Simulated | Inventory, vehicles, carriers, bookings, and messages are mocks |
+| Human identity | Demo only | Shared local secret and synthetic approver label |
+| Application deployment | Pending | No Lambda/API Gateway/static AWS hosting claim yet |
+| Native Nova | Optional/pending | Account/model availability must not block Mantle deployment |
 
-The Checkpoint 4 ledger and Checkpoint 5 dashboard implementation is now committed at `705b1e8`, and `origin/main` matches that revision. The committed source therefore contains the 94-test local baseline described by the README.
+## Current verification commands
 
-The project is a reproducible local release candidate but is still **not submission-complete**:
+Focused no-network provider contract:
 
-- No Git release tags exist.
-- The generated release manifest correctly reports a dirty working tree until the operator reviews and commits Checkpoint 6.
-- Cedar, Strands/Bedrock, durable storage, and cloud deployment remain deferred.
-- Final deck, timed rehearsals, and backup video remain incomplete.
+```bash
+./scripts/run_checkpoint_10_bedrock_mantle.sh --offline
+```
 
-Before sharing or deploying a tagged release, the complete Checkpoint 6 diff must be reviewed and any commit or tag must be created as an explicit operator action. The manifest should then be regenerated against the clean revision.
+Complete local stack:
 
-## 3. Checkpoint progress
+```bash
+./scripts/start_checkpoint_11_local.sh
+```
 
-This table uses the checkpoint sequence defined in the earlier build roadmap. The repository's internal documents number some milestones differently; for example, its local dashboard is called "Checkpoint 5," while the roadmap calls the dashboard Checkpoint 7.
+Canonical CP11 acceptance gate:
 
-| Roadmap checkpoint | Status | Progress | Evidence | Remaining work |
-|---|---|---:|---|---|
-| 0. Contracts and deterministic fixture | **Complete for local prototype** | 95% | Typed domain objects and deterministic fixtures are validated; the release manifest records a canonical fixture-tree SHA-256 checksum. | Expand fixtures only if the final 20 attack/30 benign evaluation target is required. |
-| 1. Benign end-to-end journey | **Complete locally** | 90% | Four deterministic agent roles traverse Inventory, Dispatch, Carrier, and Customer Communications through one orchestrator and trace. CLI, API, bounded tool calls, effect-classed registry, trace isolation, and mock effects are tested. | Add a model/agent adapter boundary and Strands implementation. Current roles are plain Python, not Strands agents. |
-| 2. Governor and policy enforcement | **Functional reference implementation** | 80% | Every registered tool attempt is intercepted. Six Python policy families cover ownership/mandate, provenance, cold chain, commitment budget, separation of duties, and PII boundary. Unknown tools and policy-engine failures fail closed. | Replace or supplement the Python reference engine with Cedar and run the same conformance cases against it. Cedar policy/schema files are absent. |
-| 3. Hero controls | **Complete locally** | 95% | Weight drift is caught before dispatch; cold-chain carrier guide-back works; cumulative spend escalates; prepare/approve/confirm/cancel states exist; approval binding, expiry, replay, concurrency, fresh evaluation, and exact-once behavior are tested. | Validate these contracts against the future Cedar and durable-storage adapters. |
-| 4. Shadow mode | **Complete locally** | 100% | The same adversarial fixture runs in shadow and enforce modes. Shadow records counterfactual guide/escalate outcomes while mock execution continues. | Preserve parity when Cedar/Strands adapters are added. |
-| 5. Hash-chained ledger | **Complete locally; durability deferred** | 85% | Canonical SHA-256 event hashing, per-trace sequence/head state, idempotent append, verification, first-bad-sequence reporting, and disabled-by-default disposable tampering are implemented and tested. | Add a DynamoDB adapter with conditional ordered writes. The in-memory chain is lost on process restart and is tamper-evident, not immutable. |
-| 6. HTTP API | **Complete locally** | 95% | Health, fixture, run, trace, decision, projection, verification, approval, reset, and guarded tamper endpoints are implemented in FastAPI. The full approval journey is covered by API tests. | Add durable backing services, deployment configuration, authentication appropriate to the target environment, and cloud smoke tests. |
-| 7. Operator dashboard | **Complete local MVP** | 95% | The API-driven dashboard passes automated contracts and live browser smoke across health, benign, shadow, enforce, approval, verification, tamper, and API error states; screenshots are recorded. | A framework migration is optional and should occur only if judging requirements demand it. |
-| 8. AWS adapters and deployment | **Not started** | 0% | The README accurately discloses local deterministic, in-memory modes. | Implement/probe Bedrock, Strands, Cedar, DynamoDB, SAM/Lambda/API Gateway, hosting, and optional Step Functions/EventBridge. `infrastructure/` currently has no deployment files. |
-| 9. Evaluation, freeze, and submission | **In progress** | 60% | 119 tests pass; generated results include exact denominators, p50/p95 latency, false positives, guide-back success, a fixture checksum, release manifest, browser evidence, and screenshots. | Review/commit/tag Checkpoint 6, then add Cedar/cloud parity, final architecture, deck, timed rehearsals, and backup video. |
+```bash
+./scripts/run_checkpoint_11.sh
+```
 
-### Progress interpretation
+The acceptance gate explicitly selects the recorded model and cannot incur a
+hosted-model charge.
 
-- **Core local prototype (Checkpoints 0–7): approximately 93% complete.** The principal journey is implemented, measured, and browser-verified.
-- **Target cloud architecture (Checkpoint 8): 0% complete.** No AWS or Cedar/Strands integration is currently executable.
-- **Submission packaging (Checkpoint 9): approximately 60% complete.** Measured evidence and screenshots exist; tagged release, cloud path, deck, rehearsals, and video remain.
-- **Overall feature progress:** approximately 80% when roadmap checkpoints are treated equally.
-- **Practical submission readiness:** approximately 65–70%, with Cedar/AWS credibility and final packaging now the dominant gaps.
+## Remaining work
 
-These percentages are planning estimates, not measured engineering productivity metrics.
+1. Complete two manual browser rehearsals and privacy/accessibility review.
+2. Capture sanitized screenshots and a short backup video.
+3. Commit the reviewed CP11 changes and regenerate a clean release manifest.
+5. Deploy the minimal application stack during Checkpoint 12.
+6. Add native Nova parity only if access becomes available or submission rules
+   require it.
+7. Freeze evidence, claims, artifact hashes, and the final release in CP14.
 
-## 4. What is implemented now
+## Safe submission wording
 
-### Real, executable behavior
-
-- Four sequential deterministic agent roles with bounded execution.
-- Ten registered tools with owners, effect classes, descriptions, and idempotency declarations.
-- Trace-scoped trajectory state and isolated concurrent runs.
-- Shadow and enforce governance modes.
-- Six deterministic Python policy families with stable reason codes and human-readable explanations.
-- Guided correction of 50 kg back to the sourced 500 kg value.
-- Cold-chain vehicle and carrier enforcement with legal replanning.
-- Cumulative spend in integer minor units.
-- Prepare, pending approval, approve/reject/expire, confirm, and cancel transitions.
-- Approval binding to trace, action hash, state hash, policy version, expiry, and version.
-- Fresh authorization before confirmation and exact-once local effects.
-- Ordered canonical SHA-256 hash chain with a separately stored per-trace head.
-- Clean/tampered verification with first-bad-sequence reporting.
-- FastAPI read/write endpoints for the full local demonstration.
-- API-backed local browser dashboard.
-- Automated unit, policy, integration, API, CLI, concurrency, ledger, and dashboard tests.
-- Labelled evaluation cases, deterministic functional digest, p50/p95 metrics, release manifest, fixture checksum, and browser evidence.
-
-### Simulated behavior
-
-- Inventory/WMS data.
-- Vehicles, routes, carriers, certifications, quotes, and rates.
-- Freight preparation, cancellation, and confirmation effects.
-- Approver identity through a demo shared secret.
-- Customer communications through an in-memory outbox.
-- All order, customer, and operational data.
-
-### Deferred behavior
-
-- Strands Agents SDK integration.
-- Bedrock inference or recorded model-response adapter.
-- Cedar authorization engine and policy bundle.
-- DynamoDB persistence and conditional ledger append.
-- Lambda/API Gateway and hosting deployment.
-- Step Functions approval callback and EventBridge fan-out.
-- Durable sessions, restart recovery, production identity, and real logistics connectors.
-
-## 5. Evidence by code area
-
-| Capability | Primary implementation/evidence |
-|---|---|
-| Domain contracts | `packages/domain/models.py`, `packages/domain/enums.py` |
-| Deterministic fixture validation | `fixtures/loader.py`, `fixtures/**` |
-| Four-agent workflow | `apps/runtime/orchestrator.py`, `apps/runtime/agents/**` |
-| Governed tool boundary | `packages/governor/governor.py` |
-| Tool metadata and mock effects | `packages/tools/definitions.py`, `packages/tools/registry.py`, `packages/tools/mocks.py` |
-| Six policy families | `packages/policy/python_engine.py` |
-| Commitment state | `packages/commitments/service.py` |
-| Approval and exact-once resume | `packages/approvals/service.py`, `apps/runtime/service.py` |
-| Hash chain and verification | `packages/ledger/canonical.py`, `packages/ledger/memory_store.py`, `packages/ledger/verifier.py` |
-| HTTP API | `apps/api/main.py`, `apps/api/schemas.py` |
-| Dashboard projection and UI | `packages/projections/dashboard.py`, `apps/dashboard/static/**` |
-| Verification suite | `tests/**`, `scripts/run_checkpoint_5.sh` |
-
-## 6. Key risks and issues
-
-### P0 — Review and tag the measured baseline
-
-Checkpoint 6 now generates the release manifest and measured evidence, but the working tree remains dirty until an operator reviews and commits it. After review, regenerate the manifest against the clean revision and create the checkpoint tag explicitly.
-
-### P0 — Target-architecture claim gap
-
-The central target claim specifies Strands plus Cedar, but the current implementation uses plain Python agents and a Python reference policy engine. The current solution demonstrates the product behavior but not yet the named technical differentiators.
-
-### P1 — Volatile state
-
-Runs, approvals, effects, and ledger heads live in memory. Process restart destroys them, and a separate CLI process cannot resume an existing approval. This is acceptable for the current local checkpoint but unsuitable for a deployed demo.
-
-### P1 — No tagged release or deployment path
-
-There are no tags and no infrastructure templates. The rollback and stable-demo strategy described in the plan has not begun.
-
-### P1 — Dashboard visual QA is not recorded
-
-Contract and endpoint tests pass, but this assessment did not find screenshots, browser test evidence, or a recorded clean-browser rehearsal.
-
-### P2 — Fixture breadth
-
-The current fixture set is intentionally minimal: one order, one inventory record, two vehicles, and two carrier quotes. This is sufficient for the hero demo but not for the planned 20 attack/30 benign evaluation target.
-
-## 7. Recommended next checkpoints
-
-### Next 1 — Review and tag the verified local release
-
-**Goal:** Make the assessed state reproducible before adding integrations.
-
-1. Review the Checkpoint 6 implementation and generated evidence.
-2. Run `./scripts/run_checkpoint_6.sh` from the reviewed environment.
-3. Commit the approved changes.
-4. Regenerate the release manifest so `source.dirty` is false.
-5. Tag the result, for example `v0.6.0-local-evaluated`.
-
-**Exit test:** a clean clone at the tag installs and passes the full checkpoint script.
-
-### Next 2 — Add Cedar through the existing policy interface
-
-**Goal:** Close the most important architecture gap without destabilizing the workflow.
-
-1. Define Cedar schema and `demo-v1` policies.
-2. Implement a Cedar adapter conforming to `PolicyEngine`.
-3. Run the existing Python policy cases against both engines.
-4. Keep the Python engine as a disclosed local fallback, not as a silent substitute.
-
-**Exit test:** all policy conformance and full journey tests pass with Cedar active.
-
-### Next 3 — Add durable storage
-
-**Goal:** Preserve runs, approvals, and the hash chain across processes.
-
-1. Introduce a storage protocol around the current memory store.
-2. Add DynamoDB keys and conditional sequence/head updates.
-3. Preserve idempotency and approval concurrency behavior.
-4. Test process restart and resume.
-
-**Exit test:** an API process can restart and then approve an existing pending trace exactly once.
-
-### Next 4 — Add Strands/Bedrock and deploy the thin cloud path
-
-**Goal:** Demonstrate the intended agent and AWS integration without moving authorization into the model.
-
-1. Add a deterministic/Strands agent adapter boundary.
-2. Probe Bedrock access and keep a recorded-response fallback.
-3. Add SAM for Lambda, API Gateway, and DynamoDB.
-4. Host the existing static dashboard first; migrate frameworks only if necessary.
-5. Attempt Step Functions and EventBridge only after the mandatory cloud path is green.
-
-**Exit test:** one cloud adversarial run reaches pending approval, resumes exactly once, and verifies its persisted chain.
-
-### Next 5 — Freeze and package the submission
-
-**Goal:** Convert the implementation into a reliable four-minute submission.
-
-- Produce architecture and real/mock/deferred diagrams matching the actual release.
-- Capture screenshots and a backup video.
-- Run at least three timed rehearsals from reset.
-- Verify clean-browser links and the local fallback.
-- Tag the final exact artifact and stop feature work.
-
-## 8. Suggested submission wording
-
-### Safe wording now
-
-> Manifest is a deterministic local prototype that governs a synthetic four-agent perishable-shipment trajectory. It catches numeric provenance drift, guides unsafe carrier choices to compliant alternatives, pauses cumulative spend for a bound human approval, and records decisions in a verifiable SHA-256 hash chain. All logistics systems and data are simulated; authorization currently uses a Python reference policy engine and storage is in memory.
-
-### Wording to avoid until implemented
-
-- "Powered by Cedar" or "Cedar-authorized"
-- "Built with Strands Agents"
-- "Bedrock-powered agents"
-- "DynamoDB-backed ledger"
-- "AWS-deployed"
-- "Immutable ledger"
-- "Production-ready" or any compliance certification claim
-
-## 9. Submission decision
-
-**Current decision: CONDITIONAL GO for a local prototype demonstration; NO-GO for the full target submission claim.**
-
-The local product thesis is convincingly implemented and tested. The immediate priority is not another feature: it is to produce measured evidence and a release manifest for the committed baseline, then create an operator-approved checkpoint tag before closing the Cedar/AWS gaps in that order. If time becomes constrained, preserve the current local flow, add Cedar conformance and metrics, and submit with explicit disclosure rather than risking the stable demo on optional cloud services.
+> Manifest is a governed logistics-agent prototype whose bounded Strands roles
+> propose actions through narrow tools. Cedar authorizes every protected tool
+> attempt, DynamoDB Local preserves the approval and exact-once state, and a
+> verifiable SHA-256 chain records the trajectory. The local deterministic demo
+> uses a recorded model; separate evidence proves the same governed path with
+> Amazon Bedrock Mantle. Logistics data and effects are synthetic and the
+> application is not yet deployed to AWS.

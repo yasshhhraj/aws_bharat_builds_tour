@@ -65,3 +65,12 @@ def test_openrouter_router_is_disclosed_without_secret(monkeypatch):
     assert description["requested_model_id"] == "openrouter/free"
     assert description["resolved_model_id"] is None
     assert "must-not-appear" not in repr(description)
+
+
+def test_fixed_provider_discloses_known_resolved_model():
+    settings = RuntimeSettings("strands", "recorded", "manifest-recorded-v1")
+
+    description = settings.describe()
+
+    assert description["provider_route_kind"] == "fixed"
+    assert description["resolved_model_id"] == "manifest-recorded-v1"

@@ -31,10 +31,15 @@
           <p class="hero-copy">Run the same synthetic shipment in shadow or enforce mode. Manifest follows the whole trajectory—not just one tool call.</p>
         </div>
         <dl id="environmentGrid" class="environment-grid" aria-label="Active environment">
-          <div><dt>Runtime</dt><dd>Loading…</dd></div>
-          <div><dt>Policy</dt><dd>Loading…</dd></div>
-          <div><dt>Ledger</dt><dd>Loading…</dd></div>
-          <div><dt>Approval</dt><dd>Loading…</dd></div>
+          <div><dt>Runtime</dt><dd id="envRuntime">Loading…</dd></div>
+          <div><dt>Provider</dt><dd id="envProvider">Loading…</dd></div>
+          <div><dt>Requested model</dt><dd id="envRequestedModel">Loading…</dd></div>
+          <div><dt>Resolved model</dt><dd id="envResolvedModel">Loading…</dd></div>
+          <div><dt>Route</dt><dd id="envRoute">Loading…</dd></div>
+          <div><dt>Policy</dt><dd id="envPolicy">Loading…</dd></div>
+          <div><dt>Storage</dt><dd id="envStorage">Loading…</dd></div>
+          <div><dt>Ledger</dt><dd id="envLedger">Loading…</dd></div>
+          <div><dt>Data &amp; effects</dt><dd id="envEffects">Synthetic · simulated</dd></div>
         </dl>
       </section>
 
@@ -51,7 +56,7 @@
           <button id="refreshButton" class="button button-secondary" type="button" disabled>Refresh</button>
           <button id="resetButton" class="button button-quiet" type="button" disabled>Reset demo</button>
         </form>
-        <div id="appMessage" class="app-message" aria-live="polite"></div>
+        <div id="appMessage" class="app-message" aria-live="polite" tabindex="-1"></div>
       </section>
 
       <section id="summarySection" class="summary-grid" aria-label="Trace summary">
@@ -59,6 +64,8 @@
         <article class="metric-card"><p>Projected spend</p><strong id="spendValue">—</strong><span id="spendCeiling">No active mandate</span><div class="spend-track" aria-hidden="true"><span id="spendBar"></span></div></article>
         <article class="metric-card"><p>Risk signals</p><strong id="riskValue">—</strong><span>Demo control-family score</span></article>
         <article class="metric-card"><p>Ledger integrity</p><strong id="integrityValue">Unknown</strong><span id="integrityDetail">Not verified</span></article>
+        <article id="operatorCard" class="metric-card"><p>Operator state</p><strong id="operatorState">Ready</strong><span id="operatorDetail">No governed trace loaded</span></article>
+        <article class="metric-card"><p>Exact-once receipts</p><strong id="receiptState">None</strong><span id="receiptDetail">0 confirmations · 0 notifications</span></article>
       </section>
 
       <section class="panel signal-panel" aria-labelledby="signalsHeading">
@@ -110,7 +117,7 @@
       </section>
     </main>
 
-    <footer>Manifest prototype · Synthetic logistics data · Tamper-evident, not immutable</footer>
+    <footer>Manifest local prototype · Synthetic logistics data and simulated effects · Tamper-evident, not immutable</footer>
     <script type="module" src="/dashboard/js/app.js"></script>
   </body>
 </html>

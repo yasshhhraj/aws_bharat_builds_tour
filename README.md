@@ -5,8 +5,8 @@ agent actions before they create physical, financial, or disclosure effects.
 
 ## Current status
 
-**Checkpoints 9 and 10 are complete on the `checkpoint-9-offline-strands`
-branch.** One
+**Checkpoints 9 and 10 are complete, and Checkpoint 11 hardening is implemented
+on the `checkpoint-11-hardening` branch.** One
 deterministic shipment runs through four real Strands agent loops backed by an
 offline recorded model or the selected Bedrock Mantle provider, in either
 shadow or enforce mode. Every registered tool
@@ -112,6 +112,25 @@ Run the selected Checkpoint 10 provider contract without any hosted request:
 ./scripts/run_checkpoint_10_bedrock_mantle.sh --offline
 ```
 
+Start the complete Checkpoint 11 local stack with one command:
+
+```bash
+./scripts/start_checkpoint_11_local.sh
+```
+
+The launcher binds the API, Cedar, and DynamoDB Local to loopback, selects the
+recorded Strands model, and prints ephemeral local approval/tamper secrets when
+they were not supplied. Do not include those secrets in screenshots or video.
+
+Run the canonical no-paid-call Checkpoint 11 acceptance gate:
+
+```bash
+./scripts/run_checkpoint_11.sh
+```
+
+Manual browser rehearsal and recording instructions are in
+[`docs/manual/CHECKPOINT_11_LOCAL_DEMO.md`](docs/manual/CHECKPOINT_11_LOCAL_DEMO.md).
+
 The current labelled set contains 10 attack and 12 benign/boundary cases. The
 committed results must always be read with their disclosed engine and with the
 local deterministic and in-memory modes.
@@ -122,7 +141,7 @@ local deterministic and in-memory modes.
 - Rust stable with Cargo (for the Cedar sidecar)
 - Docker with Compose (for durable DynamoDB Local mode)
 
-From `/home/yashraj/p0/project`:
+From the project root:
 
 ```bash
 python3 -m venv .venv
@@ -130,7 +149,8 @@ source .venv/bin/activate
 python3 -m pip install -e '.[dev]'
 ```
 
-No AWS account or credentials are required.
+No AWS account or credentials are required for the default recorded-mode demo.
+The separate Bedrock Mantle route is optional and billable.
 
 The default environment remains the legacy deterministic runtime for backwards
 compatibility. To run through Strands with the offline recorded model:
