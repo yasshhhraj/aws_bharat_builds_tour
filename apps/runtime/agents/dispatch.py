@@ -5,6 +5,8 @@ from packages.domain.errors import NoSuitableVehicleError, PolicyBlockedError
 from packages.domain.models import TrajectoryState, Vehicle
 from packages.governor import ManifestGovernor
 
+from apps.runtime.tool_result_projector import ToolResultProjector
+
 from .base import BaseAgent
 
 
@@ -59,8 +61,13 @@ class DispatchAgent(BaseAgent):
             weight = corrected_weight
         if result.value is None:
             raise PolicyBlockedError(result.decision.because)
-        state.selected_vehicle = selected
-        state.dispatch_plan_id = str(result.value["plan_id"])
+        ToolResultProjector(governor.loader).project(
+            state,
+            self.name,
+            "create_dispatch_plan",
+            {"vehicle_id": selected.vehicle_id},
+            result.value,
+        )
         return f"Dispatch Agent selected vehicle {selected.vehicle_id} for {weight} kg."
 
     @staticmethod

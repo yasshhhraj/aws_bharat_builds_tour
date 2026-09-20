@@ -79,16 +79,29 @@ def render_markdown(report: EvaluationReport) -> str:
     policy = report.latency["policy_ms"]
     total = report.latency["end_to_end_ms"]
     cedar_active = report.active_modes.get("policy_engine") == "cedar"
+    strands_active = report.active_modes.get("runtime") == "strands"
     title = (
-        "# Manifest Checkpoint 7 Cedar Evaluation Results"
-        if cedar_active
-        else "# Manifest Checkpoint 6 Evaluation Results"
+        "# Manifest Checkpoint 9 Offline Strands Evaluation Results"
+        if strands_active
+        else (
+            "# Manifest Checkpoint 7 Cedar Evaluation Results"
+            if cedar_active
+            else "# Manifest Checkpoint 6 Evaluation Results"
+        )
     )
+    environment = ""
+    if strands_active:
+        environment += (
+            "MANIFEST_AGENT_RUNTIME=strands MANIFEST_MODEL_PROVIDER=recorded "
+            "MANIFEST_MODEL_ID=manifest-recorded-v1 "
+        )
+    if cedar_active:
+        environment += "MANIFEST_POLICY_ENGINE=cedar CEDAR_ENDPOINT=http://127.0.0.1:18765 "
     reproduce = (
-        "MANIFEST_POLICY_ENGINE=cedar CEDAR_ENDPOINT=http://127.0.0.1:18765 "
-        "python3 scripts/run_evaluation.py --policy-engine cedar --warmup 1 --iterations 10"
-        if cedar_active
-        else "python3 scripts/run_evaluation.py --warmup 1 --iterations 10"
+        environment
+        + "python3 scripts/run_evaluation.py"
+        + (" --policy-engine cedar" if cedar_active else "")
+        + " --warmup 1 --iterations 10"
     )
     lines = [
         title,

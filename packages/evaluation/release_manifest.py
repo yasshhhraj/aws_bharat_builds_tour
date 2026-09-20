@@ -9,6 +9,7 @@ import platform
 import os
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,27 @@ from .report import write_atomic
 
 
 RELEASE_SCHEMA_VERSION = "manifest-release-v1"
+
+
+def _runtime_limitation(runtime_mode: str, model_provider: str) -> str:
+    if runtime_mode != "strands":
+        return "Deterministic Python agents; Strands is not active."
+    if model_provider == "recorded":
+        return (
+            "Offline Strands runtime with a deterministic recorded model; no hosted "
+            "model or provider network is active."
+        )
+    if model_provider == "openrouter":
+        return (
+            "Live OpenRouter model through Strands using synthetic data; provider and "
+            "free-model availability can change."
+        )
+    if model_provider == "bedrock_mantle":
+        return (
+            "Live Amazon Bedrock model through the OpenAI-compatible Mantle endpoint using "
+            "synthetic data; paid hosted inference is active."
+        )
+    return "Amazon Bedrock model through Strands; AWS access is required for live use."
 
 
 def fixture_tree_digest(fixture_root: Path) -> dict[str, Any]:
@@ -89,7 +111,17 @@ def source_metadata(repo_root: Path) -> dict[str, Any]:
     return metadata
 
 
-def dependency_versions(names: tuple[str, ...] = ("boto3", "fastapi", "uvicorn", "httpx", "pytest")) -> dict[str, str]:
+def dependency_versions(
+    names: tuple[str, ...] = (
+        "boto3",
+        "fastapi",
+        "openai",
+        "strands-agents",
+        "uvicorn",
+        "httpx",
+        "pytest",
+    ),
+) -> dict[str, str]:
     versions: dict[str, str] = {}
     for name in names:
         try:
@@ -101,7 +133,7 @@ def dependency_versions(names: tuple[str, ...] = ("boto3", "fastapi", "uvicorn",
 
 def collected_test_count(repo_root: Path) -> int:
     result = subprocess.run(
-        ["python3", "-m", "pytest", "--collect-only", "-q"],
+        [sys.executable, "-m", "pytest", "--collect-only", "-q"],
         cwd=repo_root,
         check=True,
         capture_output=True,
@@ -141,9 +173,12 @@ def build_release_manifest(
         if active_modes.get(key):
             policy[key] = str(active_modes[key])
     storage_mode = str(active_modes.get("storage", "memory_hash_chain"))
+    runtime_mode = str(active_modes.get("runtime", "legacy"))
+    model_provider = str(active_modes.get("model_provider", "deterministic"))
+    model_id = str(active_modes.get("model_id", "manifest-deterministic-v1"))
     limitations = [
         "Synthetic logistics data and effects only.",
-        "Deterministic Python agents; Strands and Bedrock are not active.",
+        _runtime_limitation(runtime_mode, model_provider),
         (
             "DynamoDB Local is durable across application restart but is not a managed production deployment."
             if storage_mode.startswith("dynamodb")
@@ -165,7 +200,22 @@ def build_release_manifest(
         "dependencies": dependency_versions(),
         "fixture_tree": fixture_tree_digest(repo_root / "fixtures"),
         "policy": policy,
-        "runtime": {"mode": "deterministic"},
+        "runtime": {
+            "mode": runtime_mode,
+            "model_provider": model_provider,
+            "model_id": model_id,
+            "requested_model_id": active_modes.get("requested_model_id", model_id),
+            "resolved_model_id": active_modes.get("resolved_model_id", "unknown"),
+            "provider_route_kind": active_modes.get("provider_route_kind", "fixed"),
+            "agent_max_turns": active_modes.get("agent_max_turns", "unknown"),
+            "agent_timeout_seconds": active_modes.get(
+                "agent_timeout_seconds", "unknown"
+            ),
+            "model_output_limit": active_modes.get(
+                "model_output_limit", "unknown"
+            ),
+            "provider_fallback_active": False,
+        },
         "storage": {
             "mode": storage_mode,
             **(

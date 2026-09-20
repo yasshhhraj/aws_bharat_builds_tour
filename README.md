@@ -5,8 +5,11 @@ agent actions before they create physical, financial, or disclosure effects.
 
 ## Current status
 
-**Checkpoint 8 is implemented locally.** One deterministic shipment runs through four
-plain-Python agent roles in either shadow or enforce mode. Every registered tool
+**Checkpoints 9 and 10 are complete on the `checkpoint-9-offline-strands`
+branch.** One
+deterministic shipment runs through four real Strands agent loops backed by an
+offline recorded model or the selected Bedrock Mantle provider, in either
+shadow or enforce mode. Every registered tool
 attempt receives an authoritative Cedar policy decision before its mock effect executes, and a
 bound human approval can resume or cancel a paused commitment. Every retained
 trace event is now part of an ordered SHA-256 hash chain that can be verified
@@ -41,12 +44,27 @@ The implementation demonstrates:
 - fail-closed engine selection with bundle/schema identity disclosure; and
 - exact functional parity across the 22-case Python/Cedar evaluation corpus; and
 - optional durable single-table DynamoDB storage with optimistic revisions,
-  transactional ledger writes, persisted approvals, and replay receipts.
+  transactional ledger writes, persisted approvals, and replay receipts; and
+- a bounded, sequential Strands runtime with role-specific governed tools and no
+  AWS account, hosted model, provider key, or network call in recorded mode; and
+- one provider factory for recorded, OpenRouter, and construction-tested Bedrock
+  models, with bounded requests, sanitized failures, and no automatic fallback.
 
 The durable-storage specification is
 [`docs/CHECKPOINT_8_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_8_IMPLEMENTATION_PLAN.md),
 with current results in
 [`docs/CHECKPOINT_8_COMPLETION_REPORT.md`](docs/CHECKPOINT_8_COMPLETION_REPORT.md).
+The offline-agent specification is
+[`docs/CHECKPOINT_9_OFFLINE_IMPLEMENTATION_PLAN.md`](docs/CHECKPOINT_9_OFFLINE_IMPLEMENTATION_PLAN.md).
+Its completed verification is recorded in
+[`docs/CHECKPOINT_9_COMPLETION_REPORT.md`](docs/CHECKPOINT_9_COMPLETION_REPORT.md).
+The hosted-provider implementation and remaining live owner action are recorded
+in [`docs/CHECKPOINT_10_IMPLEMENTATION_REPORT.md`](docs/CHECKPOINT_10_IMPLEMENTATION_REPORT.md)
+and [`docs/manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md`](docs/manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md).
+OpenRouter remains available for experiments, but the selected live gate is now
+the explicit paid Bedrock Mantle path.
+The successful live verification is recorded in
+[`docs/CHECKPOINT_10_COMPLETION_REPORT.md`](docs/CHECKPOINT_10_COMPLETION_REPORT.md).
 
 The generated evidence is in
 [`docs/results/checkpoint-6-evaluation.md`](docs/results/checkpoint-6-evaluation.md),
@@ -82,6 +100,18 @@ Run the Checkpoint 8 durability gate:
 ./scripts/run_checkpoint_8.sh
 ```
 
+Run the offline Strands Checkpoint 9 gate:
+
+```bash
+./scripts/run_checkpoint_9_offline.sh
+```
+
+Run the selected Checkpoint 10 provider contract without any hosted request:
+
+```bash
+./scripts/run_checkpoint_10_bedrock_mantle.sh --offline
+```
+
 The current labelled set contains 10 attack and 12 benign/boundary cases. The
 committed results must always be read with their disclosed engine and with the
 local deterministic and in-memory modes.
@@ -101,6 +131,63 @@ python3 -m pip install -e '.[dev]'
 ```
 
 No AWS account or credentials are required.
+
+The default environment remains the legacy deterministic runtime for backwards
+compatibility. To run through Strands with the offline recorded model:
+
+```bash
+export MANIFEST_AGENT_RUNTIME=strands
+export MANIFEST_MODEL_PROVIDER=recorded
+export MANIFEST_MODEL_ID=manifest-recorded-v1
+```
+
+This mode never contacts Bedrock or another hosted provider and never falls back
+to one. It uses the same governor, Cedar policy, approvals, storage, and ledger
+contracts as the legacy runtime.
+
+### Experimental OpenRouter path
+
+Install the optional adapter:
+
+```bash
+.venv/bin/pip install -e '.[dev,openrouter]'
+```
+
+Follow the key-safety and privacy steps in
+[`docs/manual/CHECKPOINT_10_OPENROUTER_SETUP.md`](docs/manual/CHECKPOINT_10_OPENROUTER_SETUP.md),
+then run the read-only probe before the full live gate:
+
+```bash
+export MANIFEST_AGENT_RUNTIME=strands
+export MANIFEST_MODEL_PROVIDER=openrouter
+export MANIFEST_MODEL_ID=openrouter/free
+export MANIFEST_RUN_LIVE_OPENROUTER=1
+./scripts/run_checkpoint_10_openrouter.sh --probe
+./scripts/run_checkpoint_10_openrouter.sh --live
+```
+
+The script starts authoritative Cedar, uses only synthetic fixtures, and refuses
+hosted requests without explicit opt-in. It never prints the provider key. The
+live tests are intentionally skipped by ordinary `pytest` runs.
+
+OpenRouter completed isolated probes but was unreliable across the complete
+multi-role gate. It is not the selected submission path.
+
+### Selected Bedrock Mantle proof
+
+This path is billable and uses a dedicated temporary Bedrock API key. Follow
+[`docs/manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md`](docs/manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md),
+run the zero-inference readiness check, and then deliberately opt in to one
+Inventory probe:
+
+```bash
+.venv/bin/pip install -e '.[dev,bedrock_mantle]'
+.venv/bin/python scripts/check_bedrock_mantle_ready.py
+export MANIFEST_RUN_LIVE_BEDROCK_MANTLE=1
+./scripts/run_checkpoint_10_bedrock_mantle.sh --probe
+```
+
+The script stops at the first failure and never silently switches providers.
 
 ### Durable local storage
 
@@ -308,7 +395,11 @@ The earlier Checkpoint 7 gate remains available:
 CLI / FastAPI / static browser dashboard
      |
      v
-RunService -> ShipmentOrchestrator -> four deterministic agents
+RunService -> ShipmentOrchestrator -> four bounded roles
+                                         |
+                            legacy or StrandsRuntime
+                                         |
+                    recorded | OpenRouter | Bedrock model
                                          |
                                          v
                                  ManifestGovernor
@@ -335,7 +426,9 @@ policy engine and memory repository remain explicit offline/test fallbacks.
 
 Real in this checkpoint:
 
-- agent sequencing and bounded guide-back;
+- agent sequencing and bounded guide-back through legacy or Strands execution;
+- recorded and OpenRouter model construction behind one provider-neutral seam;
+- construction-tested Bedrock configuration without an AWS invocation;
 - tool interception, ownership, and effect classification;
 - all six deterministic policy families;
 - weight provenance and cumulative spend state;
@@ -365,7 +458,8 @@ new internally consistent chain. This prototype does not claim otherwise.
 Deferred:
 
 - independently signed or Object-Locked ledger checkpoints;
-- Strands, Bedrock, and managed AWS deployment;
+- completion of the opt-in live OpenRouter evidence;
+- live Bedrock parity and managed AWS deployment;
 - a production frontend framework, durable dashboard sessions, and real
   logistics integrations.
 

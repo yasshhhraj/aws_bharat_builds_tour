@@ -165,7 +165,7 @@ async def health_ready():
     return {
         "status": "ready",
         "version": "0.7.0",
-        "runtime_mode": "deterministic",
+        **service.runtime_settings.describe(),
         "governor_mode": "policy_enforced",
         **policy_status,
         **service.store.describe(),

@@ -218,6 +218,15 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     runtime_mode: str
+    model_provider: str
+    model_id: str
+    requested_model_id: str
+    resolved_model_id: str | None
+    provider_route_kind: str
+    agent_max_turns: int
+    agent_timeout_seconds: float
+    model_max_output_tokens: int
+    provider_fallback_active: bool
     governor_mode: str
     policy_engine: str
     policy_version: str

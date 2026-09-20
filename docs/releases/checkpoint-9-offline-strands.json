@@ -9,7 +9,9 @@
     "boto3": "1.43.98",
     "fastapi": "0.141.1",
     "httpx": "0.28.1",
+    "openai": "2.54.0",
     "pytest": "8.4.2",
+    "strands-agents": "1.56.0",
     "uvicorn": "0.53.0"
   },
   "deployment": {
@@ -20,7 +22,7 @@
     "case_passed": 22,
     "case_total": 22,
     "functional_digest": "sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120",
-    "result_path": "docs/results/checkpoint-8-dynamodb-evaluation.json",
+    "result_path": "docs/results/checkpoint-9-offline-strands-evaluation.json",
     "schema_version": "manifest-evaluation-v1"
   },
   "fixture_tree": {
@@ -28,11 +30,11 @@
     "digest": "sha256:37904e005b547792befed64ef94d0c919eb40ca97330d728e8ada49c7a1b3cf4",
     "file_count": 12
   },
-  "generated_at": "2026-09-19T19:53:07.818904Z",
+  "generated_at": "2026-09-20T06:24:44.932739Z",
   "limitations": [
     "Synthetic logistics data and effects only.",
     "Cedar policy engine runs as a local loopback sidecar.",
-    "Deterministic Python agents; Strands and Bedrock are not active.",
+    "Offline Strands runtime with a deterministic recorded model; no hosted model or provider network is active.",
     "DynamoDB Local is durable across application restart but is not a managed production deployment.",
     "Tamper-evident hash chain, not an immutable ledger.",
     "Local deployment only."
@@ -52,24 +54,33 @@
     "version": "3.14.6"
   },
   "runtime": {
-    "mode": "deterministic"
+    "agent_max_turns": "8",
+    "agent_timeout_seconds": "15.0",
+    "mode": "strands",
+    "model_id": "manifest-recorded-v1",
+    "model_output_limit": "1024",
+    "model_provider": "recorded",
+    "provider_fallback_active": false,
+    "provider_route_kind": "fixed",
+    "requested_model_id": "manifest-recorded-v1",
+    "resolved_model_id": "unknown"
   },
   "schema_version": "manifest-release-v1",
   "source": {
     "branch": "checkpoint-9-offline-strands",
     "commit": "c7731e1a0ca370cb78365dee7c65f6bf1973756a",
-    "diff_fingerprint": "sha256:d1755a093d78e6349f14e9d6587f253eaad68bf6feb220b801f4b2d0ca50d479",
+    "diff_fingerprint": "sha256:f7b87b4462ed08025412537c56170b36ee76482c97b6bef9c7eaf8aefa8a35c0",
     "dirty": true
   },
   "storage": {
     "local_image": "amazon/dynamodb-local:2.5.4@sha256:cf8cebd061f988628c02daff10fdb950a54478feff9c52f6ddf84710fe3c3906",
     "mode": "dynamodb_local",
-    "namespace": "checkpoint-8-gate",
+    "namespace": "checkpoint-9-offline-gate",
     "table": "manifest-local"
   },
   "tests": {
-    "collected": 174,
-    "command": "./scripts/run_checkpoint_8.sh",
+    "collected": 213,
+    "command": "./scripts/run_checkpoint_9_offline.sh",
     "failed": 0,
     "status": "passed"
   }

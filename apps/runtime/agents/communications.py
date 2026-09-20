@@ -5,6 +5,8 @@ from packages.domain.errors import ManifestError
 from packages.domain.models import TrajectoryState
 from packages.governor import ManifestGovernor
 
+from apps.runtime.tool_result_projector import ToolResultProjector
+
 from .base import BaseAgent
 
 
@@ -29,5 +31,11 @@ class CustomerCommunicationsAgent(BaseAgent):
         )
         if result.value is None:
             raise ManifestError(result.decision.because)
-        state.notification_id = str(result.value["notification_id"])
+        ToolResultProjector(governor.loader).project(
+            state,
+            self.name,
+            "write_tracking_outbox",
+            {"order_id": state.order_id},
+            result.value,
+        )
         return "Customer Communications Agent wrote a simulated tracking message."

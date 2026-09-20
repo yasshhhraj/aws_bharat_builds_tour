@@ -35,18 +35,20 @@ from packages.storage.protocol import TraceRepository
 from packages.storage.factory import build_trace_repository_from_env
 from packages.tools import MockLogisticsTools, build_tool_registry
 
-from .agents import CarrierAgent, CustomerCommunicationsAgent, DispatchAgent, InventoryAgent
 from .orchestrator import ShipmentOrchestrator
+from .runtime_factory import build_runtime_agents
+from .runtime_settings import RuntimeSettings
 
 
 class RunService:
-    def __init__(self, loader, store, mocks, orchestrator, policy_engine, approval_lifecycle) -> None:
+    def __init__(self, loader, store, mocks, orchestrator, policy_engine, approval_lifecycle, runtime_settings) -> None:
         self.loader: FixtureLoader = loader
         self.store: TraceRepository = store
         self.mocks: MockLogisticsTools = mocks
         self.orchestrator: ShipmentOrchestrator = orchestrator
         self.policy_engine = policy_engine
         self.approval_lifecycle: ApprovalLifecycle = approval_lifecycle
+        self.runtime_settings: RuntimeSettings = runtime_settings
         self._approval_resolution_lock = RLock()
 
     def start_run(
@@ -280,6 +282,7 @@ def build_run_service(
     *,
     policy_engine: PolicyEngine | None = None,
     store: TraceRepository | None = None,
+    runtime_settings: RuntimeSettings | None = None,
 ) -> RunService:
     loader = FixtureLoader()
     loader.validate_all()
@@ -288,9 +291,10 @@ def build_run_service(
     active_policy_engine = policy_engine or build_policy_engine_from_env()
     active_policy_engine.validate_startup()
     governor = ManifestGovernor(registry, active_store, active_policy_engine, loader)
-    agents = [InventoryAgent(), DispatchAgent(), CarrierAgent(), CustomerCommunicationsAgent()]
+    active_runtime_settings = runtime_settings or RuntimeSettings.from_env()
+    agents = build_runtime_agents(active_runtime_settings)
     orchestrator = ShipmentOrchestrator(
-        agents, governor, active_store, loader
+        agents, governor, active_store, loader, active_runtime_settings
     )
     approval_lifecycle = ApprovalLifecycle(now_fn or utc_now)
     return RunService(
@@ -300,4 +304,5 @@ def build_run_service(
         orchestrator,
         active_policy_engine,
         approval_lifecycle,
+        active_runtime_settings,
     )

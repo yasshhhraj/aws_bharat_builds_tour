@@ -45,6 +45,50 @@ class ToolExecutionError(ManifestError):
     code = "TOOL_EXECUTION_ERROR"
 
 
+class AgentRuntimeError(ManifestError):
+    code = "AGENT_RUNTIME_ERROR"
+
+
+class RuntimeConfigurationError(ManifestError):
+    code = "RUNTIME_CONFIGURATION_ERROR"
+
+
+class ProviderConfigurationError(RuntimeConfigurationError):
+    code = "PROVIDER_CONFIGURATION_ERROR"
+
+
+class ProviderError(AgentRuntimeError):
+    code = "PROVIDER_ERROR"
+
+
+class ProviderAuthenticationError(ProviderError):
+    code = "PROVIDER_AUTHENTICATION_ERROR"
+
+
+class ProviderBillingError(ProviderError):
+    code = "PROVIDER_BILLING_ERROR"
+
+
+class ProviderModelUnavailableError(ProviderError):
+    code = "PROVIDER_MODEL_UNAVAILABLE"
+
+
+class ProviderRateLimitError(ProviderError):
+    code = "PROVIDER_RATE_LIMITED"
+
+
+class ProviderTimeoutError(ProviderError):
+    code = "PROVIDER_TIMEOUT"
+
+
+class ProviderUnavailableError(ProviderError):
+    code = "PROVIDER_UNAVAILABLE"
+
+
+class AgentIncompleteError(AgentRuntimeError):
+    code = "AGENT_INCOMPLETE"
+
+
 class UnsupportedModeError(ManifestError):
     code = "UNSUPPORTED_MODE"
 

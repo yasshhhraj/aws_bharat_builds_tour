@@ -7,12 +7,18 @@ from uuid import uuid4
 
 from fixtures import FixtureLoader
 from packages.domain.enums import AgentName, EventType, GovernanceMode, RunStatus, ScenarioName, WorkflowStage
-from packages.domain.errors import ApprovalStateMismatchError, ManifestError, PolicyBlockedError
+from packages.domain.errors import (
+    ApprovalStateMismatchError,
+    ManifestError,
+    PolicyBlockedError,
+    ProviderError,
+)
 from packages.domain.models import ApprovalRecord, ScenarioConfig, ShipmentMandate, TrajectoryState
 from packages.governor import ManifestGovernor
 from packages.storage.protocol import TraceRepository
 
 from .agents.base import BaseAgent
+from .runtime_settings import RuntimeSettings
 
 
 class ShipmentOrchestrator:
@@ -22,11 +28,13 @@ class ShipmentOrchestrator:
         governor: ManifestGovernor,
         store: TraceRepository,
         loader: FixtureLoader | None = None,
+        runtime_settings: RuntimeSettings | None = None,
     ) -> None:
         self.agents = tuple(agents)
         self.governor = governor
         self.store = store
         self.loader = loader or FixtureLoader()
+        self.runtime_settings = runtime_settings or RuntimeSettings()
 
     def run(
         self,
@@ -57,7 +65,7 @@ class ShipmentOrchestrator:
             EventType.RUN_STARTED,
             f"Started {scenario.value} journey for {order_id} in {mode.value} mode.",
             details={
-                "runtime_mode": "deterministic",
+                **self.runtime_settings.describe(),
                 "governor_mode": "policy_enforced",
                 "mode": mode.value,
                 "scenario": scenario.value,
@@ -94,7 +102,7 @@ class ShipmentOrchestrator:
                 self.store.append_event(
                     state,
                     EventType.RUN_COMPLETED,
-                    f"Completed deterministic journey for {order_id}.",
+                    f"Completed {self.runtime_settings.runtime_mode} journey for {order_id}.",
                     idempotency_key=f"run:{state.trace_id}:completed",
                 )
         except PolicyBlockedError as exc:
@@ -104,11 +112,17 @@ class ShipmentOrchestrator:
             state.error = exc.message
             self.store.append_event(state, EventType.RUN_FAILED, exc.message, details={"error_code": exc.code, "terminal_status": "blocked"})
         except Exception as exc:
+            failed_agent = state.current_agent
             state.status = RunStatus.FAILED
             state.workflow_stage = WorkflowStage.FAILED
             state.current_agent = None
             state.error = exc.message if isinstance(exc, ManifestError) else "Run failed unexpectedly."
-            self.store.append_event(state, EventType.RUN_FAILED, state.error, details={"error_code": getattr(exc, "code", "UNEXPECTED_ERROR")})
+            self.store.append_event(
+                state,
+                EventType.RUN_FAILED,
+                state.error,
+                details=self._failure_details(exc, failed_agent),
+            )
         return state
 
     def resume_approved(
@@ -172,6 +186,7 @@ class ShipmentOrchestrator:
                 details={"error_code": exc.code, "terminal_status": "blocked"},
             )
         except Exception as exc:
+            failed_agent = state.current_agent
             state.status = RunStatus.FAILED
             state.workflow_stage = WorkflowStage.FAILED
             state.current_agent = None
@@ -180,9 +195,26 @@ class ShipmentOrchestrator:
                 state,
                 EventType.RUN_FAILED,
                 state.error,
-                details={"error_code": getattr(exc, "code", "UNEXPECTED_ERROR")},
+                details=self._failure_details(exc, failed_agent),
             )
         return state
+
+    def _failure_details(
+        self, exc: Exception, failed_agent: AgentName | None
+    ) -> dict[str, object]:
+        details: dict[str, object] = {
+            "error_code": getattr(exc, "code", "UNEXPECTED_ERROR")
+        }
+        if isinstance(exc, ProviderError):
+            details.update(
+                {
+                    "provider_failure_category": exc.code,
+                    "model_provider": self.runtime_settings.model_provider,
+                    "requested_model_id": self.runtime_settings.model_id,
+                    "stage": failed_agent.value if failed_agent else "unknown",
+                }
+            )
+        return details
 
     def cancel_pending(
         self,
