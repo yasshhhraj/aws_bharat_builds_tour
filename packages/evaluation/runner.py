@@ -10,6 +10,7 @@ from time import perf_counter_ns
 from typing import Callable
 
 from packages.policy import PolicyEngine, PythonReferencePolicyEngine
+from apps.runtime.runtime_settings import RuntimeSettings
 from .case_loader import EvaluationCaseLoader
 from .cases import execute_case
 from .metrics import latency_summary, summarize_results
@@ -17,6 +18,30 @@ from .models import CaseResult, EvaluationObservation, EvaluationReport
 
 
 EVALUATION_SCHEMA_VERSION = "manifest-evaluation-v1"
+
+
+def _runtime_limitation(runtime: RuntimeSettings) -> str:
+    if runtime.runtime_mode != "strands":
+        return "Agents are deterministic Python roles; Strands is not active."
+    if runtime.model_provider == "recorded":
+        return (
+            "Agents use the offline Strands runtime with a deterministic recorded "
+            "model; no hosted model or provider network is active."
+        )
+    if runtime.model_provider == "openrouter":
+        return (
+            "Agents use a live OpenRouter-hosted model with synthetic data; provider "
+            "availability and routed-model behavior are non-deterministic."
+        )
+    if runtime.model_provider == "bedrock_mantle":
+        return (
+            "Agents use Amazon Bedrock's OpenAI-compatible Mantle endpoint with synthetic "
+            "data; this is paid, hosted, and non-deterministic inference."
+        )
+    return (
+        "Agents use Amazon Bedrock through Strands; this evidence records the selected "
+        "provider and model configuration."
+    )
 
 
 def canonical_digest(value: object) -> str:
@@ -89,6 +114,7 @@ class EvaluationRunner:
         ]
         engine_description = self.engine_factory().describe()
         engine_name = str(engine_description["policy_engine"])
+        runtime = RuntimeSettings.from_env()
         storage_mode = (
             "dynamodb_local"
             if os.getenv("MANIFEST_STORAGE_BACKEND", "memory").lower() == "dynamodb"
@@ -101,7 +127,7 @@ class EvaluationRunner:
                 if storage_mode.startswith("dynamodb")
                 else "Storage is an in-memory hash chain and is not durable or immutable."
             ),
-            "Agents are deterministic Python roles; Strands and Bedrock are not active.",
+            _runtime_limitation(runtime),
             "Latency reflects this local machine and is not a production benchmark.",
         ]
         if engine_name == "python_reference":
@@ -113,7 +139,16 @@ class EvaluationRunner:
                 1, "Cedar runs as a local loopback sidecar; no remote PDP is active."
             )
         active_modes = {
-            "runtime": "deterministic",
+            "runtime": runtime.runtime_mode,
+            "model_provider": runtime.model_provider,
+            "model_id": runtime.model_id,
+            "requested_model_id": runtime.model_id,
+            "resolved_model_id": "unknown",
+            "provider_route_kind": runtime.provider_route_kind,
+            "agent_max_turns": str(runtime.max_turns),
+            "agent_timeout_seconds": str(runtime.timeout_seconds),
+            "model_output_limit": str(runtime.max_output_tokens),
+            "provider_fallback_active": "false",
             "policy_engine": engine_name,
             "policy_version": "demo-v1",
             "storage": storage_mode,

@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-09-20T06:44:45.495226+00:00",
+  "governed_tools": [
+    {
+      "applied_outcome": "allow",
+      "enforced": true,
+      "reason_code": "ALLOW_POLICY_CHECKS_PASSED",
+      "tool_name": "get_order"
+    },
+    {
+      "applied_outcome": "allow",
+      "enforced": true,
+      "reason_code": "ALLOW_POLICY_CHECKS_PASSED",
+      "tool_name": "check_inventory"
+    }
+  ],
+  "ledger_valid": true,
+  "limitations": [
+    "Synthetic Manifest fixture data only.",
+    "The requested free router may select different hosted models.",
+    "Resolved model is null unless independently observed in OpenRouter Activity."
+  ],
+  "model_provider": "openrouter",
+  "policy_engine": "cedar",
+  "provider_fallback_active": false,
+  "provider_route_kind": "fixed",
+  "requested_model_id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "resolved_model_id": null,
+  "result": "passed",
+  "run_status": "running",
+  "runtime_mode": "strands",
+  "schema_version": "manifest-openrouter-live-v1",
+  "stage": "inventory-probe",
+  "trace_id": "TR-OPENROUTER-INVENTORY-PROBE"
+}

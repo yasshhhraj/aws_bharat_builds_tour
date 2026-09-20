@@ -1,16 +1,16 @@
 """Carrier role with cold-chain guide-back and two-phase commitment."""
 
-from packages.commitments import build_prepared_action
 from packages.domain.enums import (
     AgentName,
     ApprovalStatus,
     CommitmentStatus,
     DecisionOutcome,
-    WorkflowStage,
 )
 from packages.domain.errors import ApprovalStateMismatchError, NoSuitableCarrierError, PolicyBlockedError
 from packages.domain.models import ApprovalRecord, CarrierQuote, TrajectoryState
 from packages.governor import ManifestGovernor
+
+from apps.runtime.tool_result_projector import ToolResultProjector
 
 from .base import BaseAgent
 
@@ -39,9 +39,14 @@ class CarrierAgent(BaseAgent):
             result = self._select(state, governor, selected, 2)
         if result.value is None:
             raise PolicyBlockedError(result.decision.because)
-        state.selected_quote = selected
-        state.carrier_selection_id = str(result.value["selection_id"])
-        state.quoted_by = selected.quote_issuer
+        projector = ToolResultProjector(governor.loader)
+        projector.project(
+            state,
+            self.name,
+            "select_carrier_quote",
+            {"quote_id": selected.quote_id},
+            result.value,
+        )
 
         prepared_result = governor.execute_tool(
             state, self.name, "prepare_freight_booking",
@@ -55,18 +60,18 @@ class CarrierAgent(BaseAgent):
             raise PolicyBlockedError("Selected carrier remained invalid during preparation.")
         if prepared_result.value is None:
             raise PolicyBlockedError(prepared_result.decision.because)
-        prepared = build_prepared_action(
+        projector.project(
             state,
-            prepared_action_id=str(prepared_result.value["prepared_action_id"]),
-            quote_id=selected.quote_id,
-            amount_minor=selected.amount_minor,
-            currency=selected.currency,
-            prepared_by=self.name,
+            self.name,
+            "prepare_freight_booking",
+            {
+                "quote_id": selected.quote_id,
+                "amount_minor": selected.amount_minor,
+                "currency": selected.currency,
+            },
+            prepared_result.value,
         )
-        state.prepared_actions[prepared.prepared_action_id] = prepared
-        state.prepared_by = self.name
-        state.spend_reserved_minor += selected.amount_minor
-        state.workflow_stage = WorkflowStage.BOOKING_PREPARED
+        prepared = state.prepared_actions[str(prepared_result.value["prepared_action_id"])]
 
         confirmed = governor.execute_tool(
             state, self.name, "confirm_freight_booking",

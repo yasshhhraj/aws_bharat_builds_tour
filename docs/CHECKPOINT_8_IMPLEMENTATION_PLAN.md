@@ -5,7 +5,7 @@
 **Checkpoint state:** Complete  
 **Depends on:** Completed Checkpoints 1–7  
 **Verified baseline commit:** `e8e8ab4`  
-**Next checkpoint after completion:** Checkpoint 9 — Strands Agents and Bedrock Runtime
+**Next checkpoint after completion:** Checkpoint 9 — Offline Strands Runtime
 
 ### Implementation progress — 19 September 2026
 

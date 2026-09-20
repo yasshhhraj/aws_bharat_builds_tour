@@ -1,14 +1,23 @@
 {
   "active_modes": {
+    "agent_max_turns": "8",
+    "agent_timeout_seconds": "15.0",
     "approval": "local",
     "cedar_runtime_version": "4.12.0",
     "dashboard": "static_no_build",
     "deployment": "local",
+    "model_id": "manifest-recorded-v1",
+    "model_output_limit": "1024",
+    "model_provider": "recorded",
     "policy_bundle_hash": "sha256:28dbf5808a3e1f49f9ebf9653c4a90f7988a32b96459a9642f67e0d05e975667",
     "policy_engine": "cedar",
     "policy_schema_hash": "sha256:53da87760937b3d7b3ca99e2cc62f0a1a0b0ed32197239526ed98ec40641f322",
     "policy_version": "demo-v1",
-    "runtime": "deterministic",
+    "provider_fallback_active": "false",
+    "provider_route_kind": "fixed",
+    "requested_model_id": "manifest-recorded-v1",
+    "resolved_model_id": "unknown",
+    "runtime": "strands",
     "storage": "dynamodb_local"
   },
   "case_catalog_digest": "sha256:2d6715718497baeb1415e4538cc1948a533a79075d888b90a3cfc247314d1672",
@@ -41,19 +50,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 3489.776,
-          "mean": 2498.61,
-          "min": 1691.406,
-          "p50": 1722.866,
-          "p95": 3489.776
+          "max": 2716.389,
+          "mean": 2255.612,
+          "min": 1910.426,
+          "p50": 2210.848,
+          "p95": 2716.389
         },
         "policy_ms": {
           "count": 100,
-          "max": 13.253,
-          "mean": 9.229,
-          "min": 6.553,
-          "p50": 9.156,
-          "p95": 12.123
+          "max": 24.044,
+          "mean": 11.948,
+          "min": 6.733,
+          "p50": 10.752,
+          "p95": 18.682
         }
       },
       "measured_iterations": 10,
@@ -134,19 +143,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 292.088,
-          "mean": 267.557,
-          "min": 244.625,
-          "p50": 263.874,
-          "p95": 292.088
+          "max": 467.107,
+          "mean": 446.125,
+          "min": 400.873,
+          "p50": 450.06,
+          "p95": 467.107
         },
         "policy_ms": {
           "count": 10,
-          "max": 10.595,
-          "mean": 9.604,
-          "min": 8.629,
-          "p50": 9.442,
-          "p95": 10.595
+          "max": 13.48,
+          "mean": 11.015,
+          "min": 9.099,
+          "p50": 10.625,
+          "p95": 13.48
         }
       },
       "measured_iterations": 10,
@@ -193,19 +202,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 398.71,
-          "mean": 300.245,
-          "min": 250.199,
-          "p50": 276.377,
-          "p95": 398.71
+          "max": 646.563,
+          "mean": 484.588,
+          "min": 398.006,
+          "p50": 462.723,
+          "p95": 646.563
         },
         "policy_ms": {
           "count": 10,
-          "max": 22.153,
-          "mean": 12.204,
-          "min": 8.186,
-          "p50": 10.765,
-          "p95": 22.153
+          "max": 22.394,
+          "mean": 13.259,
+          "min": 8.43,
+          "p50": 11.228,
+          "p95": 22.394
         }
       },
       "measured_iterations": 10,
@@ -258,19 +267,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 1933.85,
-          "mean": 1772.242,
-          "min": 1673.639,
-          "p50": 1756.381,
-          "p95": 1933.85
+          "max": 2521.334,
+          "mean": 2293.636,
+          "min": 1988.667,
+          "p50": 2270.333,
+          "p95": 2521.334
         },
         "policy_ms": {
           "count": 100,
-          "max": 13.577,
-          "mean": 9.516,
-          "min": 6.623,
-          "p50": 9.347,
-          "p95": 12.344
+          "max": 25.319,
+          "mean": 11.836,
+          "min": 7.117,
+          "p50": 10.899,
+          "p95": 17.326
         }
       },
       "measured_iterations": 10,
@@ -358,19 +367,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 1989.504,
-          "mean": 1760.713,
-          "min": 1633.12,
-          "p50": 1742.262,
-          "p95": 1989.504
+          "max": 2757.983,
+          "mean": 2236.648,
+          "min": 1952.26,
+          "p50": 2163.085,
+          "p95": 2757.983
         },
         "policy_ms": {
           "count": 100,
-          "max": 15.787,
-          "mean": 9.559,
-          "min": 6.475,
-          "p50": 9.272,
-          "p95": 12.987
+          "max": 22.053,
+          "mean": 11.149,
+          "min": 7.406,
+          "p50": 10.065,
+          "p95": 17.914
         }
       },
       "measured_iterations": 10,
@@ -452,19 +461,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 352.845,
-          "mean": 282.517,
-          "min": 250.629,
-          "p50": 272.274,
-          "p95": 352.845
+          "max": 416.824,
+          "mean": 394.734,
+          "min": 367.581,
+          "p50": 385.032,
+          "p95": 416.824
         },
         "policy_ms": {
           "count": 10,
-          "max": 11.94,
-          "mean": 9.717,
-          "min": 7.49,
-          "p50": 9.257,
-          "p95": 11.94
+          "max": 10.456,
+          "mean": 8.88,
+          "min": 7.818,
+          "p50": 8.722,
+          "p95": 10.456
         }
       },
       "measured_iterations": 10,
@@ -514,19 +523,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 320.374,
-          "mean": 280.064,
-          "min": 262.997,
-          "p50": 274.028,
-          "p95": 320.374
+          "max": 569.075,
+          "mean": 406.703,
+          "min": 361.263,
+          "p50": 382.308,
+          "p95": 569.075
         },
         "policy_ms": {
           "count": 10,
-          "max": 13.663,
-          "mean": 10.68,
-          "min": 8.047,
-          "p50": 10.13,
-          "p95": 13.663
+          "max": 12.038,
+          "mean": 9.277,
+          "min": 8.046,
+          "p50": 8.607,
+          "p95": 12.038
         }
       },
       "measured_iterations": 10,
@@ -575,19 +584,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 286.714,
-          "mean": 269.057,
-          "min": 254.915,
-          "p50": 267.365,
-          "p95": 286.714
+          "max": 429.21,
+          "mean": 382.433,
+          "min": 348.766,
+          "p50": 375.051,
+          "p95": 429.21
         },
         "policy_ms": {
           "count": 10,
-          "max": 0.097,
-          "mean": 0.075,
-          "min": 0.059,
-          "p50": 0.074,
-          "p95": 0.097
+          "max": 0.078,
+          "mean": 0.063,
+          "min": 0.049,
+          "p50": 0.057,
+          "p95": 0.078
         }
       },
       "measured_iterations": 10,
@@ -634,19 +643,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 298.222,
-          "mean": 277.013,
-          "min": 256.319,
-          "p50": 267.985,
-          "p95": 298.222
+          "max": 526.542,
+          "mean": 448.581,
+          "min": 368.221,
+          "p50": 438.83,
+          "p95": 526.542
         },
         "policy_ms": {
           "count": 10,
-          "max": 11.284,
-          "mean": 8.974,
-          "min": 7.667,
-          "p50": 8.578,
-          "p95": 11.284
+          "max": 14.814,
+          "mean": 10.02,
+          "min": 7.916,
+          "p50": 9.065,
+          "p95": 14.814
         }
       },
       "measured_iterations": 10,
@@ -693,19 +702,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 1969.313,
-          "mean": 1715.272,
-          "min": 1667.317,
-          "p50": 1687.336,
-          "p95": 1969.313
+          "max": 2702.481,
+          "mean": 2440.253,
+          "min": 2005.344,
+          "p50": 2477.772,
+          "p95": 2702.481
         },
         "policy_ms": {
           "count": 90,
-          "max": 17.898,
-          "mean": 9.627,
-          "min": 6.189,
-          "p50": 9.245,
-          "p95": 12.871
+          "max": 24.313,
+          "mean": 12.361,
+          "min": 6.019,
+          "p50": 11.808,
+          "p95": 19.473
         }
       },
       "measured_iterations": 10,
@@ -784,19 +793,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 1790.281,
-          "mean": 1708.49,
-          "min": 1656.299,
-          "p50": 1710.515,
-          "p95": 1790.281
+          "max": 4189.369,
+          "mean": 2670.685,
+          "min": 2143.002,
+          "p50": 2277.23,
+          "p95": 4189.369
         },
         "policy_ms": {
           "count": 90,
-          "max": 12.57,
-          "mean": 8.911,
-          "min": 6.672,
-          "p50": 8.778,
-          "p95": 10.581
+          "max": 25.956,
+          "mean": 12.108,
+          "min": 7.905,
+          "p50": 11.269,
+          "p95": 18.353
         }
       },
       "measured_iterations": 10,
@@ -874,19 +883,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 319.784,
-          "mean": 305.772,
-          "min": 274.47,
-          "p50": 310.702,
-          "p95": 319.784
+          "max": 847.436,
+          "mean": 780.467,
+          "min": 694.436,
+          "p50": 764.688,
+          "p95": 847.436
         },
         "policy_ms": {
           "count": 10,
-          "max": 12.838,
-          "mean": 10.134,
-          "min": 7.285,
-          "p50": 10.259,
-          "p95": 12.838
+          "max": 27.784,
+          "mean": 15.87,
+          "min": 10.051,
+          "p50": 13.896,
+          "p95": 27.784
         }
       },
       "measured_iterations": 10,
@@ -933,19 +942,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 347.457,
-          "mean": 322.686,
-          "min": 288.434,
-          "p50": 317.158,
-          "p95": 347.457
+          "max": 1024.361,
+          "mean": 857.343,
+          "min": 710.21,
+          "p50": 867.956,
+          "p95": 1024.361
         },
         "policy_ms": {
           "count": 10,
-          "max": 15.057,
-          "mean": 10.256,
-          "min": 7.78,
-          "p50": 9.008,
-          "p95": 15.057
+          "max": 24.966,
+          "mean": 18.615,
+          "min": 10.711,
+          "p50": 18.889,
+          "p95": 24.966
         }
       },
       "measured_iterations": 10,
@@ -992,19 +1001,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 309.944,
-          "mean": 299.175,
-          "min": 282.37,
-          "p50": 301.216,
-          "p95": 309.944
+          "max": 809.454,
+          "mean": 754.537,
+          "min": 694.209,
+          "p50": 758.352,
+          "p95": 809.454
         },
         "policy_ms": {
           "count": 10,
-          "max": 11.42,
-          "mean": 9.408,
-          "min": 7.966,
-          "p50": 9.033,
-          "p95": 11.42
+          "max": 20.703,
+          "mean": 13.474,
+          "min": 9.894,
+          "p50": 11.539,
+          "p95": 20.703
         }
       },
       "measured_iterations": 10,
@@ -1053,19 +1062,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 309.815,
-          "mean": 284.895,
-          "min": 263.853,
-          "p50": 282.65,
-          "p95": 309.815
+          "max": 615.939,
+          "mean": 483.85,
+          "min": 399.525,
+          "p50": 465.244,
+          "p95": 615.939
         },
         "policy_ms": {
           "count": 10,
-          "max": 11.981,
-          "mean": 9.149,
-          "min": 7.291,
-          "p50": 8.646,
-          "p95": 11.981
+          "max": 18.552,
+          "mean": 11.96,
+          "min": 9.216,
+          "p50": 10.491,
+          "p95": 18.552
         }
       },
       "measured_iterations": 10,
@@ -1114,19 +1123,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 490.5,
-          "mean": 327.351,
-          "min": 281.468,
-          "p50": 307.314,
-          "p95": 490.5
+          "max": 510.331,
+          "mean": 451.345,
+          "min": 378.664,
+          "p50": 433.846,
+          "p95": 510.331
         },
         "policy_ms": {
           "count": 10,
-          "max": 12.629,
-          "mean": 9.876,
-          "min": 7.133,
-          "p50": 9.962,
-          "p95": 12.629
+          "max": 11.76,
+          "mean": 9.13,
+          "min": 7.464,
+          "p50": 8.97,
+          "p95": 11.76
         }
       },
       "measured_iterations": 10,
@@ -1177,19 +1186,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 2414.893,
-          "mean": 2347.304,
-          "min": 2293.719,
-          "p50": 2341.66,
-          "p95": 2414.893
+          "max": 3516.347,
+          "mean": 3207.485,
+          "min": 2906.203,
+          "p50": 3135.732,
+          "p95": 3516.347
         },
         "policy_ms": {
           "count": 120,
-          "max": 27.37,
-          "mean": 10.151,
-          "min": 6.082,
-          "p50": 8.933,
-          "p95": 21.482
+          "max": 30.97,
+          "mean": 13.235,
+          "min": 7.446,
+          "p50": 11.637,
+          "p95": 23.135
         }
       },
       "measured_iterations": 10,
@@ -1279,19 +1288,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 2533.825,
-          "mean": 2413.248,
-          "min": 2350.495,
-          "p50": 2408.155,
-          "p95": 2533.825
+          "max": 3230.074,
+          "mean": 3039.703,
+          "min": 2822.359,
+          "p50": 3093.327,
+          "p95": 3230.074
         },
         "policy_ms": {
           "count": 120,
-          "max": 25.814,
-          "mean": 10.378,
-          "min": 7.052,
-          "p50": 8.923,
-          "p95": 22.115
+          "max": 29.123,
+          "mean": 12.211,
+          "min": 7.682,
+          "p50": 10.571,
+          "p95": 23.124
         }
       },
       "measured_iterations": 10,
@@ -1376,19 +1385,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 365.147,
-          "mean": 317.335,
-          "min": 283.632,
-          "p50": 303.41,
-          "p95": 365.147
+          "max": 644.791,
+          "mean": 486.379,
+          "min": 381.454,
+          "p50": 455.015,
+          "p95": 644.791
         },
         "policy_ms": {
           "count": 10,
-          "max": 12.894,
-          "mean": 9.77,
-          "min": 7.932,
-          "p50": 9.519,
-          "p95": 12.894
+          "max": 14.238,
+          "mean": 10.429,
+          "min": 8.714,
+          "p50": 9.473,
+          "p95": 14.238
         }
       },
       "measured_iterations": 10,
@@ -1435,19 +1444,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 287.661,
-          "mean": 272.36,
-          "min": 247.394,
-          "p50": 272.611,
-          "p95": 287.661
+          "max": 568.965,
+          "mean": 472.289,
+          "min": 374.353,
+          "p50": 433.452,
+          "p95": 568.965
         },
         "policy_ms": {
           "count": 10,
-          "max": 10.856,
-          "mean": 8.91,
-          "min": 7.138,
-          "p50": 8.211,
-          "p95": 10.856
+          "max": 25.47,
+          "mean": 11.263,
+          "min": 6.732,
+          "p50": 9.187,
+          "p95": 25.47
         }
       },
       "measured_iterations": 10,
@@ -1499,19 +1508,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 2298.211,
-          "mean": 2179.992,
-          "min": 1990.691,
-          "p50": 2204.624,
-          "p95": 2298.211
+          "max": 2915.753,
+          "mean": 2539.511,
+          "min": 2411.77,
+          "p50": 2484.9,
+          "p95": 2915.753
         },
         "policy_ms": {
           "count": 110,
-          "max": 23.498,
-          "mean": 10.725,
-          "min": 6.62,
-          "p50": 9.482,
-          "p95": 21.969
+          "max": 24.682,
+          "mean": 11.313,
+          "min": 7.032,
+          "p50": 9.983,
+          "p95": 21.724
         }
       },
       "measured_iterations": 10,
@@ -1590,19 +1599,19 @@
       "latency": {
         "end_to_end_ms": {
           "count": 10,
-          "max": 1700.538,
-          "mean": 1644.697,
-          "min": 1562.405,
-          "p50": 1644.173,
-          "p95": 1700.538
+          "max": 2346.8,
+          "mean": 2178.933,
+          "min": 1894.821,
+          "p50": 2231.098,
+          "p95": 2346.8
         },
         "policy_ms": {
           "count": 90,
-          "max": 16.776,
-          "mean": 8.962,
-          "min": 6.109,
-          "p50": 8.757,
-          "p95": 11.267
+          "max": 16.634,
+          "mean": 10.646,
+          "min": 6.856,
+          "p50": 10.169,
+          "p95": 15.878
         }
       },
       "measured_iterations": 10,
@@ -1657,7 +1666,7 @@
     }
   ],
   "functional_digest": "sha256:99d44f22a833007bd2caa5121c2330b7222537633501590b1b43266c04b11120",
-  "generated_at": "2026-09-19T19:53:07.255453Z",
+  "generated_at": "2026-09-20T06:24:42.835143Z",
   "iterations": {
     "measured_per_case": 10,
     "warmup_per_case": 1
@@ -1665,30 +1674,30 @@
   "latency": {
     "end_to_end_ms": {
       "count": 220,
-      "max": 3489.776,
-      "mean": 993.027,
-      "min": 244.625,
-      "p50": 315.597,
-      "p95": 2408.513
+      "max": 4189.369,
+      "mean": 1350.538,
+      "min": 348.766,
+      "p50": 758.352,
+      "p95": 3127.54
     },
     "policy_ms": {
       "count": 1050,
-      "max": 27.37,
-      "mean": 9.653,
-      "min": 0.059,
-      "p50": 9.101,
-      "p95": 13.336
+      "max": 30.97,
+      "mean": 11.794,
+      "min": 0.049,
+      "p50": 10.638,
+      "p95": 20.929
     }
   },
   "limitations": [
     "All logistics data and operational effects are synthetic.",
     "Cedar runs as a local loopback sidecar; no remote PDP is active.",
     "Storage is local DynamoDB with a tamper-evident, not immutable, hash chain.",
-    "Agents are deterministic Python roles; Strands and Bedrock are not active.",
+    "Agents use the offline Strands runtime with a deterministic recorded model; no hosted model or provider network is active.",
     "Latency reflects this local machine and is not a production benchmark."
   ],
   "schema_version": "manifest-evaluation-v1",
-  "seed": "manifest-checkpoint-8-dynamodb-v1",
+  "seed": "manifest-checkpoint-9-offline-strands-v1",
   "summary": {
     "attack_detected": 10,
     "attack_detection_rate": 1.0,

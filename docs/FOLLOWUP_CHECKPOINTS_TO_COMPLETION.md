@@ -1,486 +1,406 @@
-# Manifest Follow-up Checkpoints to Prototype Completion
+# Manifest — Offline-First Checkpoints to Prototype Completion
 
-**Plan version:** 1.0  
-**Created:** 19 September 2026  
-**Starting point:** Completed local Checkpoint 6 implementation with 119 passing tests  
-**Execution model:** Complete, verify, and close one checkpoint before beginning the next
+**Plan version:** 2.1
 
-## 1. Purpose
+**Rewritten:** 20 September 2026
 
-This plan continues the repository's implemented Checkpoints 1–5 and takes the prototype from a tested local dashboard to a submission-ready Manifest demonstration.
+**Baseline:** Checkpoints 1–10 complete in the current working tree
 
-The work is intentionally sequential:
+**Current checkpoint:** Checkpoint 11 — Local Prototype Hardening
 
-```text
-CP6 Stable local release and evaluation baseline
-  -> CP7 Cedar authorization
-  -> CP8 durable DynamoDB-compatible storage
-  -> CP9 Strands and Bedrock runtime
-  -> CP10 AWS deployment
-  -> CP11 demo hardening and optional managed integrations
-  -> CP12 submission freeze and final verification
-```
+**AWS state:** Bedrock Mantle operational; native Nova access remains deferred
 
-Checkpoints 6, 7, and 8 have passed their local exit gates. Checkpoint 9 is now the next unlocked checkpoint.
+## 1. Revised delivery strategy
 
-## 2. One-at-a-time checkpoint protocol
-
-For every checkpoint:
-
-1. Confirm the preceding checkpoint's tag or recorded green baseline.
-2. Implement only the current checkpoint's in-scope work.
-3. Keep all external services behind interfaces with a working local fallback.
-4. Run the current checkpoint script and the full regression suite.
-5. Record actual results, limitations, configuration modes, and changed contracts.
-6. Review the diff and confirm that no unrelated work entered the checkpoint.
-7. Mark the checkpoint complete only when every mandatory acceptance test is green.
-8. Do not begin the next checkpoint while a mandatory test is red.
-
-If a checkpoint becomes blocked by external access, use its declared fallback and record the limitation. Do not silently substitute a fallback while claiming the target integration is active.
-
-## 3. Checkpoint queue
-
-| Checkpoint | Outcome | Initial status | Estimated focused time |
-|---|---|---|---:|
-| 6 | Reproducible local release plus measured evaluation | **COMPLETE** | Completed |
-| 7 | Cedar is the authoritative policy engine | **COMPLETE** | Completed |
-| 8 | Runs, approvals, and ledger survive process restart | **COMPLETE** | Completed |
-| 9 | Strands agents use Bedrock or a disclosed deterministic fallback | **NEXT** | 5–7 hours |
-| 10 | Core API and dashboard run through an AWS demo stack | Locked | 6–9 hours |
-| 11 | Demo hardening, observability, and optional managed workflow | Locked | 3–5 hours |
-| 12 | Frozen, measured, rehearsed submission artifact | Locked | 5–7 hours |
-
-The estimates assume the current local implementation remains green and AWS access is available. They are planning ranges, not deadlines.
-
----
-
-## Checkpoint 6 — Stable Local Release and Evaluation Baseline
-
-**Detailed implementation specification:**
-[`CHECKPOINT_6_IMPLEMENTATION_PLAN.md`](CHECKPOINT_6_IMPLEMENTATION_PLAN.md)
-
-### Objective
-
-Turn the committed Checkpoint 5 baseline into a reproducible local release candidate and generate judge-ready measurements before adding external integrations.
-
-### In scope
-
-- Review the existing Checkpoint 4–5 diff and untracked files.
-- Add a release manifest containing:
-  - source revision;
-  - Python and dependency versions;
-  - fixture checksum;
-  - active policy engine and version;
-  - storage, model, approval, and deployment modes;
-  - test command and result.
-- Add a deterministic evaluation scenario format and runner.
-- Cover at least the six core attack classes:
-  - weight value drift;
-  - missing or corrupted provenance;
-  - unsuitable cold-chain vehicle;
-  - uncertified or unsupported carrier;
-  - cumulative spend escalation;
-  - separation-of-duties or unsafe disclosure violation.
-- Add at least ten benign variants or parameterized benign cases.
-- Produce machine-readable results containing exact denominators.
-- Calculate policy decision p50/p95 and end-to-end run p50/p95 separately.
-- Perform local browser QA of the full hero path and capture evidence.
-- Add `scripts/run_checkpoint_6.sh`.
-
-### Out of scope
-
-- Cedar, Strands, Bedrock, DynamoDB, or cloud deployment.
-- New product features or dashboard redesign.
-- Expanding to real logistics integrations.
-
-### Mandatory deliverables
+AWS account verification must not block implementation. The remaining work now follows this order:
 
 ```text
-docs/releases/local-baseline.json
-docs/results/evaluation.json
-docs/results/evaluation.md
-tests/evaluation/
-scripts/run_evaluation.py
-scripts/run_checkpoint_6.sh
-docs/assets/screenshots/ (hero-path evidence)
+Checkpoint 8 baseline
+        |
+        v
+CP9  Offline Strands runtime + governed tools (complete)
+        |
+        v
+CP10 Bedrock Mantle provider portability + live governed proof (complete)
+        |
+        v
+CP11 Local prototype hardening + submission candidate
+        |
+        v
+CP12 Bedrock parity after AWS verification
+        |
+        v
+CP13 Optional AWS demo deployment
+        |
+        v
+CP14 Final evidence and submission freeze
 ```
 
-Exact filenames may change if the implementation documents the replacement consistently.
+This creates two honest milestones:
 
-### Acceptance tests
+1. **Local prototype complete at Checkpoint 11:** the full governed journey is hardened and reproducible offline, with separate completed Mantle evidence.
+2. **AWS deployment target complete at Checkpoint 14:** native Nova parity if available, any required cloud deployment, and final evidence are complete.
 
-- Full existing suite remains green.
-- `./scripts/run_checkpoint_5.sh` remains green.
-- One command regenerates the evaluation JSON from a fixed seed.
-- Results include scenario counts, pass/fail counts, false positives, guide-back success, approval outcomes, and p50/p95 latency.
-- Two consecutive evaluation runs have identical functional outcomes.
-- Dashboard completes benign, shadow adversarial, enforce pending-approval, approval, and verification flows in a browser.
-- The release manifest accurately reports `python_reference`, `memory_hash_chain`, `local`, and `deterministic` modes.
-- No credentials or secret values appear in results, screenshots, logs, or the manifest.
+The local milestone is not permission to claim that Bedrock or AWS deployment has been completed. It is a working fallback that allows development, testing, UI work, and rehearsal to continue.
 
-### Exit gate
+## 2. Provider order
 
-Checkpoint 6 is complete when the repository can be reproduced from a reviewed revision, all tests pass, evaluation results are generated from code, and browser evidence exists. Creating a commit or tag is an explicit operator action; the suggested tag is `v0.6.0-local-evaluated`.
+| Priority | Provider | Network | Cost/account | Purpose |
+|---:|---|---|---|---|
+| 1 | Recorded deterministic model | None | None | Mandatory repeatable acceptance and regression baseline |
+| 2 | Bedrock Mantle Qwen3 Coder Next | Internet/AWS | Paid; temporary Bedrock API key | Completed Checkpoint 10 live-provider path |
+| 3 | OpenRouter | Internet | Free availability and limits can change | Implemented experiment; full gate was unreliable |
+| 4 | Ollama | Local only | No cloud account; requires suitable hardware | Optional contingency only |
+| 5 | Amazon Nova 2 Lite | Internet/AWS | Native access still restricted | Optional native-provider parity when available |
 
-### Fallback
+Relevant provider documentation:
 
-If the planned 20 attack/30 benign set cannot be completed, ship the six core attacks plus at least ten benign variants with exact denominators. Never invent or extrapolate results.
+- Strands model providers: <https://strandsagents.com/docs/user-guide/concepts/model-providers/>
+- Strands with Ollama: <https://strandsagents.com/docs/user-guide/concepts/model-providers/ollama/>
+- Strands with OpenRouter: <https://strandsagents.com/docs/integrations/model-providers/openrouter/>
+- OpenRouter free-model router: <https://openrouter.ai/openrouter/free>
+
+### Non-negotiable provider rules
+
+- The selected provider is explicit at process start and visible in diagnostics, traces, and demo evidence.
+- Never silently change providers during an agent trajectory.
+- The model proposes actions; `ManifestGovernor` and Cedar authorize them.
+- Every operational effect continues through the governed tool boundary.
+- Only synthetic Manifest data may be sent to any hosted provider.
+- API keys and AWS credentials never enter the repository, `.env.example`, screenshots, logs, or submission artifacts.
+- The free router is a development convenience, not the deterministic acceptance oracle. Free models, quotas, and routing can change.
+- A provider outage must fail closed before a commitment is made.
+
+## 3. Execution queue
+
+| Order | Checkpoint | Status | Can start while AWS is verifying? | Exit result |
+|---:|---|---|---|---|
+| 9 | Offline Strands Runtime | **COMPLETE** | Yes | All four roles use Strands with the recorded model and governed tools |
+| 10 | Bedrock Mantle Provider Portability | **COMPLETE** | Yes | Qwen probe, benign journey, and adversarial Cedar escalation passed |
+| 11 | Local Prototype Hardening | **NEXT** | Yes | Rehearsed, reproducible local submission candidate |
+| 12 | Bedrock Provider Parity | Waiting on AWS verification and CP11 | No live gate yet | Nova 2 Lite passes the same provider and governance contracts |
+| 13 | AWS Demo Stack | Locked by CP12 | No | Reproducible least-privilege cloud deployment if required |
+| 14 | Submission Freeze | Locked by release-path decision | Mostly | Final evidence, claims, artifacts, and tagged release |
+
+Work one checkpoint at a time. A checkpoint closes only after its exit gate and evidence are recorded. Do not weaken Cedar, exact-once approval, numeric provenance, or ledger checks to make a model provider pass.
 
 ---
 
-## Checkpoint 7 — Cedar Authorization Parity
+## Checkpoint 9 — Offline Strands Runtime
 
-**Status: COMPLETE — 19 September 2026.** The official Cedar 4.12.0 Rust sidecar is authoritative in the Checkpoint 7 gate. All 22 evaluation cases match the Checkpoint 6 functional digest, and 136 tests pass with Cedar active. See [`CHECKPOINT_7_COMPLETION_REPORT.md`](CHECKPOINT_7_COMPLETION_REPORT.md).
+**Objective:** Replace the plain-Python action-selection layer with thin Strands agents while using a deterministic, offline recorded model. No AWS account, credential, API key, or network call is required.
 
-**Detailed implementation specification:**
-[`CHECKPOINT_7_IMPLEMENTATION_PLAN.md`](CHECKPOINT_7_IMPLEMENTATION_PLAN.md)
+**Detailed implementation plan:** [`CHECKPOINT_9_OFFLINE_IMPLEMENTATION_PLAN.md`](CHECKPOINT_9_OFFLINE_IMPLEMENTATION_PLAN.md)
 
-### Prerequisite
+### Scope
 
-Checkpoint 6 is complete and its baseline is reproducible.
+1. Pin and install the Strands SDK in the project environment.
+2. Introduce an `AgentRuntime` boundary so orchestration does not depend directly on a provider SDK.
+3. Implement `RecordedManifestModel` through the real Strands model interface.
+4. Create thin Inventory, Dispatch, Carrier, and Customer Communications Strands agents.
+5. Wrap existing operations as narrow, typed Strands tools.
+6. Route every protected tool call through `ManifestGovernor.execute_tool`.
+7. Keep the existing bounded four-stage workflow, approval lifecycle, Cedar evaluation, persistence, and ledger behavior unchanged.
+8. Add explicit runtime/provider diagnostics and trace events.
+9. Keep the legacy deterministic runtime temporarily available for parity comparison, not as a silent fallback.
 
-### Objective
+### Required tests
 
-Make Cedar the authoritative authorization engine while preserving the existing `PolicyEngine` contract, reason catalogue, shadow/enforce semantics, and hero journey.
+- recorded-model protocol and malformed-response tests;
+- one-tool, unknown-tool, duplicate-tool, and maximum-turn tests;
+- role-to-tool allow-list tests;
+- benign, shadow, enforce, approval, and tamper journeys through Strands;
+- equality of protected state and authorization outcomes between legacy and Strands modes;
+- proof that provider text cannot bypass Cedar or create direct effects;
+- all Checkpoint 8 tests remain green.
 
-### In scope
+### Exit gate
 
-- Select and pin one supported Cedar integration path.
-- Add Cedar schema, entities/context mapping, and a versioned `demo-v1` policy bundle.
-- Implement the existing six policy families in Cedar where appropriate.
-- Retain deterministic pre-policy validation for cryptographic fact hashes and typed input normalization when Cedar cannot perform those operations directly.
-- Add a Cedar adapter conforming to `packages.policy.protocol.PolicyEngine`.
-- Map Cedar decisions to stable Manifest outcomes, reason codes, `because`, and guidance.
-- Add engine selection through configuration.
-- Keep the Python engine as an explicitly disclosed fallback and reference oracle.
-- Run the same conformance cases against both engines and document any deliberate division of responsibility.
-- Add `scripts/run_checkpoint_7.sh`.
+- All four roles execute through Strands in `recorded` mode.
+- The entire hero journey completes without network access.
+- Adversarial enforce mode remains blocked or guided back as designed.
+- Exact-once confirmation and ledger verification still pass.
+- Provider/runtime mode is shown in `/health`, traces, and evidence.
+- A new `scripts/run_checkpoint_9_offline.sh` gate passes twice consecutively.
+- No AWS environment variables or hosted-provider credentials are required.
 
-### Mandatory deliverables
+### Manual work
+
+None beyond approving dependency installation if the environment requests network permission. Do not work on the AWS console during this checkpoint.
+
+### Explicit cuts
+
+- no Bedrock invocation;
+- no OpenRouter or Ollama integration yet;
+- no AWS deployment;
+- no autonomous planning beyond the bounded workflow;
+- no direct tool execution outside the governor.
+
+---
+
+## Checkpoint 10 — Bedrock Mantle Provider Portability
+
+**Objective:** Prove that the Strands runtime can swap to Amazon Bedrock Mantle without changing tools, policy, approval, state, or ledger semantics. OpenRouter remains an implemented but unreliable experimental path.
+
+**Detailed implementation plan:** [`CHECKPOINT_10_IMPLEMENTATION_PLAN.md`](CHECKPOINT_10_IMPLEMENTATION_PLAN.md)
+
+**Manual setup guide:** [`manual/CHECKPOINT_10_OPENROUTER_SETUP.md`](manual/CHECKPOINT_10_OPENROUTER_SETUP.md)
+
+**Selected setup guide:** [`manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md`](manual/CHECKPOINT_10_BEDROCK_MANTLE_SETUP.md)
+
+### Implementation work
+
+1. Add a provider factory with explicit configuration:
+
+   ```text
+   MANIFEST_MODEL_PROVIDER=recorded|openrouter|bedrock_mantle|bedrock
+   MANIFEST_MODEL_ID=<explicit model or router id>
+   ```
+
+2. Keep `recorded` as the default for tests and reproducible demos.
+3. Add Strands OpenAI-compatible adapters for OpenRouter and Bedrock Mantle plus a construction-only native Bedrock branch.
+4. Normalize provider output into the same tool-call contract.
+5. Add request timeouts, turn limits, retry limits, and output-size limits.
+6. Record provider, requested model, actual routed model when returned, latency, usage when returned, and failure category.
+7. Ensure a provider failure stops the current trajectory; a retry or provider change starts a new disclosed run.
+
+### Selected route — Bedrock Mantle
+
+1. Generate a temporary Bedrock API key in the same Region where the playground worked.
+2. Put the key only in the current shell through hidden input.
+3. Start with `MANIFEST_MODEL_ID=qwen.qwen3-coder-next`.
+4. Run a governed read-only Inventory probe.
+5. Review the current Bedrock price before the paid probe and full gate.
+6. Send only the synthetic `ORD-8842` fixture.
+7. Remove the short-term key from the shell after testing.
+
+Never paste the Bedrock key into source files, committed `.env` files, logs, screenshots, or chat.
+
+### Required tests
+
+- common provider contract suite against the recorded adapter;
+- live read-only tool probe against Bedrock Mantle;
+- live benign hero journey against the selected provider;
+- adversarial enforce journey proving Cedar remains authoritative;
+- provider timeout, rate-limit, invalid tool, and malformed-argument handling;
+- no automatic provider switching inside a trajectory;
+- recorded offline gate remains green.
+
+### Exit gate
+
+- At least one non-recorded provider completes a governed read-only tool call and benign hero journey.
+- The same Cedar decisions, commitment limits, approval rules, and ledger invariants hold.
+- Provider and model identity are visible in evidence.
+- Hosted-provider failure can be reproduced without corrupting state.
+- `scripts/run_checkpoint_10_bedrock_mantle.sh` passes, with the live portion clearly labelled paid and non-deterministic.
+
+### OpenRouter outcome
+
+OpenRouter completed isolated read-only probes but failed the complete multi-role gate through both the free router and a fixed free model. Keep those failures as honest evidence; do not repeatedly retry them. Bedrock Mantle is the selected live provider, and its reviewed probe, benign journey, and adversarial gate have passed.
+
+---
+
+## Checkpoint 11 — Local Prototype Hardening and Submission Candidate
+
+**Objective:** Finish and rehearse the complete local prototype before returning to AWS.
+
+### Scope
+
+1. Show runtime, provider, requested model, actual model when known, policy mode, storage mode, and ledger state in the dashboard.
+2. Add clear UI states for provider timeout, rate limit, authorization denial, approval required, duplicate confirmation, and tamper detection.
+3. Remove stale placeholder claims and make simulated effects visually explicit.
+4. Bound prompts and traces so only necessary synthetic fields reach the provider.
+5. Add startup validation that reports missing optional provider configuration without breaking recorded mode.
+6. Add a one-command local startup path and a one-command local acceptance gate.
+7. Capture local screenshots, trace samples, test summaries, and a short backup demo recording.
+8. Rehearse benign, shadow, enforce, guide-back, approval, exact-once, and tamper journeys twice from a clean local state.
+
+### Required gates
 
 ```text
-packages/cedar_adapter/
-policies/schema/
-policies/demo-v1/
-policies/tests/
-tests/policy/test_cedar_parity.py
-scripts/run_checkpoint_7.sh
+Checkpoint 8 Cedar + storage gate
+Checkpoint 9 offline Strands gate
+Checkpoint 10 provider contract gate
+Full Python and Rust test suites
+Evaluation dataset gate
+Browser smoke and accessibility checks
+Secret and stale-claim scan
+Two clean local rehearsals
 ```
 
-### Acceptance tests
-
-- Cedar returns the expected allow, guide/block, and escalate authorization signals for every policy fixture.
-- Unknown action, missing context, owner mismatch, and disallowed effect fail closed.
-- The 500-to-50 kg path is stopped before dispatch effect.
-- The uncertified carrier is rejected and guide-back still succeeds.
-- INR 4,550 against INR 4,000 still produces a bound approval.
-- Approved confirmation is re-evaluated and executes once.
-- Shadow mode records the counterfactual result without applying enforcement.
-- Python and Cedar conformance suites agree on all declared cases.
-- Health and trace output identify the active engine as Cedar only when Cedar is actually active.
-- Full Checkpoint 6 regression remains green.
-
 ### Exit gate
 
-Checkpoint 7 is complete only when the hero run and policy suite pass with Cedar active. Installing Cedar without making it authoritative does not complete the checkpoint.
+- A new developer can follow the README and reproduce the local recorded-mode demo.
+- The chosen no-cost/local provider path is separately documented and truthfully labelled.
+- Offline mode remains sufficient for deterministic judging evidence.
+- All error states fail closed and leave protected state valid.
+- The local evidence bundle is complete enough to demo even if AWS is still unavailable.
 
-### Fallback
+### Manual work
 
-If the preferred Python binding fails, use a thin local Cedar sidecar behind the same adapter. If neither path is stable within the checkpoint timebox, keep the Python reference engine, record Checkpoint 7 as blocked, and do not claim Cedar use.
+- Review screenshots for secrets and personal account information.
+- Record the short local backup demo.
+- Verify that all claims say “local,” “simulated,” or “recorded model” where applicable.
 
 ---
 
-## Checkpoint 8 — Durable Storage and DynamoDB Parity
+## Checkpoint 12 — Bedrock Provider Parity
 
-### Prerequisite
+**Objective:** After AWS account verification succeeds, add Amazon Nova 2 Lite as another provider behind the already-tested Strands runtime.
 
-Checkpoint 7 is green, or Cedar is explicitly recorded as externally blocked while the local reference baseline remains green.
+**Deferred setup guide:** [`manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md`](manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md). The filename is retained for link stability, but the work now belongs to Checkpoint 12.
 
-### Objective
+### Preconditions
 
-Persist traces, approvals, decisions, idempotency records, and ledger heads so the workflow survives process restart and supports the intended DynamoDB data model.
+- AWS reports that account verification is complete.
+- A Bedrock playground or CLI probe no longer returns `ValidationException: Operation not allowed`.
+- The owner has enabled cost monitoring and agreed to use paid AWS services.
+- CP9–CP11 are green; do not change local governance semantics to accommodate Bedrock.
 
-### In scope
+### Manual AWS work
 
-- Extract a storage protocol from `MemoryTraceStore` without changing domain behavior.
-- Preserve the memory implementation for unit tests and offline fallback.
-- Implement a DynamoDB-compatible adapter using the planned keys:
+1. Confirm account and payment verification in Billing/Account settings.
+2. Use `us-east-1` unless the current model availability documentation requires another supported region.
+3. Confirm access to Amazon Nova 2 Lite v1.
+4. Test the US cross-region inference profile `us.amazon.nova-2-lite-v1:0`.
+5. Create a non-root developer identity or temporary login for application testing.
+6. Grant only the required Bedrock Runtime invocation permissions.
+7. Create a small budget alert and review CloudTrail/cost visibility.
 
-```text
-PK=TRACE#<trace_id>, SK=META
-PK=TRACE#<trace_id>, SK=HEAD
-PK=TRACE#<trace_id>, SK=EVENT#<sequence>
-PK=TRACE#<trace_id>, SK=APPROVAL#<approval_id>
-```
+Do not create root access keys. Root console access does not repair an account-level `Operation not allowed` restriction.
 
-- Use conditional sequence/head updates to prevent chain forks.
-- Persist approval versioning and idempotency results.
-- Reconstruct trajectory state for read, approval resume, verification, and dashboard projection.
-- Support local DynamoDB or an equivalent test double before cloud deployment.
-- Add migration-free table creation and reset for the synthetic demo namespace.
-- Add `scripts/run_checkpoint_8.sh`.
+### Implementation work
 
-### Acceptance tests
-
-- A pending adversarial run survives API process restart.
-- The restarted service can approve the exact prepared action and confirm once.
-- Concurrent approval attempts still produce one terminal decision.
-- Duplicate event append and duplicate confirm remain idempotent.
-- Conditional writes reject stale sequence/head updates.
-- Clean verification passes after restart.
-- Disposable tampering is detected without affecting other traces.
-- Two simultaneous traces remain isolated.
-- Memory and DynamoDB adapters pass the same storage contract suite.
-- Checkpoint 7 policy behavior remains unchanged.
+1. Add the Strands `BedrockModel` adapter to the provider factory.
+2. Use the normal AWS credential chain; never load AWS secrets from committed configuration.
+3. Keep the same tool schemas, governor boundary, timeouts, traces, and failure behavior as CP10.
+4. Run a read-only tool probe before any effectful hero journey.
+5. Record region, inference profile, provider, latency, and request identifiers without recording credentials or sensitive prompt content.
 
 ### Exit gate
 
-Checkpoint 8 is complete when persistence and restart recovery are proven with the DynamoDB-compatible adapter, not merely when table code exists.
+- Nova 2 Lite completes a governed read-only tool call.
+- A Bedrock-backed benign hero journey completes.
+- Adversarial enforce mode remains denied/guided back by Cedar.
+- Bedrock unavailability fails closed with no silent provider switch.
+- Offline and no-cost/local provider gates remain green.
+- Evidence clearly distinguishes recorded, local/free, and Bedrock runs.
 
-### Fallback
+### If verification is still pending
 
-Use local DynamoDB-compatible storage for the demo if cloud credentials are unavailable. A file-backed emergency adapter may be used only for recovery and must be disclosed; it does not satisfy the DynamoDB completion claim.
+Leave CP12 in `WAITING_EXTERNAL`. Do not create unrelated paid usage, rotate policies randomly, or weaken security in an attempt to force activation. Continue polishing CP11 evidence and periodically retry a minimal playground/CLI probe.
 
 ---
 
-## Checkpoint 9 — Strands Agents and Bedrock Runtime
+## Checkpoint 13 — AWS Demo Stack
 
-### Prerequisite
+**Objective:** Deploy only the minimum AWS components required by the hackathon/submission after Bedrock is proven.
 
-Checkpoint 8 persistence contracts are green.
+### Core deployment scope
 
-### Objective
+1. Define infrastructure as code for the selected region.
+2. Package the API/runtime for Lambda or another explicitly chosen compute target.
+3. Expose only required endpoints through API Gateway.
+4. Use DynamoDB with conditional writes for approval, confirmation, and ledger state.
+5. Host the dashboard on the smallest suitable static-hosting path.
+6. Use least-privilege execution roles and provider-specific permissions.
+7. Add structured logs, correlation IDs, alarms, and cost controls.
+8. Run the same acceptance journeys against the deployed endpoint.
 
-Replace the plain-Python agent decision layer with four thin Strands agents using Bedrock when available, while keeping the governor—not the model—authoritative.
+### Optional integrations
 
-### In scope
-
-- Introduce an agent runtime protocol with deterministic and Strands implementations.
-- Pin the Strands SDK and selected Bedrock model configuration.
-- Implement Inventory, Dispatch, Carrier, and Customer Communications agents with bounded steps.
-- Expose only registered governed tools to each agent.
-- Prove that every tool call passes through `ManifestGovernor`.
-- Preserve stable trace, decision, approval, and ledger contracts.
-- Add controlled guide-back prompts/results for weight and carrier correction.
-- Add recorded deterministic model responses behind the same runtime interface.
-- Add model step/token limits, timeouts, and safe error handling.
-- Disclose active model/runtime mode through health, trace, dashboard, and release manifest.
-- Add `scripts/run_checkpoint_9.sh`.
-
-### Acceptance tests
-
-- All four Strands agents appear in one trace.
-- No registered operational effect bypasses the governor.
-- Benign enforce completes twice from reset.
-- Adversarial shadow completes with counterfactual decisions.
-- Adversarial enforce guides both weight and carrier, then pauses for approval.
-- Approval resumes the original trace and confirms once.
-- Maximum-step and timeout paths fail safely.
-- Bedrock failure switches only to the explicitly enabled recorded fallback.
-- Recorded fallback drives the same governed tools; it does not bypass policy or ledger behavior.
-- Cedar remains authoritative regardless of model mode.
+EventBridge, Step Functions, SNS/SES, advanced observability, custom domains, and richer workflow orchestration are optional unless the submission rules explicitly require them. Simulated carrier and notification effects remain acceptable when disclosed.
 
 ### Exit gate
 
-Checkpoint 9 is complete when one Bedrock-backed hero run passes or, if Bedrock access is externally unavailable, the Strands integration is proven with the disclosed recorded adapter and the limitation is recorded. Plain-Python agents alone do not satisfy this checkpoint.
+- Infrastructure can be created and removed reproducibly.
+- No long-lived credentials are embedded in artifacts.
+- Deployed benign, adversarial, approval, exact-once, restart, and tamper journeys pass.
+- The cloud UI identifies region, runtime, model, policy, storage, and simulated effects accurately.
+- Budget alarms and a teardown procedure are documented.
 
-### Fallback
+### Manual work
 
-Use recorded deterministic responses through the same Strands/runtime interface. Do not replace deterministic authorization with prompt instructions.
+- Approve actual AWS spend before deployment.
+- Review IAM roles and public endpoint exposure.
+- Configure allowed origins and any hosted frontend settings.
+- Run the final console smoke test and capture sanitized evidence.
 
 ---
 
-## Checkpoint 10 — AWS Demo Stack
+## Checkpoint 14 — Final Evidence and Submission Freeze
 
-### Prerequisite
+**Objective:** Freeze one truthful, reproducible release and prepare the final submission.
 
-Checkpoint 9 is green and the local fallback remains untouched.
+### Release-path decision
 
-### Objective
+- **Preferred:** CP12 and CP13 are green; submit the AWS-backed evidence bundle.
+- **Contingency:** If AWS remains externally unavailable and rules permit local submission, submit the CP11 local candidate and explicitly state that Bedrock/AWS gates are pending.
+- Never describe a local/OpenRouter/Ollama run as a Bedrock run.
 
-Deploy the minimum credible AWS path for the existing prototype without adding new product scope.
+### Required artifacts
 
-### In scope
-
-- Add infrastructure-as-code for:
-  - API Gateway;
-  - Lambda handlers or an explicitly documented runtime host;
-  - DynamoDB;
-  - CloudWatch logs/metrics;
-  - minimum IAM permissions;
-  - static dashboard hosting.
-- Package the exact tested runtime and policy bundle.
-- Add configuration validation and a useful readiness endpoint.
-- Keep secrets server-side and use the AWS credential chain locally.
-- Deploy backend first, run smoke tests, then deploy the dashboard.
-- Add a synthetic-only reset mechanism restricted to the demo stack.
-- Add cloud smoke and rollback scripts.
-- Add `scripts/run_checkpoint_10.sh`.
-
-### Acceptance tests
-
-- A clean browser loads the hosted dashboard.
-- Health reports actual runtime, model, policy, storage, approval, and deployment modes.
-- The cloud path starts a run and returns real trace data.
-- Adversarial enforce reaches pending approval with Cedar active.
-- Approval confirms the exact action once and survives separate API invocations.
-- `/verify` passes for the completed persisted trace.
-- The local/offline Checkpoint 9 path remains green.
-- Logs contain trace correlation but no credentials, task tokens, raw PII, or approver secrets.
-- Deployment can roll back to the previous known-good artifact.
+- architecture diagram matching the implemented runtime;
+- setup and runbook for the selected release path;
+- exact test and evaluation evidence;
+- provider/model disclosure;
+- policy decision, approval, exact-once, and ledger trace examples;
+- sanitized screenshots and demo video;
+- limitations, simulated-effect disclosure, cost/region notes, and teardown steps;
+- release manifest with commit SHA, dependency versions, model IDs, policy version, fixture ID, and evidence hashes;
+- clean tag/commit authorized by the repository owner.
 
 ### Exit gate
 
-Checkpoint 10 is complete when the public or judge-accessible URL passes the hero smoke test from a clean browser. A created AWS stack that cannot complete the journey is not sufficient.
-
-### Fallback
-
-Cloud repair has a strict time cap. If it remains unstable, preserve the frozen local build and use a backup video. Disclose that the judged run is local; do not represent it as the cloud path.
-
----
-
-## Checkpoint 11 — Demo Hardening and Managed Integrations
-
-### Prerequisite
-
-Checkpoint 10 has a green core cloud path or an explicit local-only fallback decision.
-
-### Objective
-
-Harden the demonstrated path, add operational visibility, and attempt only the managed integrations that cannot threaten the stable release.
-
-### Mandatory scope
-
-- Add structured CloudWatch or local metrics for:
-  - decision count and outcomes;
-  - policy latency;
-  - guide-back success;
-  - approval age;
-  - ledger verification failures.
-- Add UI loading, error, stale, disconnected, and fallback-mode checks.
-- Test approval approve, reject, expiry, replay, wrong binding, and stale version through the deployed interface.
-- Test Bedrock, storage, policy-engine, and network failure behavior.
-- Capture screenshots of the five hero states.
-- Add `scripts/run_checkpoint_11.sh`.
-
-### Optional scope, in order
-
-1. Step Functions callback while preserving the local approval adapter.
-2. EventBridge fan-out after authoritative ledger append.
-3. S3 redacted trace archive.
-
-Cognito, Object Lock, additional provenance fields, and a frontend rewrite remain stretch work. OpenSearch, real integrations, multi-tenancy, billing, and policy-authoring features remain cut.
-
-### Acceptance tests
-
-- Every mandatory failure path is understandable in the UI and fails safely.
-- Approval tokens or Step Functions task tokens never reach the browser or trace.
-- Managed approval, if enabled, is bound to the same trace/action/state/policy fields.
-- Event fan-out, if enabled, is not authoritative for ledger ordering.
-- All optional integrations can be disabled without breaking the core journey.
-- Local and cloud modes are labelled truthfully.
-- Full earlier checkpoint suite remains green.
-
-### Exit gate
-
-Checkpoint 11 is complete when the core demo is resilient and observable. Optional managed integrations may remain incomplete without blocking completion if their fallbacks are tested and clearly disclosed.
+- All claims can be traced to evidence.
+- A clean-environment rehearsal succeeds twice.
+- No secret, personal account identifier, stale claim, or broken link remains.
+- The exact submitted commit and artifact hashes are recorded.
+- No source changes occur after the final successful rehearsal except a full gate rerun.
 
 ---
 
-## Checkpoint 12 — Submission Freeze and Prototype Completion
+## 4. Manual-action ledger
 
-### Prerequisite
+| When | Owner action | Required? | Why |
+|---|---|---:|---|
+| CP9 | Approve dependency download if prompted | Maybe | Install the pinned Strands SDK |
+| CP10 | Generate and remove a temporary Bedrock API key | Complete | Selected paid Mantle proof |
+| CP11 | Review/record sanitized demo evidence | Yes | Human quality and privacy check |
+| CP12 | Complete AWS account verification | Yes for Bedrock | Account-level activation cannot be automated locally |
+| CP12 | Create non-root AWS identity and budget alert | Yes | Safer runtime access and spend visibility |
+| CP13 | Approve deployment spend and public exposure | Yes | External state and cost change |
+| CP14 | Approve release commit/tag and submission | Yes | Irreversible release decision |
 
-The selected local/cloud release path is stable and no mandatory implementation checkpoint is red.
+## 5. Permanent scope cuts
 
-### Objective
+Unless a written submission requirement says otherwise, do not add:
 
-Freeze one exact artifact, verify all claims, and package a reliable four-minute demonstration and submission.
+- multi-order or multi-tenant production behavior;
+- real carrier booking or real customer messaging;
+- a general-purpose autonomous agent;
+- direct model access to databases or cloud SDKs;
+- policy authoring by the model;
+- a custom authentication platform;
+- production HA/DR or multi-region deployment;
+- Kubernetes, EKS, or an unnecessary microservice split;
+- a second LLM framework;
+- hidden automatic failover between providers.
 
-### In scope
+## 6. Current handoff
 
-- Freeze code, policy, schemas, fixtures, model configuration, and infrastructure parameters.
-- Run the final evaluation target:
-  - preferred: 20 attack and 30 benign runs;
-  - minimum: six core attack classes plus at least ten benign variants.
-- Generate the final results JSON and human-readable report.
-- Update architecture to match the actual release.
-- Complete the real/mock/deferred disclosure table.
-- Finalize README setup, reset, demo, evaluation, deployment, rollback, and limitation instructions.
-- Prepare the four-minute script, architecture visual, and metrics slide.
-- Record a complete backup video.
-- Store local copies of essential assets.
-- Run three timed rehearsals; at least two must pass from a clean reset.
-- Verify every submission link from a clean browser.
-- Identify the exact release revision and create the final tag as an explicit operator action.
+**Start now:** Checkpoint 11 — Local Prototype Hardening and Submission Candidate.
 
-### Mandatory submission artifacts
+**Do not wait for:** native Nova access or AWS deployment.
 
-```text
-README.md
-docs/architecture/
-docs/demo/FOUR_MINUTE_SCRIPT.md
-docs/results/evaluation.json
-docs/results/evaluation.md
-docs/REAL_MOCK_DEFERRED.md
-docs/KNOWN_LIMITATIONS.md
-docs/releases/final-release.json
-docs/assets/screenshots/
-backup demo video location recorded in the release manifest
-```
+**Do not do yet:** native Nova migration or AWS deployment.
 
-### Final smoke matrix
+**First command before implementation:** `./scripts/run_checkpoint_10_bedrock_mantle.sh --offline`
 
-- Benign enforce completes.
-- Adversarial shadow completes and records counterfactual violations.
-- Adversarial enforce corrects weight and carrier and pauses for approval.
-- Approval confirms exactly once and sends one simulated notification.
-- Rejection and expiry cancel and release the reservation.
-- Clean chain verifies.
-- Disposable tampered chain identifies the first bad sequence.
-- Active model, policy, storage, approval, and deployment modes are visible.
-- Cloud path passes if it is part of the submitted claim.
-- Local/offline fallback passes independently.
-- Backup video plays without network access.
+**Completed provider report:** [`CHECKPOINT_10_COMPLETION_REPORT.md`](CHECKPOINT_10_COMPLETION_REPORT.md)
 
-### Exit gate: definition of prototype complete
+**Current manual guide:** Checkpoint 11 instructions are the next planning task.
 
-The prototype is finished only when all of the following are true:
+**Deferred AWS guide:** [`manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md`](manual/CHECKPOINT_9_AWS_BEDROCK_SETUP.md)
 
-1. The primary four-minute journey passes twice from a clean reset.
-2. The local fallback passes once without cloud or Bedrock.
-3. All claimed integrations are active and visible during their relevant proof, or clearly labelled as fallback/deferred.
-4. Results are reproducible and include exact denominators.
-5. The release has no known P0/P1 defect in the primary journey.
-6. The source revision, policy bundle, fixture checksum, model mode, deployment mode, and artifact hashes are pinned.
-7. Documentation, screenshots, architecture, video, and links match the exact frozen build.
-8. No unsupported production, compliance, or immutability claim remains.
-
-### Final release decision
-
-- **GO:** all mandatory exit conditions pass and the claimed demo route is stable.
-- **CONDITIONAL GO:** the complete local path passes, but one or more cloud/managed integrations are disclosed as unavailable and excluded from claims.
-- **NO-GO:** the primary journey, approval exact-once behavior, provenance correction, Cedar authorization claim, or ledger verification is unreliable.
-
-## 4. Permanent cut list
-
-The following work does not belong in these completion checkpoints:
-
-- Real WMS, TMS, carrier, payment, SMS, or ONDC integrations.
-- Route optimization.
-- OpenSearch.
-- Blockchain.
-- Multi-tenancy, billing, or complete user administration.
-- Broad policy authoring, replay, behavioral baselining, or collusion analysis.
-- Production PII processing or compliance certification.
-- A dashboard redesign that does not improve the four-minute proof.
-
-## 5. Current handoff
-
-- **Completed checkpoints:** 6 — Stable Local Release; 7 — Cedar Authorization Parity; 8 — Durable Storage and DynamoDB Parity
-- **Checkpoint 8 evidence:** 164 Python tests with live Cedar; 11 shared/durable storage tests; 2 Rust tests; three DynamoDB hero journeys; 22/22 evaluation cases; exact Checkpoint 7 functional parity
-- **Current checkpoint:** 9 — Strands Agents and Bedrock Runtime
-- **Current status:** Unlocked and ready for planning/implementation
-- **Do not begin yet:** AWS application deployment (Checkpoint 10)
-- **Checkpoint 8 completion report:** [`CHECKPOINT_8_COMPLETION_REPORT.md`](CHECKPOINT_8_COMPLETION_REPORT.md)
-- **Checkpoint 8 release evidence:** [`releases/checkpoint-8-dynamodb-local.json`](releases/checkpoint-8-dynamodb-local.json)
+The immediate target is a rehearsed local submission candidate that preserves the completed Bedrock Mantle and offline evidence.

@@ -98,6 +98,7 @@ class EventType(StringEnum):
     TOOL_SUCCEEDED = "tool_succeeded"
     TOOL_FAILED = "tool_failed"
     AGENT_COMPLETED = "agent_completed"
+    AGENT_MODEL_COMPLETED = "agent_model_completed"
     AGENT_PAUSED = "agent_paused"
     AGENT_RESUMED = "agent_resumed"
     APPROVAL_APPROVED = "approval_approved"
